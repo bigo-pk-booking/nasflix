@@ -26,7 +26,7 @@ export async function onRequest({request,env,params}){
     if(file.size<1||file.size>MAX_FILE_SIZE)return json({error:"File must be smaller than 50 MB in this starter uploader."},413);
     if(!ALLOWED.has(file.type))return json({error:"Unsupported file type. Use MP4, WebM, MP3, M4A, OGG, WAV, JPG, PNG or WebP."},415);
     if(!["Movie","AI Video","Series","Music"].includes(type))return json({error:"Invalid content type."},400);
-    const id=crypto.randomUUID(),objectKey=id+"/"+safeName(file.name);
+    const id=crypto.randomUUID(),objectKey=id+"-"+safeName(file.name);
     await env.MEDIA_BUCKET.put(objectKey,file.stream(),{httpMetadata:{contentType:file.type,cacheControl:"public, max-age=3600"},customMetadata:{title}});
     try{
       await env.DB.prepare("INSERT INTO media (id,title,type,genre,description,object_key,content_type,size,allow_download) VALUES (?,?,?,?,?,?,?,?,?)")

@@ -1,39 +1,66 @@
-# NASFLIX starter website
+# NASFLIX
 
-A responsive static front-end prototype for a creator-owned entertainment catalogue.
+A responsive entertainment catalogue for creator-owned movies, AI videos, series and music.
 
-## Included
-- Responsive homepage and navigation
-- Browse filters for Movies, AI Videos, Series and Music
-- Search
-- Preview player UI
-- Admin catalogue form for adding/removing demo entries in the current browser session
+## Current features
+- Responsive homepage, category filters and search
+- Preview player for video/audio URLs and uploaded media
+- Admin upload form with access-key protection
+- Cloudflare Pages Functions API
+- Cloudflare R2 object storage for uploaded media
+- Cloudflare D1 catalogue metadata
+- Delete saved catalogue items from Admin
 
-## Important limitations
-This is a **front-end starter**, not a production streaming backend:
-- The Admin panel is not authenticated. Do not publish private credentials or treat it as a secure admin area.
-- Added entries exist only in the current page session and are not saved to a server/database.
-- Media URLs are optional previews. No files are uploaded to cloud storage yet.
-- Download controls appear only for entries with a supplied URL and the download option enabled.
-- Use only media you own or are licensed to distribute.
+## Cloudflare Pages setup
 
-## Deploy on GitHub Pages
-1. Create a new **public** GitHub repository named `nasflix`.
-2. Upload `index.html`, `styles.css`, `app.js`, and this README to the repository root.
-3. In GitHub, open **Settings → Pages**.
-4. Under Build and deployment, select **Deploy from a branch**.
-5. Select branch `main` and folder `/ (root)`, then Save.
-6. GitHub will show the published URL after deployment.
+The site is deployed as a Cloudflare Pages project connected to the GitHub repository.
 
-You can also connect the repository to Cloudflare Pages:
-1. Sign in to Cloudflare and open **Workers & Pages → Create → Pages → Connect to Git**.
-2. Select the `nasflix` repository.
-3. Framework preset: **None**. Build command: leave blank. Build output directory: `/`.
-4. Deploy. Cloudflare will provide a `*.pages.dev` address if the project name is available.
+Build settings:
+- Framework preset: None
+- Build command: leave blank
+- Build output directory: `/`
+- Production branch: `main`
 
-## Next production steps
-1. Add a real admin authentication system.
-2. Add a server-side upload API with file validation and size limits.
-3. Store media in object storage (for example Cloudflare R2) and metadata in a database.
-4. Generate signed or access-controlled upload/download URLs where appropriate.
-5. Add moderation, copyright/takedown contact, privacy policy and terms before public launch.
+## Required Cloudflare resources
+
+The upload API will return a storage-not-configured error until these bindings and the D1 schema are installed.
+
+### 1. Create an R2 bucket
+In Cloudflare Dashboard, open **R2 Object Storage** and create a bucket named `nasflix-media`.
+
+In the Pages project, open **Settings → Functions → R2 bucket bindings** and add:
+- Variable name: `MEDIA_BUCKET`
+- R2 bucket: `nasflix-media`
+
+### 2. Create a D1 database
+In Cloudflare Dashboard, open **Workers & Pages → D1 SQL Database** and create a database named `nasflix-db`.
+
+Open the database Console and run the complete SQL from this repository's `schema.sql` file.
+
+In the Pages project, open **Settings → Functions → D1 database bindings** and add:
+- Variable name: `DB`
+- D1 database: `nasflix-db`
+
+### 3. Add the admin secret
+In the Pages project, open **Settings → Environment variables** (or **Settings → Variables and Secrets**) and add a production secret:
+- Name: `ADMIN_TOKEN`
+- Value: create a long, random private key and keep it secret
+
+Do not put the key in GitHub, source code, screenshots or public messages. Enter it only in the Admin Studio access-key field when uploading or deleting saved media.
+
+After adding bindings/secrets, trigger a new deployment so Pages Functions receive the resources.
+
+## Upload limits and notes
+- This starter uploader accepts files up to **50 MB**.
+- Supported types: MP4, WebM, MP3, M4A, OGG, WAV, JPG, PNG and WebP.
+- Full-length movies are often larger than this limit. A later upgrade should use direct-to-R2 multipart or signed uploads for large files.
+- Uploaded media is served through the Pages Function at `/media/...`.
+- Download permission is controlled by the Admin checkbox. Only enable it for files you own or are licensed to distribute.
+- Demo catalogue entries remain illustrative previews; uploaded entries are stored in D1 and R2.
+
+## Security and launch checklist
+- Use a long random `ADMIN_TOKEN` and rotate it if exposed.
+- Do not share the admin key.
+- Add a proper multi-user login before inviting other admins.
+- Add privacy policy, terms, copyright/takedown contact and moderation procedures before public launch.
+- Only upload media you own or have permission to distribute.

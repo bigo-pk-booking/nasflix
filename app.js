@@ -26,7 +26,7 @@ function render(){
 function card(x){return `<article class="media-card" data-id="${x.id}"><div class="poster" style="--c1:${x.c1||"#4c1d95"};--c2:${x.c2||"#111827"}"><span class="card-type">${esc(x.type)}</span><span class="poster-art">${esc(x.art||"✦")}</span><div><span class="poster-label">${esc(x.genre||"FEATURED").toUpperCase()}</span></div><span class="play-badge">▶</span></div><h3 class="card-title">${esc(x.title)}</h3><p class="card-meta">${esc(x.type)} · ${esc(x.genre||"Entertainment")}</p></article>`}
 function track(x){return `<div class="track"><div class="track-cover">♫</div><div class="track-info"><b>${esc(x.title)}</b><small>${esc(x.genre||"Music")} · ${esc(x.description||"Featured track")}</small></div><button data-track="${x.id}">▶ Listen</button></div>`}
 function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function openPlayer(id){const x=items.find(i=>i.id===id);if(!x)return;$("#playerType").textContent=x.type.toUpperCase()+" · "+(x.genre||"FEATURED");$("#playerTitle").textContent=x.title;$("#playerDescription").textContent=x.description||"Enjoy this featured title.";const link=$("#downloadLink");if(x.url&&x.download){link.href=x.url;link.hidden=false}else{link.hidden=true}$("#playerScreen").innerHTML=x.url&&/\.(mp4|webm|mp3|ogg)(\?|$)/i.test(x.url)?(x.type==="Music"?`<audio controls src="${esc(x.url)}"></audio>`:`<video controls playsinline src="${esc(x.url)}"></video>`):`<div class="play-symbol">▶</div><p>PREVIEW PLAYER</p>`;$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");}
+function openPlayer(id){const x=items.find(i=>String(i.id)===String(id));if(!x)return;$("#playerType").textContent=x.type.toUpperCase()+" · "+(x.genre||"FEATURED");$("#playerTitle").textContent=x.title;$("#playerDescription").textContent=x.description||"Enjoy this featured title.";const link=$("#downloadLink");if(x.url&&x.download){link.href=x.url;link.hidden=false}else{link.hidden=true}$("#playerScreen").innerHTML=x.url&&/\.(mp4|webm|mp3|ogg)(\?|$)/i.test(x.url)?(x.type==="Music"?`<audio controls src="${esc(x.url)}"></audio>`:`<video controls playsinline src="${esc(x.url)}"></video>`):`<div class="play-symbol">▶</div><p>PREVIEW PLAYER</p>`;$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");}
 function closeModal(id){const el=$("#"+id+"Modal");el.classList.remove("open");el.setAttribute("aria-hidden","true");}
 document.querySelectorAll(".cat-chip").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;render()}));
 $("#searchInput").addEventListener("input",render);
@@ -34,7 +34,49 @@ $("#heroExplore").addEventListener("click",()=>$("#movies").scrollIntoView({beha
 $("#adminOpen").addEventListener("click",()=>{$("#adminModal").classList.add("open");$("#adminModal").setAttribute("aria-hidden","false");});
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal("player");closeModal("admin")}});
-$("#contentForm").addEventListener("submit",e=>{e.preventDefault();const item={id:Date.now(),title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),download:$("#itemDownload").checked,art:"✦",c1:"#6d28d9",c2:"#171026"};items.unshift(item);$("#contentForm").reset();render();});
-function renderAdmin(){$("#adminItems").innerHTML=items.map(x=>`<div class="admin-row"><span>${esc(x.title)} <small>(${esc(x.type)})</small></span><button data-delete="${x.id}">Remove</button></div>`).join("");document.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>{items=items.filter(x=>x.id!==Number(b.dataset.delete));render()}));}
+$("#contentForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const file=$("#itemFile").files[0], token=$("#adminToken").value.trim(), status=$("#uploadStatus");
+  if(file){
+    if(!token){status.textContent="Enter your admin access key first.";return;}
+    const form=new FormData();
+    form.append("file",file);form.append("title",$("#itemTitle").value.trim());
+    form.append("type",$("#itemType").value);form.append("genre",$("#itemGenre").value.trim());
+    form.append("description",$("#itemDescription").value.trim());form.append("allowDownload",String($("#itemDownload").checked));
+    status.textContent="Uploading media to NASFLIX...";
+    try{
+      const response=await fetch("/api/upload",{method:"POST",headers:{Authorization:"Bearer "+token},body:form});
+      const result=await response.json();
+      if(!response.ok) throw new Error(result.error||"Upload failed.");
+      status.textContent="Upload complete! Your media is now saved in NASFLIX.";
+      $("#contentForm").reset();$("#adminToken").value=token;await loadRemote();
+    }catch(error){status.textContent=error.message;}
+    return;
+  }
+  const item={id:Date.now(),title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),download:$("#itemDownload").checked,art:"✦",c1:"#6d28d9",c2:"#171026"};
+  items.unshift(item);$("#contentForm").reset();$("#adminToken").value=token;status.textContent="Added as a temporary browser preview. Choose a file to save permanently.";render();
+});
+async function loadRemote(){
+  try{
+    const response=await fetch("/api/media");if(!response.ok)return;
+    const data=await response.json();
+    const remote=data.map((x,i)=>({...x,id:x.id,url:x.url,download:!!x.allow_download,remote:true,art:"✦",c1:["#6d28d9","#be185d","#0369a1","#0f766e"][i%4],c2:"#171026"}));
+    items=[...remote,...demoItems];render();
+  }catch(error){console.warn("NASFLIX media API is not configured yet.",error);}
+}
+function renderAdmin(){
+  $("#adminItems").innerHTML=items.map(x=>"<div class=\"admin-row\"><span>"+esc(x.title)+" <small>("+esc(x.type)+")"+(x.remote?" · Saved":"")+"</small></span><button data-delete=\""+esc(x.id)+"\" data-remote=\""+(x.remote?"1":"0")+"\">Remove</button></div>").join("");
+  document.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",async()=>{
+    const id=b.dataset.delete;
+    if(b.dataset.remote==="1"){
+      const token=$("#adminToken").value.trim();
+      if(!token){$("#uploadStatus").textContent="Enter your admin access key before removing saved content.";return;}
+      const response=await fetch("/api/media/"+encodeURIComponent(id),{method:"DELETE",headers:{Authorization:"Bearer "+token}});
+      if(!response.ok){const result=await response.json().catch(()=>({}));$("#uploadStatus").textContent=result.error||"Could not remove this item.";return;}
+    }
+    items=items.filter(x=>String(x.id)!==String(id));render();
+  }));
+}
 $("#year").textContent=new Date().getFullYear();
 render();
+loadRemote();

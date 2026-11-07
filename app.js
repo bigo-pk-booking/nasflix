@@ -55,7 +55,7 @@ function openMusicPlayer(id,shouldPlay=true){
  renderEpisodeNav(x);$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");if(shouldPlay){if(activeMusicContext?.state==="suspended")activeMusicContext.resume();audio.play().catch(()=>{play.textContent="▶";});}
 }
 
-function closeModal(id){const el=$("#"+id+"Modal");el.classList.remove("open");el.setAttribute("aria-hidden","true");if(id==="player"&&activeMusicAudio){activeMusicAudio.pause();activeMusicAudio=null;if(musicVisualFrame)cancelAnimationFrame(musicVisualFrame);}}
+function closeModal(id){const el=$("#"+id+"Modal");el.classList.remove("open");el.setAttribute("aria-hidden","true");}
 document.querySelectorAll(".cat-chip").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;render()}));
 $("#searchInput").addEventListener("input",render);
 $("#heroExplore").addEventListener("click",()=>$("#movies").scrollIntoView({behavior:"smooth"}));

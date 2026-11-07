@@ -1,6 +1,11 @@
 package com.nasflix.app;
 
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.app.RemoteAction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.graphics.drawable.Icon;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,6 +23,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     private WebView webView;
@@ -26,9 +32,14 @@ public class MainActivity extends Activity {
     private WebChromeClient.CustomViewCallback customViewCallback;
     private int normalUiVisibility;
     private volatile boolean directVideoPlaying = false;
+    private static volatile MainActivity activeInstance;
+    public static final String ACTION_PIP_PAUSE = "com.nasflix.app.PIP_PAUSE";
+    public static final String ACTION_PIP_PLAY = "com.nasflix.app.PIP_PLAY";
+    public static final String ACTION_PIP_CLOSE = "com.nasflix.app.PIP_CLOSE";
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activeInstance = this;
         getWindow().setStatusBarColor(android.graphics.Color.rgb(9,8,17));
         getWindow().setNavigationBarColor(android.graphics.Color.rgb(9,8,17));
         root = new FrameLayout(this);
@@ -139,12 +150,49 @@ public class MainActivity extends Activity {
         customViewCallback = null;
     }
 
+    private RemoteAction pipAction(String title, int iconRes, String action, int requestCode) {
+        Intent intent = new Intent(this, PipActionReceiver.class).setAction(action);
+        PendingIntent pending = PendingIntent.getBroadcast(this, requestCode, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        return new RemoteAction(Icon.createWithResource(this, iconRes), title, pending);
+    }
+
+    private void handlePipAction(String action) {
+        if (webView == null) return;
+        if (ACTION_PIP_CLOSE.equals(action)) {
+            webView.evaluateJavascript("(function(){var v=document.querySelector('#playerScreen video');if(v)v.pause();})();", null);
+            directVideoPlaying = false;
+            finish();
+        } else if (ACTION_PIP_PAUSE.equals(action)) {
+            webView.evaluateJavascript("(function(){var v=document.querySelector('#playerScreen video');if(v)v.pause();})();", null);
+        } else if (ACTION_PIP_PLAY.equals(action)) {
+            webView.evaluateJavascript("(function(){var v=document.querySelector('#playerScreen video');if(v)v.play().catch(function(){});})();", null);
+        }
+    }
+
+    public static class PipActionReceiver extends BroadcastReceiver {
+        @Override public void onReceive(Context context, Intent intent) {
+            MainActivity activity = activeInstance;
+            if (activity != null && intent != null) activity.runOnUiThread(() -> activity.handlePipAction(intent.getAction()));
+        }
+    }
+
+    @Override protected void onDestroy() {
+        if (activeInstance == this) activeInstance = null;
+        super.onDestroy();
+    }
+
     @Override public void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && directVideoPlaying && customView == null) {
             try {
+                ArrayList<RemoteAction> actions = new ArrayList<>();
+                actions.add(pipAction("Play", android.R.drawable.ic_media_play, ACTION_PIP_PLAY, 1));
+                actions.add(pipAction("Pause", android.R.drawable.ic_media_pause, ACTION_PIP_PAUSE, 2));
+                actions.add(pipAction("Close", android.R.drawable.ic_menu_close_clear_cancel, ACTION_PIP_CLOSE, 3));
                 PictureInPictureParams params = new PictureInPictureParams.Builder()
                     .setAspectRatio(new Rational(16, 9))
+                    .setActions(actions)
                     .build();
                 enterPictureInPictureMode(params);
             } catch (IllegalStateException error) {

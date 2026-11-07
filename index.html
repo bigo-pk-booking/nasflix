@@ -86,7 +86,7 @@
 
     <section class="music-section" id="music">
       <div class="section-heading"><div><p class="eyebrow">PRESS PLAY</p><h2>Soundtrack <em>your day</em></h2></div><span class="section-note">Music from the NASFLIX library</span></div>
-      <div class="artist-browser"><div class="artist-browser-heading"><div><p class="eyebrow">YOUR MUSIC LIBRARY</p><h3>Browse by <em>artist</em></h3></div><button type="button" id="playAllMusic">▶ Play all</button></div><div class="artist-filters" id="artistFilters"></div></div><div class="music-list" id="musicList"></div>
+      <div class="artist-browser"><div class="artist-browser-heading"><div><p class="eyebrow">YOUR MUSIC LIBRARY</p><h3>Browse by <em>artist</em></h3></div><button type="button" id="playAllMusic">▶ Play all</button></div><div class="artist-filters" id="artistFilters"></div><div class="album-browser" id="albumBrowser" hidden></div></div><div class="music-list" id="musicList"></div>
     </section>
     <section class="join-banner"><div><p class="eyebrow">THE NEXT SCENE STARTS HERE</p><h2>Find your next<br><em>favorite thing.</em></h2></div><a href="#home" class="primary">Back to top ↑</a></section>
   </main>
@@ -99,6 +99,7 @@
     <div class="bulk-upload-panel" style="margin:22px 0;padding:18px;border:1px solid #51406a;border-radius:18px;background:linear-gradient(145deg,#21162f,#12101b)">
       <p class="eyebrow">BATCH UPLOAD</p><h3 style="margin:0 0 8px">Upload music</h3><p class="upload-hint">Music files only. Select multiple songs from one artist; each filename becomes its own track title.</p>
       <label>Artist / Singer name<input id="bulkMusicArtist" maxlength="90" placeholder="Artist name"></label>
+      <label>Album name (optional)<input id="bulkMusicAlbum" maxlength="90" placeholder="Album name"></label>
       <label>Music files (MP3, M4A, OGG, WAV)<input id="bulkMusicFiles" type="file" accept="audio/mpeg,audio/mp4,audio/ogg,audio/wav,.mp3,.m4a,.ogg,.wav" multiple></label>
       <label>Shared artist poster (optional)<input id="bulkMusicPoster" type="file" accept="image/jpeg,image/png,image/webp"></label>
       <button class="primary full" id="bulkMusicSubmit" type="button">Upload music batch</button>
@@ -117,6 +118,7 @@
       <label>Content title<input id="itemTitle" required maxlength="90" placeholder="Enter a title"></label>
       <div class="form-row"><label>Type<select id="itemType"><option>Movie</option><option>AI Video</option><option>Series</option><option>Music</option></select></label><label>Genre<select id="itemGenre"><option>Animation</option><option>Anime</option><option>Action</option><option>Comedy</option><option>Horror</option><option>Romance</option><option>Fantasy</option><option>Sci-Fi</option><option>Documentary</option><option>Drama</option><option>Thriller</option><option>Music</option><option>Independent</option></select></label></div>
       <label id="artistFieldLabel">Artist / Singer name<input id="itemArtist" maxlength="90" placeholder="e.g. Alex Warren"></label>
+      <label id="albumFieldLabel">Album name (music only)<input id="albumTitle" maxlength="90" placeholder="e.g. My First Album"></label>
       <label>Series / Folder name (for episodes only)<input id="seriesTitle" maxlength="90" placeholder="e.g. The Mafia Hired Nani"></label>
       <div class="form-row"><label>Season number<input id="seasonNumber" type="number" min="1" max="99" value="1"></label><label>Episode number<input id="episodeNumber" type="number" min="1" max="999" placeholder="e.g. 1"></label></div>
       <label>Episode title (optional)<input id="episodeTitle" maxlength="90" placeholder="e.g. The First Meeting"></label>

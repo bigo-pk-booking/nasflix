@@ -169,6 +169,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public long getDuration() { return PlaybackService.getDurationMs(); }
         @JavascriptInterface public boolean isPlaying() { return PlaybackService.isPlayingNow(); }
         @JavascriptInterface public String getPlaybackError() { return PlaybackService.getLastPlaybackError(); }
+        @JavascriptInterface public String getPlaybackDiagnostics() { return PlaybackService.getPlaybackDiagnostics(); }
     }
 
     private void showCustomView(View view, WebChromeClient.CustomViewCallback callback) {

@@ -79,6 +79,16 @@ async function accountAction(kind){
 }
 async function addTrackToPlaylist(id){if(!accountUser){accountMessage("Log in first to create and save playlists.");$("#accountEmail").focus();return;}const p=userPlaylists.find(x=>x.id===activePlaylistId);if(!p){accountMessage("Create and select a playlist first.");return;}if(!p.trackIds.includes(String(id)))p.trackIds.push(String(id));renderUserPlaylists();schedulePlaylistSync();}
 function playUserPlaylist(){const p=userPlaylists.find(x=>x.id===activePlaylistId);if(!p)return;const queue=p.trackIds.map(id=>items.find(x=>String(x.id)===id)).filter(x=>x&&x.url&&isDirectMedia(x.url));if(!queue.length){accountMessage("No playable songs in this playlist yet.");return;}openMusicPlayer(queue[0].id,true,"","All Albums");}
+// Resilient delegated account controls: handle clicks even if a button listener was missed.
+document.addEventListener("click",function(event){
+ const button=event.target.closest("#accountLogin,#accountCreate,#accountRegister,#accountBackToLogin");
+ if(!button)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ if(button.id==="accountLogin")accountAction("login");
+ else if(button.id==="accountCreate")accountAction("register");
+ else if(button.id==="accountRegister")setAccountFormMode("register");
+ else if(button.id==="accountBackToLogin")setAccountFormMode("login");
+},true);
 $("#continueGuest")?.addEventListener("click",enterGuestMode);
 setAccountFormMode("login");
 $("#welcomeClose")?.addEventListener("click",enterGuestMode);

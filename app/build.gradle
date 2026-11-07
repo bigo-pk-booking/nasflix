@@ -10,6 +10,28 @@ android {
         versionCode 4
         versionName '1.2.1'
     }
+
+    // Release signing is supplied only through GitHub Actions secrets.
+    def releaseStoreFile = System.getenv('NASFLIX_KEYSTORE_FILE')
+    def releaseStorePassword = System.getenv('NASFLIX_KEYSTORE_PASSWORD')
+    def releaseKeyAlias = System.getenv('NASFLIX_KEY_ALIAS')
+    if (releaseStoreFile && releaseStorePassword && releaseKeyAlias) {
+        signingConfigs {
+            release {
+                storeFile file(releaseStoreFile)
+                storeType 'PKCS12'
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseStorePassword
+            }
+        }
+        buildTypes {
+            release {
+                signingConfig signingConfigs.release
+                minifyEnabled false
+            }
+        }
+    }
 }
 dependencies {
     implementation 'androidx.media3:media3-exoplayer:1.5.1'

@@ -17,6 +17,15 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
+import android.view.Gravity;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.webkit.JavascriptInterface;
 import android.os.Bundle;
 import android.app.PictureInPictureParams;
@@ -35,6 +44,10 @@ import java.util.ArrayList;
 public class MainActivity extends Activity {
     private WebView webView;
     private FrameLayout root;
+    private View nativeSplash;
+    private final Handler splashHandler = new Handler(Looper.getMainLooper());
+    private long splashStartedAt;
+    private boolean initialPageLoaded = false;
     private View customView;
     private WebChromeClient.CustomViewCallback customViewCallback;
     private int normalUiVisibility;
@@ -48,6 +61,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         installCrashLogger();
         activeInstance = this;
+        splashStartedAt = android.os.SystemClock.elapsedRealtime();
         getWindow().setStatusBarColor(android.graphics.Color.rgb(9,8,17));
         getWindow().setNavigationBarColor(android.graphics.Color.rgb(9,8,17));
         root = new FrameLayout(this);
@@ -64,6 +78,11 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                if (!initialPageLoaded) {
+                    initialPageLoaded = true;
+                    long remaining = Math.max(0L, 2200L - (android.os.SystemClock.elapsedRealtime() - splashStartedAt));
+                    splashHandler.postDelayed(() -> dismissNativeSplash(), remaining);
+                }
                 String js = "(function(){"
                     + "var injected=document.getElementById('nasflixAppMenuButton');if(injected)injected.remove();"
                     + "var toggle=document.getElementById('menuToggle'),nav=document.getElementById('mainNav');"
@@ -84,6 +103,9 @@ public class MainActivity extends Activity {
         });
         root.addView(webView, new FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        nativeSplash = createNativeSplash();
+        root.addView(nativeSplash, new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 4102);
@@ -95,6 +117,101 @@ public class MainActivity extends Activity {
     }
 
 
+
+    private View createNativeSplash() {
+        FrameLayout splash = new FrameLayout(this);
+        GradientDrawable background = new GradientDrawable(
+            GradientDrawable.Orientation.TL_BR,
+            new int[]{Color.rgb(38, 18, 62), Color.rgb(18, 12, 31), Color.rgb(7, 6, 13)});
+        splash.setBackground(background);
+
+        LinearLayout content = new LinearLayout(this);
+        content.setGravity(Gravity.CENTER);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(dp(30), dp(30), dp(30), dp(30));
+
+        TextView logo = new TextView(this);
+        logo.setText("N");
+        logo.setTextColor(Color.WHITE);
+        logo.setTextSize(38);
+        logo.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        logo.setGravity(Gravity.CENTER);
+        GradientDrawable logoBg = new GradientDrawable(
+            GradientDrawable.Orientation.TL_BR,
+            new int[]{Color.rgb(168, 85, 247), Color.rgb(192, 38, 211)});
+        logoBg.setCornerRadius(dp(22));
+        logo.setBackground(logoBg);
+        LinearLayout.LayoutParams logoParams = new LinearLayout.LayoutParams(dp(76), dp(76));
+        logoParams.bottomMargin = dp(28);
+        content.addView(logo, logoParams);
+
+        TextView kicker = new TextView(this);
+        kicker.setText("YOUR ENTERTAINMENT UNIVERSE");
+        kicker.setTextColor(Color.rgb(196, 169, 255));
+        kicker.setTextSize(11);
+        kicker.setLetterSpacing(0.20f);
+        kicker.setGravity(Gravity.CENTER);
+        content.addView(kicker);
+
+        TextView title = new TextView(this);
+        title.setText("NASFLIX");
+        title.setTextColor(Color.WHITE);
+        title.setTextSize( thirtySp() );
+        title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        title.setLetterSpacing(0.16f);
+        title.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        titleParams.topMargin = dp(12);
+        content.addView(title, titleParams);
+
+        TextView tagline = new TextView(this);
+        tagline.setText("Every story starts here.");
+        tagline.setTextColor(Color.rgb(169, 160, 187));
+        tagline.setTextSize(13);
+        tagline.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams taglineParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        taglineParams.topMargin = dp(8);
+        taglineParams.bottomMargin = dp(34);
+        content.addView(tagline, taglineParams);
+
+        ProgressBar progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        progress.setIndeterminate(true);
+        progress.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.rgb(192, 132, 252)));
+        progress.setIndeterminateTintList(android.content.res.ColorStateList.valueOf(Color.rgb(192, 132, 252)));
+        LinearLayout.LayoutParams progressParams = new LinearLayout.LayoutParams(dp(230), dp(5));
+        content.addView(progress, progressParams);
+
+        TextView status = new TextView(this);
+        status.setText("Starting NASFLIX app…");
+        status.setTextColor(Color.rgb(234, 220, 255));
+        status.setTextSize(12);
+        status.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        statusParams.topMargin = dp(18);
+        content.addView(status, statusParams);
+
+        FrameLayout.LayoutParams contentParams = new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+        splash.addView(content, contentParams);
+        return splash;
+    }
+
+    private int dp(float value) {
+        return (int)(value * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    private float thirtySp() { return 30f; }
+
+    private void dismissNativeSplash() {
+        if (nativeSplash == null || nativeSplash.getParent() == null) return;
+        nativeSplash.animate().alpha(0f).setDuration(300).withEndAction(() -> {
+            if (nativeSplash != null && nativeSplash.getParent() == root) root.removeView(nativeSplash);
+            nativeSplash = null;
+        }).start();
+    }
 
     private void installCrashLogger() {
         final Thread.UncaughtExceptionHandler previous = Thread.getDefaultUncaughtExceptionHandler();

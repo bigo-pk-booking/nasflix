@@ -63,6 +63,11 @@ async function accountAction(kind){const email=$("#accountEmail").value.trim(),p
 async function addTrackToPlaylist(id){if(!accountUser){accountMessage("Log in first to create and save playlists.");$("#accountEmail").focus();return;}const p=userPlaylists.find(x=>x.id===activePlaylistId);if(!p){accountMessage("Create and select a playlist first.");return;}if(!p.trackIds.includes(String(id)))p.trackIds.push(String(id));renderUserPlaylists();schedulePlaylistSync();}
 function playUserPlaylist(){const p=userPlaylists.find(x=>x.id===activePlaylistId);if(!p)return;const queue=p.trackIds.map(id=>items.find(x=>String(x.id)===id)).filter(x=>x&&x.url&&isDirectMedia(x.url));if(!queue.length){accountMessage("No playable songs in this playlist yet.");return;}openMusicPlayer(queue[0].id,true,"","All Albums");}
 $("#continueGuest")?.addEventListener("click",enterGuestMode);
+$("#welcomeClose")?.addEventListener("click",enterGuestMode);
+function closeOfflineLoginModal(){const modal=$("#offlineLoginModal");if(modal)modal.hidden=true;}
+$("#offlineLoginClose")?.addEventListener("click",closeOfflineLoginModal);
+$("#offlineLoginCancel")?.addEventListener("click",closeOfflineLoginModal);
+$("#offlineLoginContinue")?.addEventListener("click",()=>{closeOfflineLoginModal();guestMode=false;$("#welcomeGate").hidden=false;setAccountFormMode("login");});
 function setAccountFormMode(mode){const signup=mode==="register";const field=$("#fullNameField"),confirm=$("#confirmPasswordField");if(field)field.hidden=!signup;if(confirm)confirm.hidden=!signup;$("#accountLogin").hidden=signup;$("#accountCreate").hidden=!signup;$("#accountRegister").hidden=signup;$("#accountBackToLogin").hidden=!signup;$("#accountPassword").setAttribute("autocomplete",signup?"new-password":"current-password");accountMessage(signup?"Create your NASFLIX account using your full name, email and password twice.":"Log in with your email and password.");}
 $("#accountLogin")?.addEventListener("click",()=>accountAction("login"));
 $("#accountRegister")?.addEventListener("click",()=>setAccountFormMode("register"));
@@ -360,6 +365,7 @@ async function loadRemote(){
   }catch(error){console.warn("NASFLIX media API is not configured yet.",error);try{items=JSON.parse(localStorage.getItem("nasflix-catalogue-cache")||"[]");}catch{items=[];}musicBatchLoading=false;render();}
 }
 async function saveOffline(id){
+ if(!accountUser){const modal=$("#offlineLoginModal");if(modal)modal.hidden=false;return;}
  const item=items.find(x=>String(x.id)===String(id));
  if(!item){alert("This title is not available in the catalogue yet.");return;}
  if(!item.url||!isDirectMedia(item.url)||youtubeId(item.url)){alert("Offline saving is available for direct NASFLIX video and music files. Embedded YouTube links cannot be saved.");return;}

@@ -1,6 +1,11 @@
 package com.nasflix.app;
 
 import android.app.Activity;
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.webkit.JavascriptInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +32,7 @@ public class MainActivity extends Activity {
         webView = new WebView(this);
         webView.setBackgroundColor(android.graphics.Color.rgb(9,8,17));
         WebSettings settings = webView.getSettings();
+        webView.addJavascriptInterface(new NasflixBridge(), "NasflixAndroid");
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(true);
@@ -57,9 +63,45 @@ public class MainActivity extends Activity {
         root.addView(webView, new FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
+        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 4102);
+        }
         webView.clearCache(true);
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261107-menu3");
+        webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261107-nativeaudio1");
+    }
+
+
+    private void sendPlaybackCommand(String action, Intent extras) {
+        Intent command = new Intent(this, PlaybackService.class);
+        command.setAction(action);
+        if (extras != null) command.putExtras(extras);
+        if (Build.VERSION.SDK_INT >= 26) startForegroundService(command);
+        else startService(command);
+    }
+
+    private class NasflixBridge {
+        @JavascriptInterface public void playQueue(String queueJson, int index, boolean autoplay) {
+            Intent extras = new Intent();
+            extras.putExtra(PlaybackService.EXTRA_QUEUE, queueJson);
+            extras.putExtra(PlaybackService.EXTRA_INDEX, index);
+            extras.putExtra(PlaybackService.EXTRA_AUTOPLAY, autoplay);
+            sendPlaybackCommand(PlaybackService.ACTION_SET_QUEUE, extras);
+        }
+        @JavascriptInterface public void play() { sendPlaybackCommand(PlaybackService.ACTION_PLAY, null); }
+        @JavascriptInterface public void pause() { sendPlaybackCommand(PlaybackService.ACTION_PAUSE, null); }
+        @JavascriptInterface public void stop() { sendPlaybackCommand(PlaybackService.ACTION_STOP, null); }
+        @JavascriptInterface public void seekTo(long positionMs) {
+            Intent extras = new Intent(); extras.putExtra(PlaybackService.EXTRA_POSITION, positionMs);
+            sendPlaybackCommand(PlaybackService.ACTION_SEEK, extras);
+        }
+        @JavascriptInterface public void setVolume(float volume) {
+            Intent extras = new Intent(); extras.putExtra(PlaybackService.EXTRA_VOLUME, volume);
+            sendPlaybackCommand(PlaybackService.ACTION_VOLUME, extras);
+        }
+        @JavascriptInterface public long getCurrentPosition() { return PlaybackService.getCurrentPositionMs(); }
+        @JavascriptInterface public long getDuration() { return PlaybackService.getDurationMs(); }
+        @JavascriptInterface public boolean isPlaying() { return PlaybackService.isPlayingNow(); }
     }
 
     private void showCustomView(View view, WebChromeClient.CustomViewCallback callback) {

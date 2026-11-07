@@ -15,3 +15,8 @@
 .player-loading span{width:28px;height:28px;border:3px solid #ffffff30;border-top-color:#c084fc;border-radius:50%;animation:nasflix-spin .8s linear infinite}
 @keyframes nasflix-spin{to{transform:rotate(360deg)}}
 @media(max-width:650px){.modal{padding:8px}.modal-card.player-card{width:100%;padding:14px;border-radius:15px}.player-screen{width:100%;aspect-ratio:16/9}.player-fullscreen{right:8px;bottom:8px;width:38px;height:38px}}
+
+.admin-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.admin-actions button{padding:5px 8px;border:1px solid #ffffff20;border-radius:6px}
+.admin-actions button[data-edit]{color:#c4b5fd}
+.admin-cancel{width:100%;padding:10px;border:1px solid #ffffff25;border-radius:9px;background:#211a30;color:#d8b4fe;font:12px 'DM Sans',sans-serif}

@@ -115,9 +115,10 @@ public class PlaybackService extends MediaSessionService {
                     player.setVolume(Math.max(0f, Math.min(1f, volume)));
                 }
             }
-            if (handledByNasflix) return sessionResult;
+            // MediaSessionService must receive each start command exactly once.
+            return sessionResult;
         }
-        return super.onStartCommand(intent, flags, startId);
+        return sessionResult;
     }
 
     private void setQueue(String json, int requestedIndex, boolean autoplay) {

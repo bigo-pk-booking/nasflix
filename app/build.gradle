@@ -1,3 +1,4 @@
+// AndroidX Media3 background playback
 plugins { id 'com.android.application' }
 android {
     namespace 'com.nasflix.app'

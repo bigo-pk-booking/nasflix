@@ -216,11 +216,12 @@ public class MainActivity extends Activity {
         taglineParams.bottomMargin = dp(34);
         content.addView(tagline, taglineParams);
 
-        ProgressBar progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        // Circular indeterminate loader with a purple accent.
+        ProgressBar progress = new ProgressBar(this);
         progress.setIndeterminate(true);
-        progress.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.rgb(192, 132, 252)));
         progress.setIndeterminateTintList(android.content.res.ColorStateList.valueOf(Color.rgb(192, 132, 252)));
-        LinearLayout.LayoutParams progressParams = new LinearLayout.LayoutParams(dp(230), dp(5));
+        LinearLayout.LayoutParams progressParams = new LinearLayout.LayoutParams(dp(42), dp(42));
+        progressParams.gravity = Gravity.CENTER_HORIZONTAL;
         content.addView(progress, progressParams);
 
         TextView status = new TextView(this);

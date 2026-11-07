@@ -49,3 +49,5 @@
 .upload-progress.done .upload-progress-track span{background:linear-gradient(90deg,#10b981,#34d399)}
 .upload-progress.error{border-color:#f87171}
 @keyframes uploadShimmer{to{transform:translateX(100%)}}
+
+body.app-mode #adminOpen,body.app-mode #adminModal{display:none!important}

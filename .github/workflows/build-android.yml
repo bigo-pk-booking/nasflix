@@ -48,8 +48,8 @@ jobs:
       - name: Publish public GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: nasflix-v1.2.1-release-20261107
-          name: NASFLIX v1.2.1 - Signed Android APK
+          tag_name: nasflix-v1.2.2-release-20261108
+          name: NASFLIX v1.2.2 - Signed Android APK
           body: |
             Signed NASFLIX Android release APK.
             Download the APK below and install it on your Android device.

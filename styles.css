@@ -362,3 +362,5 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .music-trending-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
 .music-trending-grid .trending-card-art{aspect-ratio:1/1}
 @media(max-width:600px){.trending-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.trending-card-info{padding:9px}.trending-card-info b{font-size:13px}.trending-card-info small{font-size:11px}}
+
+.trending-see-more{display:inline-flex;margin-top:16px;padding:9px 18px;border:1px solid rgba(190,135,240,.55);border-radius:999px;background:rgba(73,39,96,.35);color:#e8d3ff;font-weight:700;cursor:pointer}.trending-see-more[hidden]{display:none!important}

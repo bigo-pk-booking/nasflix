@@ -49,7 +49,7 @@ document.querySelectorAll(".cat-chip").forEach(b=>b.addEventListener("click",()=
 $("#searchInput").addEventListener("input",render);
 $("#heroExplore").addEventListener("click",()=>$("#movies").scrollIntoView({behavior:"smooth"}));
 if($("#adminOpen")&&$("#adminModal"))$("#adminOpen").addEventListener("click",()=>{$("#adminModal").classList.add("open");$("#adminModal").setAttribute("aria-hidden","false");});
-document.addEventListener("click",async e=>{const btn=e.target.closest(".player-fullscreen");if(!btn)return;const screen=$("#playerScreen");try{if(!document.fullscreenElement)await screen.requestFullscreen();else await document.exitFullscreen();}catch{const media=screen.querySelector("iframe,video");if(media?.requestFullscreen)try{await media.requestFullscreen()}catch{}}});
+document.addEventListener("click",async e=>{const btn=e.target.closest(".player-fullscreen");if(!btn)return;const screen=$("#playerScreen"),video=screen.querySelector("video"),frame=screen.querySelector("iframe");try{if(document.fullscreenElement){await document.exitFullscreen();return;}if(video){if(typeof video.webkitEnterFullscreen==="function"){video.webkitEnterFullscreen();return;}if(video.requestFullscreen){await video.requestFullscreen();return;}}if(frame?.requestFullscreen){await frame.requestFullscreen();return;}if(screen.requestFullscreen)await screen.requestFullscreen();}catch(error){console.warn("Fullscreen request was blocked by the device WebView.",error);}});
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal("player");closeModal("admin")}});
 function setUploadProgress(percent,label,detail,state=""){

@@ -36,21 +36,10 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient() {
             @Override public void onShowCustomView(View view, CustomViewCallback callback) {
-                if (customView != null) { callback.onCustomViewHidden(); return; }
-                customView = view;
-                customViewCallback = callback;
-                normalUiVisibility = getWindow().getDecorView().getSystemUiVisibility();
-                webView.setVisibility(View.GONE);
-                root.addView(view, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_FULLSCREEN |
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                showCustomView(view, callback);
+            }
+            @Override public void onShowCustomView(View view, int requestedOrientation, CustomViewCallback callback) {
+                showCustomView(view, callback);
             }
             @Override public void onHideCustomView() { hideCustomView(); }
         });
@@ -58,6 +47,24 @@ public class MainActivity extends Activity {
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
         webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1");
+    }
+
+    private void showCustomView(View view, WebChromeClient.CustomViewCallback callback) {
+        if (customView != null) { callback.onCustomViewHidden(); return; }
+        customView = view;
+        customViewCallback = callback;
+        normalUiVisibility = getWindow().getDecorView().getSystemUiVisibility();
+        webView.setVisibility(View.GONE);
+        root.addView(view, new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_FULLSCREEN |
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     private void hideCustomView() {

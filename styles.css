@@ -599,3 +599,8 @@ body.app-mode .music-section .track-cover{width:48px;height:48px;flex-basis:48px
   body.app-mode .music-section>.music-library-actions{grid-template-columns:1fr}
   body.app-mode .music-section .artist-filter{flex-basis:80px;max-width:80px}
 }
+
+/* Artist portrait must stay clipped inside the circular initials avatar. */
+.music-section .artist-avatar{position:relative;display:grid;place-items:center;overflow:hidden;border-radius:50%;isolation:isolate;flex:0 0 64px;}
+.music-section .artist-avatar img{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center!important;border-radius:50%!important;z-index:2!important;}
+.music-section .artist-avatar-initials{position:relative;z-index:1;}

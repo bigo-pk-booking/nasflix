@@ -328,3 +328,15 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .header-logout{border:1px solid rgba(196,145,255,.55);background:rgba(76,39,102,.45);color:#f3e7ff;border-radius:999px;padding:9px 13px;font-size:12px;font-weight:700;white-space:nowrap}
 .header-logout[hidden]{display:none!important}
 @media(max-width:560px){.header-logout{padding:8px 10px;font-size:11px}.header-actions{gap:7px}}
+
+.welcome-card{position:relative}
+.welcome-close{position:absolute;top:18px;right:18px;width:36px;height:36px;border:1px solid rgba(220,180,255,.35);border-radius:50%;background:rgba(15,10,24,.65);color:#f7eaff;font-size:25px;line-height:1;display:grid;place-items:center;cursor:pointer}
+.offline-login-modal[hidden]{display:none!important}
+.offline-login-modal{position:fixed;inset:0;z-index:1200;background:rgba(4,2,8,.78);display:grid;place-items:center;padding:20px}
+.offline-login-card{position:relative;width:min(100%,420px);padding:28px 22px 22px;border:1px solid rgba(190,130,235,.65);border-radius:22px;background:linear-gradient(145deg,#24132f,#100c18);color:#f7edff;box-shadow:0 22px 70px rgba(0,0,0,.55)}
+.offline-login-card h3{font-size:21px;margin:0 35px 10px 0}
+.offline-login-card p{color:#c8b8d5;line-height:1.55;margin:0 0 20px}
+.offline-login-close{position:absolute;right:13px;top:12px;border:0;background:transparent;color:#e9d8f7;font-size:27px}
+.offline-login-actions{display:flex;gap:10px}
+.offline-login-actions button{flex:1;border:1px solid #9861c9;border-radius:12px;padding:12px;background:#432354;color:#fff;font-weight:700}
+.offline-login-actions button:last-child{background:transparent;border-color:#604b70}

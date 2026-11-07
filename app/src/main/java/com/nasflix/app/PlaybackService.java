@@ -196,10 +196,16 @@ public class PlaybackService extends MediaSessionService {
             int index = Math.max(0, Math.min(requestedIndex, mediaItems.size() - 1));
             lastPlaybackError = "";
             playbackDiagnostics = "Queue received: " + mediaItems.size() + " tracks; URL=" + mediaItems.get(index).localConfiguration.uri;
-            player.setMediaItems(mediaItems, index, 0);
+            player.setMediaItems(mediaItems, index, C.TIME_UNSET);
             player.prepare();
-            player.setPlayWhenReady(autoplay);
-            if (!autoplay) player.pause();
+            // Explicitly reset to the beginning after preparation so a fresh queue
+            // starts from 0:00 instead of waiting for a manual seek on some devices.
+            if (autoplay) {
+                player.seekToDefaultPosition(index);
+                player.play();
+            } else {
+                player.pause();
+            }
         } catch (Exception error) {
             lastPlaybackError = error.getClass().getSimpleName() + ": " + String.valueOf(error.getMessage());
             playbackDiagnostics = lastPlaybackError;

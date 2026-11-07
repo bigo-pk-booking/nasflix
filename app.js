@@ -19,8 +19,8 @@ function render(){
   musicList.innerHTML = visible.filter(x=>x.type==="Music").map(track).join("");
   $("#emptyState").hidden = visible.length>0;
   document.querySelectorAll(".cat-chip").forEach(b=>b.classList.toggle("selected",b.dataset.filter===activeFilter));
-  document.querySelectorAll(".media-card").forEach(el=>el.addEventListener("click",()=>openPlayer(Number(el.dataset.id))));
-  document.querySelectorAll("[data-track]").forEach(el=>el.addEventListener("click",()=>openPlayer(Number(el.dataset.track))));
+  document.querySelectorAll(".media-card").forEach(el=>el.addEventListener("click",()=>openPlayer(el.dataset.id)));
+  document.querySelectorAll("[data-track]").forEach(el=>el.addEventListener("click",()=>openPlayer(el.dataset.track)));
   renderAdmin();
 }
 function card(x){return `<article class="media-card" data-id="${x.id}"><div class="poster" style="--c1:${x.c1||"#4c1d95"};--c2:${x.c2||"#111827"}"><span class="card-type">${esc(x.type)}</span><span class="poster-art">${esc(x.art||"✦")}</span><div><span class="poster-label">${esc(x.genre||"FEATURED").toUpperCase()}</span></div><span class="play-badge">▶</span></div><h3 class="card-title">${esc(x.title)}</h3><p class="card-meta">${esc(x.type)} · ${esc(x.genre||"Entertainment")}</p></article>`}

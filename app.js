@@ -289,7 +289,24 @@ if($("#adminOpen")&&$("#adminModal"))$("#adminOpen").addEventListener("click",()
 const menuToggle=$("#menuToggle"),mainNav=$("#mainNav");
 function closeNav(){if(!menuToggle||!mainNav)return;menuToggle.setAttribute("aria-expanded","false");menuToggle.setAttribute("aria-label","Open navigation menu");mainNav.classList.remove("open");}
 menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("aria-expanded")!=="true";menuToggle.setAttribute("aria-expanded",String(open));menuToggle.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");mainNav.classList.toggle("open",open);});
-mainNav?.querySelectorAll("a").forEach(link=>link.addEventListener("click",()=>{const filter=link.dataset.menuFilter;if(filter){activeFilter=filter;render();}closeNav();}));
+function showNasflixPage(page){
+  const target=page==="playlists"?"music":page;
+  document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",section.dataset.pageSection!==target));
+  mainNav?.querySelectorAll("[data-page]").forEach(link=>link.classList.toggle("active",link.dataset.page===page));
+  if(page==="movies"){activeFilter="All";render();}
+  if(page==="playlists"){
+    const panel=$("#accountPlaylistPanel");
+    if(panel){panel.hidden=false;setTimeout(()=>panel.scrollIntoView({behavior:"smooth",block:"start"}),80);}
+  }else if(page==="music"){setTimeout(()=>$("#music")?.scrollIntoView({behavior:"smooth",block:"start"}),30);}
+  else if(page==="movies"){setTimeout(()=>$("#movies")?.scrollIntoView({behavior:"smooth",block:"start"}),30);}
+  else window.scrollTo({top:0,behavior:"smooth"});
+}
+mainNav?.querySelectorAll("a").forEach(link=>link.addEventListener("click",event=>{
+  const page=link.dataset.page,filter=link.dataset.menuFilter;
+  if(page){event.preventDefault();showNasflixPage(page);}
+  else if(filter){event.preventDefault();showNasflixPage("movies");activeFilter=filter;render();}
+  closeNav();
+}));
 document.addEventListener("click",e=>{if(mainNav?.classList.contains("open")&&!e.target.closest("#mainNav")&&!e.target.closest("#menuToggle"))closeNav();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNav();});
 document.addEventListener("click",e=>{const start=e.target.closest("[data-youtube-start]");if(!start)return;const id=start.dataset.youtubeStart;const screen=$("#playerScreen");if(!screen||!id)return;screen.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0" title="Video player" allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe><button class="player-fullscreen" type="button" aria-label="Fullscreen">⛶</button>';});

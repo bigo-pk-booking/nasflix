@@ -40,6 +40,7 @@ public class PlaybackService extends MediaSessionService {
 
     private ExoPlayer player;
     private MediaSession mediaSession;
+    // Defers the initial seek until ExoPlayer reports a prepared stream.
     private boolean startWhenReady = false;
     private int pendingStartIndex = 0;
     private final Handler handler = new Handler(Looper.getMainLooper());

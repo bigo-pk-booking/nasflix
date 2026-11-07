@@ -90,7 +90,6 @@ public class PlaybackService extends MediaSessionService {
                     startWhenReady = false;
                     player.seekToDefaultPosition(pendingStartIndex);
                     player.play();
-                    triggerNotificationUpdate();
                 }
                 updatePlaybackState();
             }
@@ -149,7 +148,6 @@ public class PlaybackService extends MediaSessionService {
             } else if (ACTION_PLAY.equals(action)) {
                 if (player != null && player.getMediaItemCount() > 0) {
                     player.play();
-                    triggerNotificationUpdate();
                 }
             } else if (ACTION_PAUSE.equals(action)) {
                 if (player != null) player.pause();
@@ -214,12 +212,10 @@ public class PlaybackService extends MediaSessionService {
             player.prepare();
             if (!autoplay) {
                 player.pause();
-                triggerNotificationUpdate();
             } else if (player.getPlaybackState() == Player.STATE_READY) {
                 startWhenReady = false;
                 player.seekToDefaultPosition(index);
                 player.play();
-                triggerNotificationUpdate();
             }
         } catch (Exception error) {
             lastPlaybackError = error.getClass().getSimpleName() + ": " + String.valueOf(error.getMessage());

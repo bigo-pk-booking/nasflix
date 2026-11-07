@@ -12,7 +12,7 @@ let activeFilter = "All";
 let activeMusicArtist = "All Artists";
 let activeMusicAlbum = "All Albums";
 let musicVisibleCount = 10;
-let musicLoadObserver = null;
+let activeDownloadFolder = "all";
 let editingId = null;
 function render(){
   const term = $("#searchInput").value.trim().toLowerCase();
@@ -34,14 +34,7 @@ function render(){
   const visibleTracks=shownMusic.slice(0,musicVisibleCount);
   musicList.innerHTML=visibleTracks.map(track).join("");
   const sentinel=$("#musicLoadSentinel");
-  if(sentinel){
-    sentinel.hidden=visibleTracks.length>=shownMusic.length;
-    if(musicLoadObserver)musicLoadObserver.disconnect();
-    if(!musicLoadObserver&&"IntersectionObserver" in window)musicLoadObserver=new IntersectionObserver(entries=>{
-      if(entries.some(entry=>entry.isIntersecting)){musicVisibleCount+=10;render();}
-    },{rootMargin:"220px"});
-    if(!sentinel.hidden&&musicLoadObserver)musicLoadObserver.observe(sentinel);
-  }
+  if(sentinel)sentinel.hidden=visibleTracks.length>=shownMusic.length;
   const playAll=$("#playAllMusic");if(playAll){playAll.disabled=shownMusic.length===0;playAll.textContent=activeMusicAlbum!=="All Albums"?"▶ Play album":activeMusicArtist==="All Artists"?"▶ Play all":"▶ Play "+activeMusicArtist;}
   $("#emptyState").hidden = visible.length>0;
   if(visible.length===0) $("#emptyState").textContent=items.length===0?"No content has been added yet. Check back soon.":"No titles found. Try another search.";
@@ -50,10 +43,6 @@ function render(){
   document.querySelectorAll("[data-track]").forEach(el=>el.addEventListener("click",()=>openPlayer(el.dataset.track)));
   document.querySelectorAll("[data-artist-filter]").forEach(el=>el.addEventListener("click",()=>{activeMusicArtist=el.dataset.artistFilter;activeMusicAlbum="All Albums";musicVisibleCount=10;render();}));
   document.querySelectorAll("[data-album-filter]").forEach(el=>el.addEventListener("click",()=>{activeMusicAlbum=el.dataset.albumFilter;musicVisibleCount=10;render();}));
-  document.querySelectorAll("[data-library-folder]").forEach(el=>el.addEventListener("click",()=>{
-    if(el.dataset.libraryFolder==="music"){document.querySelector("#music")?.scrollIntoView({behavior:"smooth"});}
-    else{activeFilter="All";render();document.querySelector("#contentGrid")?.scrollIntoView({behavior:"smooth",block:"start"});}
-  }));
   $("#playAllMusic")?.addEventListener("click",()=>{const list=shownMusic.filter(x=>x.url&&isDirectMedia(x.url));if(list.length)openMusicPlayer(list[0].id,true,activeMusicArtist==="All Artists"?"":activeMusicArtist,activeMusicAlbum);});
   renderAdmin();
   renderDownloads();
@@ -354,7 +343,25 @@ async function saveOffline(id){
  }catch(error){alert("Offline save failed: "+error.message);}finally{if(button){button.disabled=false;button.textContent=offlineItems.some(s=>String(s.id)===String(id))?"✓ Saved offline":(original||"↓ Save offline");}}
 }
 async function removeOffline(id){const entry=offlineItems.find(s=>String(s.id)===String(id));if(entry?.url){const cache=await caches.open(OFFLINE_CACHE_NAME);await cache.delete(new URL(entry.url,location.href).href);}offlineItems=offlineItems.filter(s=>String(s.id)!==String(id));saveOfflineList();renderDownloads();render();}
-function renderDownloads(){const box=$("#downloadsGrid"),empty=$("#downloadsEmpty"),count=$("#downloadsCount");if(!box)return;count.textContent=offlineItems.length+" saved";box.innerHTML=offlineItems.map(x=>"<div class=\"download-card\"><div class=\"download-card-main\" data-offline-play=\""+esc(x.id)+"\"><span class=\"download-type\">"+esc(x.type)+"</span><b>"+esc(x.episodeTitle||x.title)+"</b><small>"+esc(x.seriesTitle||x.genre||"NASFLIX")+"</small><span class=\"download-play\">▶ Play offline</span></div><button type=\"button\" data-offline-delete=\""+esc(x.id)+"\" aria-label=\"Delete saved download\">×</button></div>").join("");empty.hidden=offlineItems.length>0;}
+function loadMoreMusicOnScroll(){
+ const sentinel=$("#musicLoadSentinel");if(!sentinel||sentinel.hidden)return;
+ const term=$("#searchInput").value.trim().toLowerCase();
+ const filtered=items.filter(x=>x.type==="Music"&&(activeFilter==="All"||x.type===activeFilter||String(x.genre||"").toLowerCase()===activeFilter.toLowerCase())&&[x.title,x.seriesTitle,x.type,x.genre,x.description,x.artist,x.albumTitle].join(" ").toLowerCase().includes(term));
+ const artistTracks=activeMusicArtist==="All Artists"?filtered:filtered.filter(x=>String(x.artist||"").trim()===activeMusicArtist);
+ const shown=activeMusicAlbum==="All Albums"?artistTracks:artistTracks.filter(x=>(String(x.albumTitle||"").trim()||"Singles")===activeMusicAlbum);
+ if(musicVisibleCount<shown.length&&sentinel.getBoundingClientRect().top<=window.innerHeight+260){musicVisibleCount+=10;render();}
+}
+window.addEventListener("scroll",loadMoreMusicOnScroll,{passive:true});
+window.addEventListener("resize",loadMoreMusicOnScroll);
+document.querySelectorAll("[data-download-folder]").forEach(button=>button.addEventListener("click",()=>{activeDownloadFolder=button.dataset.downloadFolder;renderDownloads();}));
+function renderDownloads(){
+ const box=$("#downloadsGrid"),empty=$("#downloadsEmpty"),count=$("#downloadsCount");if(!box)return;
+ const filtered=offlineItems.filter(x=>activeDownloadFolder==="all"||(activeDownloadFolder==="music"?String(x.type).toLowerCase()==="music":String(x.type).toLowerCase()!=="music"));
+ count.textContent=offlineItems.length+" saved";
+ box.innerHTML=filtered.map(x=>"<div class=\"download-card\"><div class=\"download-card-main\" data-offline-play=\""+esc(x.id)+"\"><span class=\"download-type\">"+esc(x.type)+"</span><b>"+esc(x.episodeTitle||x.title)+"</b><small>"+esc(x.seriesTitle||x.genre||"NASFLIX")+"</small><span class=\"download-play\">▶ Play offline</span></div><button type=\"button\" data-offline-delete=\""+esc(x.id)+"\" aria-label=\"Delete saved download\">×</button></div>").join("");
+ empty.hidden=filtered.length>0;
+ document.querySelectorAll("[data-download-folder]").forEach(button=>button.classList.toggle("active",button.dataset.downloadFolder===activeDownloadFolder));
+}
 document.addEventListener("click",e=>{const save=e.target.closest("[data-offline-save]");if(save){e.preventDefault();e.stopPropagation();saveOffline(save.dataset.offlineSave);return;}const del=e.target.closest("[data-offline-delete]");if(del){e.preventDefault();e.stopPropagation();removeOffline(del.dataset.offlineDelete);return;}const play=e.target.closest("[data-offline-play]");if(play){const id=play.dataset.offlinePlay;const item=offlineItems.find(x=>String(x.id)===String(id));if(item){if(!items.some(x=>String(x.id)===String(id)))items.push(item);openPlayer(id);}return;}});
 function renderAdmin(){
   $("#adminItems").innerHTML=items.map(x=>"<div class=\"admin-row\"><span>"+esc(x.title)+" <small>("+esc(x.type)+")"+(x.remote?" · Saved":"")+"</small></span><span class=\"admin-actions\">"+(x.remote?"<button data-edit=\""+esc(x.id)+"\">Edit</button>":"")+"<button data-delete=\""+esc(x.id)+"\" data-remote=\""+(x.remote?"1":"0")+"\">Remove</button></span></div>").join("");

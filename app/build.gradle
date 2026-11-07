@@ -4,7 +4,7 @@ android {
     namespace 'com.nasflix.app'
     compileSdk 35
     defaultConfig {
-        applicationId 'com.nasflix.app.next'
+        applicationId 'com.nasflix.app'
         minSdk 23
         targetSdk 34
         versionCode 5

@@ -152,7 +152,7 @@ $("#playerRestore")?.addEventListener("click",restorePlayer);
 $("#playerScreen")?.addEventListener("click",e=>{
   if($("#playerModal").classList.contains("minimized")&&!e.target.closest("video,iframe,button,a"))restorePlayer();
 });
-function closeModal(id){const el=$("#"+id+"Modal");if(!el)return;if(id==="player")stopCurrentMedia();el.classList.remove("open","minimized");el.setAttribute("aria-hidden","true");}
+function closeModal(id){const el=$("#"+id+"Modal");if(!el)return;/* Closing the player UI must not stop the native background playback session. */el.classList.remove("open","minimized");el.setAttribute("aria-hidden","true");}
 document.querySelectorAll(".cat-chip").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;render()}));
 $("#searchInput").addEventListener("input",render);
 $("#heroExplore").addEventListener("click",()=>$("#movies").scrollIntoView({behavior:"smooth"}));

@@ -35,7 +35,7 @@
         <div class="hero-meta"><span>✦ Curated entertainment</span><span>•</span><span>New stories added regularly</span></div>
       </div>
       <div class="hero-art" aria-label="Abstract cinematic artwork">
-        <div class="orb orb-one"></div><div class="orb orb-two"></div><div class="hero-frame"><span>FEATURED</span><b>THE<br>UNKNOWN</b><small>AN ORIGINAL STORY</small></div>
+        <div class="orb orb-one"></div><div class="orb orb-two"></div><div class="hero-frame"><span>NASFLIX</span><b>YOUR<br>LIBRARY</b><small>MOVIES · SERIES · MUSIC</small></div>
       </div>
       <div class="hero-bottom">SCROLL TO DISCOVER <span>↓</span></div>
     </section>
@@ -57,7 +57,7 @@
     </section>
 
     <section class="content-section" id="movies">
-      <div class="section-heading"><div><p class="eyebrow">HANDPICKED FOR YOU</p><h2>Featured <em>tonight</em></h2></div><span class="section-note">A little something for every mood</span></div>
+      <div class="section-heading"><div><p class="eyebrow">EXPLORE THE LIBRARY</p><h2>Browse <em>titles</em></h2></div><span class="section-note">Movies, series and original videos</span></div>
       <div class="content-grid" id="contentGrid"></div>
       <div class="empty-state" id="emptyState" hidden>No titles found. Try another search.</div>
     </section>
@@ -65,7 +65,7 @@
     <section class="wide-promo" id="videos"><div><p class="eyebrow">A WORLD OF ORIGINALS</p><h2>Made to be<br><em>discovered.</em></h2><p>Explore independent creations, imaginative AI visuals and stories from different genres.</p></div><div class="promo-symbol">N<span>✦</span></div></section>
 
     <section class="music-section" id="music">
-      <div class="section-heading"><div><p class="eyebrow">PRESS PLAY</p><h2>Soundtrack <em>your day</em></h2></div><span class="section-note">Listen to featured tracks</span></div>
+      <div class="section-heading"><div><p class="eyebrow">PRESS PLAY</p><h2>Soundtrack <em>your day</em></h2></div><span class="section-note">Music from the NASFLIX library</span></div>
       <div class="music-list" id="musicList"></div>
     </section>
     <section class="join-banner"><div><p class="eyebrow">THE NEXT SCENE STARTS HERE</p><h2>Find your next<br><em>favorite thing.</em></h2></div><a href="#home" class="primary">Back to top ↑</a></section>
@@ -73,7 +73,7 @@
 
   <footer><a class="brand" href="#"><span class="brand-mark">N</span> NAS<span>FLIX</span></a><p>© <span id="year"></span> NASFLIX. A home for independent entertainment.</p><div><a href="#home">Home</a><a href="#movies">Browse</a><a href="mailto:hello@example.com">Contact</a></div></footer>
 
-  <div class="modal" id="playerModal" aria-hidden="true"><div class="modal-backdrop" data-close="player"></div><div class="modal-card player-card"><button class="modal-close" data-close="player" aria-label="Close">×</button><div class="player-screen" id="playerScreen"><div class="play-symbol">▶</div><p>PREVIEW PLAYER</p></div><div class="modal-info"><p class="eyebrow" id="playerType">FEATURE</p><h2 id="playerTitle">Title</h2><p id="playerDescription"></p><a class="download-link" id="downloadLink" href="#" download hidden>↓ Download file</a><p class="notice">Demo content only. Add your own authorized media files through the connected admin system.</p></div><div class="series-episodes" id="seriesEpisodes" hidden></div></div></div>
+  <div class="modal" id="playerModal" aria-hidden="true"><div class="modal-backdrop" data-close="player"></div><div class="modal-card player-card"><button class="modal-close" data-close="player" aria-label="Close">×</button><div class="player-screen" id="playerScreen"><div class="play-symbol">▶</div><p>SELECT A TITLE TO PLAY</p></div><div class="modal-info"><p class="eyebrow" id="playerType">FEATURE</p><h2 id="playerTitle">Title</h2><p id="playerDescription"></p><a class="download-link" id="downloadLink" href="#" download hidden>↓ Download file</a></div><div class="series-episodes" id="seriesEpisodes" hidden></div></div></div>
 
   <div class="modal" id="adminModal" aria-hidden="true"><div class="modal-backdrop" data-close="admin"></div><div class="modal-card admin-card"><button class="modal-close" data-close="admin" aria-label="Close">×</button><p class="eyebrow">PRIVATE WORKSPACE</p><h2>Admin <em>studio</em></h2><p class="admin-intro">Add authorized video and music links to your NASFLIX catalogue. Links and catalogue details are saved in the free D1 database.</p>
     <label>Admin access key<input id="adminToken" type="password" autocomplete="current-password" placeholder="Enter your private admin key"></label>
@@ -86,7 +86,7 @@
       <label>Description<textarea id="itemDescription" rows="3" maxlength="400" placeholder="Tell viewers about this content"></textarea></label>
       <label>Media file <input id="itemFile" type="file" accept="video/mp4,video/webm,audio/mpeg,audio/mp4,audio/ogg,audio/wav"></label><label>Poster / Thumbnail <input id="posterFile" type="file" accept="image/jpeg,image/png,image/webp"></label><small class="upload-hint">Optional JPG, PNG or WebP poster · Maximum 5 MB</small>
       <small class="upload-hint">MP4, WebM, MP3, M4A, OGG, WAV, JPG, PNG or WebP · Maximum 50 MB</small>
-      <label>Or media URL <input id="itemUrl" type="text" inputmode="url" placeholder="https://... (optional external preview)"></label>
+      <label>Or media URL <input id="itemUrl" type="text" inputmode="url" placeholder="https://... (optional media URL)"></label>
       <label class="check-label"><input id="itemDownload" type="checkbox"> Allow downloads (only for files you have rights to distribute)</label>
       <button class="primary full" id="contentSubmit" type="submit">Save to NASFLIX catalogue +</button><button class="admin-cancel" id="cancelEdit" type="button" hidden>Cancel edit</button>
       <div class="upload-progress" id="uploadProgress" hidden><div class="upload-progress-top"><span id="uploadProgressLabel">Preparing upload…</span><strong id="uploadProgressPercent">0%</strong></div><div class="upload-progress-track"><span id="uploadProgressBar"></span></div><p id="uploadProgressDetail">Please keep this page open while your file uploads.</p></div>

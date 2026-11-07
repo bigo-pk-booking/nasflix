@@ -68,3 +68,10 @@ body.app-mode #adminOpen,body.app-mode #adminModal{display:none!important}
 .nav-categories a{font-size:12px;padding:9px 8px;border-radius:8px;color:#c9bfd7}
 .nav-categories a:hover{background:#2a1c40;color:white}
 @media(max-width:650px){.topbar{flex-wrap:nowrap;gap:10px}.brand-group{gap:10px}.main-nav{order:initial;width:min(300px,88vw);padding:12px}.header-actions{margin-left:auto}.search input{width:85px}}
+
+/* Ensure the same hamburger drawer is visible and tappable inside the Android app */
+body.app-mode .brand-group{display:flex;align-items:center;gap:12px}
+body.app-mode .menu-toggle{display:flex;min-width:40px;min-height:40px;position:relative;z-index:25;touch-action:manipulation}
+body.app-mode .main-nav{display:none;position:fixed;left:14px;top:76px;width:min(310px,calc(100vw - 28px));max-height:calc(100dvh - 96px);overflow-y:auto;z-index:100;background:#151220;border:1px solid #ffffff28;border-radius:16px;box-shadow:0 20px 60px #000d;padding:12px}
+body.app-mode .main-nav.open{display:flex}
+body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-action:manipulation}

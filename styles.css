@@ -265,3 +265,12 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .download-folder small{font-size:9px;color:#a99bb9}
 .download-folder.active{border-color:#c084fc;background:linear-gradient(130deg,#342047,#191322);box-shadow:0 0 0 1px #c084fc33}
 @media(max-width:650px){.download-folders{gap:8px}.download-folder{padding:11px}.download-folder small{font-size:8px}}
+
+.track-skeleton{pointer-events:none}
+.track-skeleton .skeleton-block,.track-skeleton .skeleton-line,.track-skeleton .skeleton-button{display:block;background:linear-gradient(90deg,#21182c 20%,#49335d 45%,#21182c 70%);background-size:220% 100%;animation:nasflixShimmer 1.15s ease-in-out infinite;border-radius:9px}
+.track-skeleton .track-cover{border-radius:13px}
+.track-skeleton .skeleton-line{height:14px;width:min(210px,85%);margin:5px 0 10px}
+.track-skeleton .skeleton-line.short{height:10px;width:42%;margin:0}
+.track-skeleton .skeleton-button{width:74px;height:38px;border-radius:22px}
+.track-skeleton .skeleton-button.round{width:42px;height:42px;border-radius:50%}
+@keyframes nasflixShimmer{0%{background-position:100% 0}100%{background-position:-120% 0}}

@@ -84,7 +84,16 @@ async function accountAction(kind){
  finally{accountActionBusy=false;if(button){button.disabled=false;button.textContent=original;}}
 }
 window.NASFLIXAccountAction=accountAction;
-async function addTrackToPlaylist(id){if(!accountUser){accountMessage("Log in first to create and save playlists.");$("#accountEmail").focus();return;}const p=userPlaylists.find(x=>x.id===activePlaylistId);if(!p){accountMessage("Create and select a playlist first.");return;}if(!p.trackIds.includes(String(id)))p.trackIds.push(String(id));renderUserPlaylists();schedulePlaylistSync();}
+let pendingPlaylistTrackId="";
+function closePlaylistPicker(){const modal=$("#playlistPicker");if(modal)modal.hidden=true;pendingPlaylistTrackId="";}
+function openPlaylistPicker(id){
+ if(!accountUser){accountMessage("Log in first to save songs to playlists.");$("#accountEmail").focus();return;}
+ if(!userPlaylists.length){accountMessage("Create a playlist first, then tap ＋ beside a song.");return;}
+ pendingPlaylistTrackId=String(id);const modal=$("#playlistPicker"),box=$("#playlistPickerOptions");if(!modal||!box)return;
+ box.innerHTML=userPlaylists.map(p=>'<button type="button" class="playlist-picker-option" data-choose-playlist="'+esc(p.id)+'"><span class="playlist-icon">♫</span><span><b>'+esc(p.name)+'</b><small>'+p.trackIds.length+' songs</small></span><span>＋</span></button>').join("");
+ modal.hidden=false;
+}
+function addTrackToPlaylist(id){openPlaylistPicker(id);}
 function playUserPlaylist(){const p=userPlaylists.find(x=>x.id===activePlaylistId);if(!p)return;const queue=p.trackIds.map(id=>items.find(x=>String(x.id)===id)).filter(x=>x&&x.url&&isDirectMedia(x.url));if(!queue.length){accountMessage("No playable songs in this playlist yet.");return;}openMusicPlayer(queue[0].id,true,"","All Albums");}
 // Resilient delegated account controls: handle clicks even if a button listener was missed.
 document.addEventListener("click",function(event){

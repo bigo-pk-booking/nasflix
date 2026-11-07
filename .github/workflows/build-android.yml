@@ -19,11 +19,26 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Build debug APK
-        run: gradle assembleDebug
-      - name: Upload APK
+      - name: Prepare release signing key
+        env:
+          NASFLIX_KEYSTORE_BASE64: ${{ secrets.NASFLIX_KEYSTORE_BASE64 }}
+          NASFLIX_KEYSTORE_PASSWORD: ${{ secrets.NASFLIX_KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$NASFLIX_KEYSTORE_BASE64"
+          test -n "$NASFLIX_KEYSTORE_PASSWORD"
+          mkdir -p "$RUNNER_TEMP/nasflix-signing"
+          printf '%s' "$NASFLIX_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/nasflix-signing/release.p12"
+          KEY_ALIAS="$(keytool -list -v -storetype PKCS12 -keystore "$RUNNER_TEMP/nasflix-signing/release.p12" -storepass "$NASFLIX_KEYSTORE_PASSWORD" 2>/dev/null | awk -F': ' '/^Alias name:/{print $2; exit}')"
+          test -n "$KEY_ALIAS"
+          echo "NASFLIX_KEYSTORE_FILE=$RUNNER_TEMP/nasflix-signing/release.p12" >> "$GITHUB_ENV"
+          echo "NASFLIX_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "NASFLIX_KEYSTORE_PASSWORD=$NASFLIX_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+      - name: Build signed release APK
+        run: gradle assembleRelease
+      - name: Upload signed release APK
         uses: actions/upload-artifact@v4
         with:
-          name: NASFLIX-Android-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: NASFLIX-Signed-Release-APK
+          path: app/build/outputs/apk/release/app-release.apk
           retention-days: 30

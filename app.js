@@ -52,7 +52,7 @@ function openMusicPlayer(id,shouldPlay=true){
  audio.addEventListener("play",()=>{if(activeMusicContext?.state==="suspended")activeMusicContext.resume();play.textContent="Ⅱ";play.setAttribute("aria-label","Pause");});audio.addEventListener("pause",()=>{play.textContent="▶";play.setAttribute("aria-label","Play");});
  audio.addEventListener("ended",()=>loadTrack(index+1,true));audio.addEventListener("loadedmetadata",()=>{$("#musicDuration").textContent=time(audio.duration);});audio.addEventListener("timeupdate",()=>{if(Number.isFinite(audio.duration)&&audio.duration>0){seek.value=String(Math.round(audio.currentTime/audio.duration*1000));$("#musicCurrent").textContent=time(audio.currentTime);}});
  seek.addEventListener("input",()=>{if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=(Number(seek.value)/1000)*audio.duration;});$("#musicVolume").addEventListener("input",e=>audio.volume=Number(e.target.value));
- renderEpisodeNav(x);$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");requestAnimationFrame(()=>{resizeCanvas();draw();});if(shouldPlay){if(activeMusicContext?.state==="suspended")activeMusicContext.resume();audio.play().catch(()=>{play.textContent="▶";});}
+ renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");$("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";requestAnimationFrame(()=>{resizeCanvas();draw();});if(shouldPlay){if(activeMusicContext?.state==="suspended")activeMusicContext.resume();audio.play().catch(()=>{play.textContent="▶";});}
 }
 
 function minimizePlayer(){

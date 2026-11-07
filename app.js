@@ -199,6 +199,48 @@ function uploadWithProgress(url,formData,token,onProgress,method="POST"){
     xhr.send(formData);
   });
 }
+async function uploadBulkBatch(kind){
+  const music=kind==="music";
+  const files=[...(music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).files];
+  const artist=(music?$("#bulkMusicArtist"):$("#bulkVideoArtist").value).trim();
+  const poster=(music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).files[0];
+  const status=$(music?"#bulkMusicStatus":"#bulkVideoStatus");
+  const button=$(music?"#bulkMusicSubmit":"#bulkVideoSubmit");
+  const token=$("#adminToken").value.trim();
+  if(!token){status.textContent="Enter your Admin access key first.";return;}
+  if(!files.length){status.textContent="Choose at least one "+(music?"music":"video")+" file.";return;}
+  if(music&&!artist){status.textContent="Enter the artist / singer name.";return;}
+  if(poster&&poster.size>5*1024*1024){status.textContent="Shared poster maximum size is 5 MB.";return;}
+  const invalid=files.find(file=>file.size>50*1024*1024);
+  if(invalid){status.textContent=invalid.name+" is over the 50 MB per-file limit.";return;}
+  button.disabled=true;
+  let completed=0;
+  try{
+    for(const file of files){
+      const title=file.name.replace(/\.[^.]+$/,"").replace(/[._]+/g," ").trim()||file.name;
+      const form=new FormData();
+      const data={title,type:music?"Music":"Movie",genre:music?"Music":"Independent",artist,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
+      Object.entries(data).forEach(([key,value])=>form.append(key,String(value)));
+      form.append("file",file);
+      if(poster&&completed===0)form.append("posterFile",poster);
+      status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+file.name;
+      await uploadWithProgress("/api/media",form,token,(loaded,total)=>{
+        const pct=total?Math.round(loaded/total*100):0;
+        status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+file.name+" ("+pct+"%)";
+      },"POST");
+      completed++;
+    }
+    status.textContent="Done! "+completed+" "+(music?"music tracks":"videos")+" added to NASFLIX.";
+    (music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).value="";
+    (music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).value="";
+    await loadRemote();
+  }catch(error){
+    status.textContent=completed+" of "+files.length+" uploaded. Stopped at the first error: "+error.message+" You can select the remaining files and retry.";
+  }finally{button.disabled=false;}
+}
+$("#bulkMusicSubmit")?.addEventListener("click",()=>uploadBulkBatch("music"));
+$("#bulkVideoSubmit")?.addEventListener("click",()=>uploadBulkBatch("video"));
+
 $("#contentForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const token=$("#adminToken").value.trim(),status=$("#uploadStatus"),file=$("#itemFile").files[0],posterFile=$("#posterFile")?.files?.[0],submit=$("#contentSubmit");

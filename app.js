@@ -273,7 +273,41 @@ function renderAdmin(){
 }
 $("#year").textContent=new Date().getFullYear();
 render();
-loadRemote();
+let startupStepTimer=null;
+function setStartupStep(step){
+  const status=$("#startupStatus"),bar=$("#startupProgressBar");
+  const labels=["Starting NASFLIX app…","Loading videos…","Loading music…","Loading pictures…","Preparing your library…"];
+  if(status)status.textContent=labels[Math.max(0,Math.min(step,labels.length-1))];
+  if(bar)bar.style.width=(12+step*17)+"%";
+  document.querySelectorAll("[data-startup-step]").forEach(el=>{
+    const n=Number(el.dataset.startupStep);
+    el.classList.toggle("current",n===step);
+    el.classList.toggle("complete",n<step);
+  });
+}
+async function finishStartupLoading(){
+  const overlay=$("#nasStartup");
+  if(!overlay)return;
+  // Let visible poster artwork finish loading, but don't keep startup open forever
+  const images=[...document.querySelectorAll("#contentGrid img, #downloadsGrid img")];
+  const imageLoads=images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{
+    img.addEventListener("load",resolve,{once:true});
+    img.addEventListener("error",resolve,{once:true});
+  }));
+  await Promise.race([Promise.all(imageLoads),new Promise(resolve=>setTimeout(resolve,2200))]);
+  if(startupStepTimer){clearInterval(startupStepTimer);startupStepTimer=null;}
+  setStartupStep(4);
+  const bar=$("#startupProgressBar");if(bar)bar.style.width="100%";
+  const status=$("#startupStatus");if(status)status.textContent="You're all set. Enjoy NASFLIX!";
+  document.querySelectorAll("[data-startup-step]").forEach(el=>{el.classList.remove("current");el.classList.add("complete");});
+  await new Promise(resolve=>setTimeout(resolve,450));
+  overlay.classList.add("startup-hidden");
+  setTimeout(()=>overlay.remove(),700);
+}
+setStartupStep(0);
+let startupStep=0;
+startupStepTimer=setInterval(()=>{startupStep=Math.min(4,startupStep+1);setStartupStep(startupStep);},650);
+loadRemote().finally(finishStartupLoading);
 
 $("#cancelEdit").addEventListener("click",()=>{editingId=null;$("#contentForm").reset();$("#contentSubmit").textContent="Save to NASFLIX catalogue +";$("#cancelEdit").hidden=true;$("#uploadStatus").textContent="Edit cancelled.";});
 

@@ -1,4 +1,5 @@
 name: Build NASFLIX Android APK
+# Trigger release build with the newly configured signing key
 on:
   workflow_dispatch:
   push:

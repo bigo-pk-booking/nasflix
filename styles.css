@@ -37,3 +37,15 @@
 .episode-nav-buttons{display:flex;justify-content:space-between;gap:12px;padding-top:14px}
 .episode-nav-buttons button{border:1px solid #ffffff25;background:#211a30;color:#d8b4fe;border-radius:22px;padding:10px 14px;font-size:11px}
 .episode-nav-buttons button:disabled{opacity:.35;cursor:not-allowed}
+
+
+.upload-progress{margin:14px 0 8px;padding:14px;border:1px solid #8b5cf6;border-radius:14px;background:linear-gradient(135deg,#211633,#171326);box-shadow:0 8px 28px #8b5cf622}
+.upload-progress-top{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#e9d5ff;font-size:12px;font-weight:700;margin-bottom:10px}
+.upload-progress-top strong{font-size:15px;color:#fff;font-variant-numeric:tabular-nums}
+.upload-progress-track{height:10px;border-radius:99px;background:#ffffff18;overflow:hidden}
+.upload-progress-track span{display:block;width:0%;height:100%;border-radius:99px;background:linear-gradient(90deg,#8b5cf6,#d946ef,#a78bfa);transition:width .18s ease;position:relative;overflow:hidden}
+.upload-progress-track span::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 20%,#ffffff88 50%,transparent 80%);transform:translateX(-100%);animation:uploadShimmer 1.25s linear infinite}
+.upload-progress p{font-size:11px;color:#b9abc9;margin:9px 0 0}
+.upload-progress.done .upload-progress-track span{background:linear-gradient(90deg,#10b981,#34d399)}
+.upload-progress.error{border-color:#f87171}
+@keyframes uploadShimmer{to{transform:translateX(100%)}}

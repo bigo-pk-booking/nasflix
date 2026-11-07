@@ -106,3 +106,10 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .music-bottom input{width:85px;accent-color:#c084fc}
 .music-queue-label{text-align:center;color:#766b89;font-size:8px;letter-spacing:2px}
 @media(max-width:650px){.nas-music-player{padding:14px 10px;gap:10px}.music-visualizer{height:115px}.music-controls{gap:20px}}
+
+
+/* Music player uses its own full-height layout instead of the 16:9 video frame */
+.player-screen.music-mode{height:auto;min-height:390px;aspect-ratio:auto;overflow:visible;align-items:stretch;justify-content:stretch}
+.player-screen.music-mode .nas-music-player{width:100%;min-height:390px;flex:1}
+.player-screen.music-mode .music-visualizer{height:150px;min-height:150px}
+@media(max-width:650px){.player-screen.music-mode{min-height:340px}.player-screen.music-mode .nas-music-player{min-height:340px}.player-screen.music-mode .music-visualizer{height:120px;min-height:120px}}

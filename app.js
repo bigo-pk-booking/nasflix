@@ -10,28 +10,35 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.se
 const grid = $("#contentGrid"), musicList = $("#musicList");
 let activeFilter = "All";
 let activeMusicArtist = "All Artists";
+let activeMusicAlbum = "All Albums";
 let editingId = null;
 function render(){
   const term = $("#searchInput").value.trim().toLowerCase();
-  const visible = items.filter(x => (activeFilter==="All" || x.type===activeFilter || String(x.genre||"").toLowerCase()===activeFilter.toLowerCase()) && [x.title,x.seriesTitle,x.type,x.genre,x.description].join(" ").toLowerCase().includes(term));
+  const visible = items.filter(x => (activeFilter==="All" || x.type===activeFilter || String(x.genre||"").toLowerCase()===activeFilter.toLowerCase()) && [x.title,x.seriesTitle,x.type,x.genre,x.description,x.artist,x.albumTitle].join(" ").toLowerCase().includes(term));
   const catalogueCards=[];const seenSeries=new Set();
   visible.filter(x=>x.type!=="Music").forEach(x=>{if(x.type==="Series"){const seriesName=String(x.seriesTitle||x.title||"").trim();const key=seriesName.toLowerCase();if(seenSeries.has(key))return;seenSeries.add(key);const episodes=items.filter(e=>e.type==="Series"&&String(e.seriesTitle||e.title||"").trim().toLowerCase()===key);catalogueCards.push({...x,displayTitle:seriesName,episodeCount:episodes.length});}else catalogueCards.push(x);});
   grid.innerHTML = catalogueCards.map(card).join("");
   const musicItems=visible.filter(x=>x.type==="Music");
   const artists=[...new Set(musicItems.map(x=>String(x.artist||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  if(activeMusicArtist!=="All Artists"&&!artists.includes(activeMusicArtist))activeMusicArtist="All Artists";
+  if(activeMusicArtist!=="All Artists"&&!artists.includes(activeMusicArtist)){activeMusicArtist="All Artists";activeMusicAlbum="All Albums";}
   const artistBox=$("#artistFilters");
   if(artistBox)artistBox.innerHTML=["All Artists",...artists].map(name=>'<button type="button" class="artist-filter '+(name===activeMusicArtist?'selected':'')+'" data-artist-filter="'+esc(name)+'">'+esc(name)+'</button>').join("");
-  const shownMusic=activeMusicArtist==="All Artists"?musicItems:musicItems.filter(x=>String(x.artist||"").trim()===activeMusicArtist);
+  const artistTracks=activeMusicArtist==="All Artists"?musicItems:musicItems.filter(x=>String(x.artist||"").trim()===activeMusicArtist);
+  const albums=[...new Set(artistTracks.map(x=>String(x.albumTitle||"").trim()||"Singles"))].sort((a,b)=>a.localeCompare(b));
+  if(activeMusicAlbum!=="All Albums"&&!albums.includes(activeMusicAlbum))activeMusicAlbum="All Albums";
+  const albumBox=$("#albumBrowser");
+  if(albumBox){albumBox.hidden=albums.length===0;albumBox.innerHTML=(activeMusicArtist!=="All Artists"?'<button class="album-back" type="button" data-album-filter="All Albums">← All albums</button>':"")+albums.map(name=>'<button type="button" class="album-tile '+(name===activeMusicAlbum?'selected':'')+'" data-album-filter="'+esc(name)+'"><b>▣ '+esc(name)+'</b><small>'+artistTracks.filter(x=>(String(x.albumTitle||"").trim()||"Singles")===name).length+' tracks</small></button>').join("");}
+  const shownMusic=activeMusicAlbum==="All Albums"?artistTracks:artistTracks.filter(x=>(String(x.albumTitle||"").trim()||"Singles")===activeMusicAlbum);
   musicList.innerHTML=shownMusic.map(track).join("");
-  const playAll=$("#playAllMusic");if(playAll){playAll.disabled=shownMusic.length===0;playAll.textContent=activeMusicArtist==="All Artists"?"▶ Play all":"▶ Play "+activeMusicArtist;}
+  const playAll=$("#playAllMusic");if(playAll){playAll.disabled=shownMusic.length===0;playAll.textContent=activeMusicAlbum!=="All Albums"?"▶ Play album":activeMusicArtist==="All Artists"?"▶ Play all":"▶ Play "+activeMusicArtist;}
   $("#emptyState").hidden = visible.length>0;
   if(visible.length===0) $("#emptyState").textContent=items.length===0?"No content has been added yet. Check back soon.":"No titles found. Try another search.";
   document.querySelectorAll(".cat-chip").forEach(b=>b.classList.toggle("selected",b.dataset.filter===activeFilter));
   document.querySelectorAll(".media-card").forEach(el=>el.addEventListener("click",e=>{if(e.target.closest("[data-offline-save]"))return;openPlayer(el.dataset.id);}));
   document.querySelectorAll("[data-track]").forEach(el=>el.addEventListener("click",()=>openPlayer(el.dataset.track)));
-  document.querySelectorAll("[data-artist-filter]").forEach(el=>el.addEventListener("click",()=>{activeMusicArtist=el.dataset.artistFilter;render();}));
-  $("#playAllMusic")?.addEventListener("click",()=>{const list=items.filter(x=>x.type==="Music"&&x.url&&isDirectMedia(x.url)&&(activeMusicArtist==="All Artists"||String(x.artist||"").trim()===activeMusicArtist));if(list.length)openMusicPlayer(list[0].id,true,activeMusicArtist==="All Artists"?"":activeMusicArtist);});
+  document.querySelectorAll("[data-artist-filter]").forEach(el=>el.addEventListener("click",()=>{activeMusicArtist=el.dataset.artistFilter;activeMusicAlbum="All Albums";render();}));
+  document.querySelectorAll("[data-album-filter]").forEach(el=>el.addEventListener("click",()=>{activeMusicAlbum=el.dataset.albumFilter;render();}));
+  $("#playAllMusic")?.addEventListener("click",()=>{const list=shownMusic.filter(x=>x.url&&isDirectMedia(x.url));if(list.length)openMusicPlayer(list[0].id,true,activeMusicArtist==="All Artists"?"":activeMusicArtist,activeMusicAlbum);});
   renderAdmin();
   renderDownloads();
 }
@@ -121,9 +128,9 @@ async function openPlayer(id){const x=items.find(i=>String(i.id)===String(id));i
    video.addEventListener("ended",()=>{updateMediaPlaybackState("none");try{window.NasflixAndroid?.setVideoPlaying(false);}catch{}});
  }
  renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");$("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";}
-async function openMusicPlayer(id,shouldPlay=true,artistFilter=""){
+async function openMusicPlayer(id,shouldPlay=true,artistFilter="",albumFilter="All Albums"){
  const offlineQueueMode=offlineItems.some(s=>String(s.id)===String(id));
- const queue=offlineQueueMode?offlineItems.filter(x=>x.type==="Music"&&x.url&&(!artistFilter||String(x.artist||"").trim()===artistFilter)):items.filter(x=>x.type==="Music"&&x.url&&isDirectMedia(x.url)&&(!artistFilter||String(x.artist||"").trim()===artistFilter));if(offlineQueueMode){try{window.NasflixAndroid?.stop();}catch{}}let index=queue.findIndex(x=>String(x.id)===String(id));if(index<0)return;const x=queue[index];const screen=$("#playerScreen");screen.classList.add("music-mode");
+ const queue=offlineQueueMode?offlineItems.filter(x=>x.type==="Music"&&x.url&&(!artistFilter||String(x.artist||"").trim()===artistFilter)&&(albumFilter==="All Albums"||(String(x.albumTitle||"").trim()||"Singles")===albumFilter)):items.filter(x=>x.type==="Music"&&x.url&&isDirectMedia(x.url)&&(!artistFilter||String(x.artist||"").trim()===artistFilter)&&(albumFilter==="All Albums"||(String(x.albumTitle||"").trim()||"Singles")===albumFilter));if(offlineQueueMode){try{window.NasflixAndroid?.stop();}catch{}}let index=queue.findIndex(x=>String(x.id)===String(id));if(index<0)return;const x=queue[index];const screen=$("#playerScreen");screen.classList.add("music-mode");
  if(activeMusicAudio){activeMusicAudio.pause();activeMusicAudio=null;}if(musicVisualFrame)cancelAnimationFrame(musicVisualFrame);
  $("#playerType").textContent="NOW PLAYING · MUSIC";$("#playerTitle").textContent=x.title;$("#playerDescription").textContent=x.description||"Enjoy the music.";const link=$("#downloadLink");if(x.download){link.href=x.url;link.hidden=false}else link.hidden=true;const saveBtn=$("#saveOfflinePlayer");if(saveBtn){saveBtn.dataset.id=String(x.id);saveBtn.dataset.offlineSave=String(x.id);saveBtn.textContent=offlineItems.some(s=>String(s.id)===String(x.id))?"✓ Saved offline":"↓ Save offline";}
  screen.innerHTML='<div class="nas-music-player"><canvas class="music-visualizer" id="musicVisualizer" aria-label="Audio visualizer"></canvas><div class="music-live"><span></span> NOW PLAYING</div><div class="music-track-name" id="musicTrackName">'+esc(x.title)+'</div><div class="music-track-genre" id="musicTrackGenre">'+esc(x.genre||"Music")+'</div><audio id="nasMusicAudio" preload="metadata"></audio><div class="music-progress-row"><span id="musicCurrent">0:00</span><input id="musicSeek" type="range" min="0" max="1000" value="0" aria-label="Seek music"><span id="musicDuration">0:00</span></div><div class="music-controls"><button type="button" id="musicPrevious" aria-label="Previous track">⏮</button><button type="button" id="musicPlayPause" class="music-play" aria-label="Play">▶</button><button type="button" id="musicNext" aria-label="Next track">⏭</button></div><div class="music-bottom"><span>NASFLIX AUDIO</span><label>VOL <input id="musicVolume" type="range" min="0" max="1" step=".01" value=".85"></label></div><div class="music-queue-label" id="musicQueueLabel">TRACK '+(index+1)+' OF '+queue.length+'</div></div>';
@@ -219,7 +226,7 @@ async function uploadBulkBatch(kind){
     for(const file of files){
       const title=file.name.replace(/\.[^.]+$/,"").replace(/[._]+/g," ").trim()||file.name;
       const form=new FormData();
-      const data={title,type:music?"Music":"Movie",genre:music?"Music":"Independent",artist,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
+      const data={title,type:music?"Music":"Movie",genre:music?"Music":"Independent",artist,albumTitle:music?$("#bulkMusicAlbum").value.trim():"",description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
       Object.entries(data).forEach(([key,value])=>form.append(key,String(value)));
       form.append("file",file);
       if(poster&&completed===0)form.append("posterFile",poster);
@@ -245,7 +252,7 @@ $("#contentForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const token=$("#adminToken").value.trim(),status=$("#uploadStatus"),file=$("#itemFile").files[0],posterFile=$("#posterFile")?.files?.[0],submit=$("#contentSubmit");
   const progress=$("#uploadProgress");
-  const item={title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",artist:$("#itemArtist").value.trim(),description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),allowDownload:$("#itemDownload").checked,seriesTitle:$("#seriesTitle").value.trim(),seasonNumber:Number($("#seasonNumber").value)||1,episodeNumber:Number($("#episodeNumber").value)||null,episodeTitle:$("#episodeTitle").value.trim()};
+  const item={title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",artist:$("#itemArtist").value.trim(),albumTitle:$("#albumTitle").value.trim(),description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),allowDownload:$("#itemDownload").checked,seriesTitle:$("#seriesTitle").value.trim(),seasonNumber:Number($("#seasonNumber").value)||1,episodeNumber:Number($("#episodeNumber").value)||null,episodeTitle:$("#episodeTitle").value.trim()};
   if(!token){status.textContent="Enter your admin access key first.";return;}
   if(!item.title){status.textContent="Enter a title.";return;}
   if(!editingId&&file&&file.size>50*1024*1024){status.textContent="Maximum upload size is 50 MB.";return;}if(posterFile&&posterFile.size>5*1024*1024){status.textContent="Poster maximum size is 5 MB.";return;}
@@ -271,7 +278,7 @@ $("#contentForm").addEventListener("submit",async e=>{
       result=await response.json();if(!response.ok)throw new Error(result.error||"Could not save this item.");
     }
     status.textContent=editingId?"Changes saved successfully!":(file||posterFile)?"Content and poster saved securely!":"Saved permanently to NASFLIX!";
-    editingId=null;$("#contentForm").reset();$("#adminToken").value=token;$("#contentSubmit").textContent="Save to NASFLIX catalogue +";$("#cancelEdit").hidden=true;
+    editingId=null;$("#contentForm").reset();$("#bulkMusicAlbum").value="";$("#adminToken").value=token;$("#contentSubmit").textContent="Save to NASFLIX catalogue +";$("#cancelEdit").hidden=true;
     await loadRemote();
   }catch(error){status.textContent=error.message;if(file||posterFile)setUploadProgress(0,"Upload not completed",error.message,"error");}
   finally{submit.disabled=false;if(submit.textContent==="Uploading…"||submit.textContent==="Saving…")submit.textContent="Save to NASFLIX catalogue +";}
@@ -280,7 +287,7 @@ async function loadRemote(){
   try{
     const response=await fetch("/api/media");if(!response.ok)throw new Error("Catalogue unavailable offline.");
     const data=await response.json();
-    const remote=data.map((x,i)=>({...x,id:x.id,url:x.media_url,download:!!x.allow_download,seriesTitle:x.series_title||"",seasonNumber:x.season_number||1,episodeNumber:x.episode_number||null,episodeTitle:x.episode_title||"",remote:true,art:"✦",c1:["#6d28d9","#be185d","#0369a1","#0f766e"][i%4],c2:"#171026"}));
+    const remote=data.map((x,i)=>({...x,id:x.id,url:x.media_url,download:!!x.allow_download,seriesTitle:x.series_title||"",seasonNumber:x.season_number||1,albumTitle:x.album_title||"",episodeNumber:x.episode_number||null,episodeTitle:x.episode_title||"",remote:true,art:"✦",c1:["#6d28d9","#be185d","#0369a1","#0f766e"][i%4],c2:"#171026"}));
     items=remote;localStorage.setItem("nasflix-catalogue-cache",JSON.stringify(remote));render();
   }catch(error){console.warn("NASFLIX media API is not configured yet.",error);try{items=JSON.parse(localStorage.getItem("nasflix-catalogue-cache")||"[]");render();}catch{items=[];render();}}
 }
@@ -302,7 +309,7 @@ function renderDownloads(){const box=$("#downloadsGrid"),empty=$("#downloadsEmpt
 document.addEventListener("click",e=>{const save=e.target.closest("[data-offline-save]");if(save){e.preventDefault();e.stopPropagation();saveOffline(save.dataset.offlineSave);return;}const del=e.target.closest("[data-offline-delete]");if(del){e.preventDefault();e.stopPropagation();removeOffline(del.dataset.offlineDelete);return;}const play=e.target.closest("[data-offline-play]");if(play){const id=play.dataset.offlinePlay;const item=offlineItems.find(x=>String(x.id)===String(id));if(item){if(!items.some(x=>String(x.id)===String(id)))items.push(item);openPlayer(id);}return;}});
 function renderAdmin(){
   $("#adminItems").innerHTML=items.map(x=>"<div class=\"admin-row\"><span>"+esc(x.title)+" <small>("+esc(x.type)+")"+(x.remote?" · Saved":"")+"</small></span><span class=\"admin-actions\">"+(x.remote?"<button data-edit=\""+esc(x.id)+"\">Edit</button>":"")+"<button data-delete=\""+esc(x.id)+"\" data-remote=\""+(x.remote?"1":"0")+"\">Remove</button></span></div>").join("");
-  document.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>{const x=items.find(item=>String(item.id)===String(b.dataset.edit));if(!x)return;editingId=x.id;$("#itemTitle").value=x.title;$("#itemType").value=x.type;$("#itemGenre").value=x.genre||"";$("#itemArtist").value=x.artist||"";$("#itemDescription").value=x.description||"";$("#itemUrl").value=x.url||"";$("#seriesTitle").value=x.seriesTitle||"";$("#seasonNumber").value=x.seasonNumber||1;$("#episodeNumber").value=x.episodeNumber||"";$("#episodeTitle").value=x.episodeTitle||"";$("#itemDownload").checked=!!x.download;$("#contentSubmit").textContent="Save changes";$("#cancelEdit").hidden=false;$("#uploadStatus").textContent="Editing: "+x.title;$("#contentForm").scrollIntoView({behavior:"smooth",block:"start"});}));
+  document.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>{const x=items.find(item=>String(item.id)===String(b.dataset.edit));if(!x)return;editingId=x.id;$("#itemTitle").value=x.title;$("#itemType").value=x.type;$("#itemGenre").value=x.genre||"";$("#itemArtist").value=x.artist||"";$("#albumTitle").value=x.albumTitle||"";$("#itemDescription").value=x.description||"";$("#itemUrl").value=x.url||"";$("#seriesTitle").value=x.seriesTitle||"";$("#seasonNumber").value=x.seasonNumber||1;$("#episodeNumber").value=x.episodeNumber||"";$("#episodeTitle").value=x.episodeTitle||"";$("#itemDownload").checked=!!x.download;$("#contentSubmit").textContent="Save changes";$("#cancelEdit").hidden=false;$("#uploadStatus").textContent="Editing: "+x.title;$("#contentForm").scrollIntoView({behavior:"smooth",block:"start"});}));
   document.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",async()=>{
     const id=b.dataset.delete;
     if(b.dataset.remote==="1"){

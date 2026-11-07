@@ -61,6 +61,8 @@ public class PlaybackService extends MediaSessionService {
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .build();
         player.setAudioAttributes(audioAttributes, true);
+        // Keep the CPU awake during active playback so audio can continue with the screen off.
+        player.setWakeMode(C.WAKE_MODE_LOCAL);
         player.setHandleAudioBecomingNoisy(true);
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
         player.addListener(new Player.Listener() {

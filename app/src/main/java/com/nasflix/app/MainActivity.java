@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
         }
         webView.clearCache(true);
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261107-nativeaudio3");
+        webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261107-nativeaudio4");
     }
 
 

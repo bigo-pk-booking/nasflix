@@ -340,3 +340,8 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .offline-login-actions{display:flex;gap:10px}
 .offline-login-actions button{flex:1;border:1px solid #9861c9;border-radius:12px;padding:12px;background:#432354;color:#fff;font-weight:700}
 .offline-login-actions button:last-child{background:transparent;border-color:#604b70}
+
+#fullNameField[hidden],#confirmPasswordField[hidden],#accountCreate[hidden],#accountBackToLogin[hidden],#accountRegister[hidden],#accountLogin[hidden]{display:none!important}
+.header-login{border:1px solid rgba(196,145,255,.55);background:rgba(76,39,102,.45);color:#f3e7ff;border-radius:999px;padding:9px 13px;font-size:12px;font-weight:700;white-space:nowrap}
+.header-login[hidden]{display:none!important}
+@media(max-width:560px){.header-login{padding:8px 10px;font-size:11px}}

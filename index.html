@@ -69,6 +69,10 @@
 
     <section class="content-section" id="movies">
       <div class="section-heading"><div><p class="eyebrow">EXPLORE THE LIBRARY</p><h2>Browse <em>titles</em></h2></div><span class="section-note">Movies, series and original videos</span></div>
+      <div class="library-folders" aria-label="Media folders">
+        <button type="button" class="library-folder video-folder" data-library-folder="videos"><span class="folder-icon">▣</span><span><b>Videos</b><small>Movies, series &amp; original videos</small></span><span class="folder-arrow">↗</span></button>
+        <button type="button" class="library-folder music-folder" data-library-folder="music"><span class="folder-icon">♫</span><span><b>Music</b><small>Artists, albums &amp; songs</small></span><span class="folder-arrow">↗</span></button>
+      </div>
       <div class="content-grid" id="contentGrid"></div>
       <div class="empty-state" id="emptyState" hidden>No titles found. Try another search.</div>
     </section>
@@ -82,11 +86,9 @@
       </div>
     </section>
 
-    <section class="wide-promo" id="videos"><div><p class="eyebrow">A WORLD OF ORIGINALS</p><h2>Made to be<br><em>discovered.</em></h2><p>Explore independent creations, imaginative AI visuals and stories from different genres.</p></div><div class="promo-symbol">N<span>✦</span></div></section>
-
     <section class="music-section" id="music">
       <div class="section-heading"><div><p class="eyebrow">PRESS PLAY</p><h2>Soundtrack <em>your day</em></h2></div><span class="section-note">Music from the NASFLIX library</span></div>
-      <div class="artist-browser"><div class="artist-browser-heading"><div><p class="eyebrow">YOUR MUSIC LIBRARY</p><h3>Browse by <em>artist</em></h3></div><button type="button" id="playAllMusic">▶ Play all</button></div><div class="artist-filters" id="artistFilters"></div><div class="album-browser" id="albumBrowser" hidden></div></div><div class="music-list" id="musicList"></div>
+      <div class="artist-browser"><div class="artist-browser-heading"><div><p class="eyebrow">YOUR MUSIC LIBRARY</p><h3>Browse by <em>artist</em></h3></div><button type="button" id="playAllMusic">▶ Play all</button></div><div class="artist-filters" id="artistFilters"></div><div class="album-browser" id="albumBrowser" hidden></div></div><div class="music-list" id="musicList"></div><div id="musicLoadSentinel" class="music-load-sentinel" aria-hidden="true"></div>
     </section>
     <section class="join-banner"><div><p class="eyebrow">THE NEXT SCENE STARTS HERE</p><h2>Find your next<br><em>favorite thing.</em></h2></div><a href="#home" class="primary">Back to top ↑</a></section>
   </main>

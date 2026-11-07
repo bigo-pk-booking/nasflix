@@ -11,6 +11,8 @@ const grid = $("#contentGrid"), musicList = $("#musicList");
 let activeFilter = "All";
 let activeMusicArtist = "All Artists";
 let activeMusicAlbum = "All Albums";
+let musicVisibleCount = 10;
+let musicLoadObserver = null;
 let editingId = null;
 function render(){
   const term = $("#searchInput").value.trim().toLowerCase();
@@ -29,15 +31,29 @@ function render(){
   const albumBox=$("#albumBrowser");
   if(albumBox){albumBox.hidden=activeMusicArtist==="All Artists"||albums.length===0;albumBox.innerHTML=(activeMusicArtist!=="All Artists"?'<button class="album-back" type="button" data-album-filter="All Albums">← All albums</button>':"")+albums.map(name=>'<button type="button" class="album-tile '+(name===activeMusicAlbum?'selected':'')+'" data-album-filter="'+esc(name)+'"><b>▣ '+esc(name)+'</b><small>'+artistTracks.filter(x=>(String(x.albumTitle||"").trim()||"Singles")===name).length+' tracks</small></button>').join("");}
   const shownMusic=activeMusicAlbum==="All Albums"?artistTracks:artistTracks.filter(x=>(String(x.albumTitle||"").trim()||"Singles")===activeMusicAlbum);
-  musicList.innerHTML=shownMusic.map(track).join("");
+  const visibleTracks=shownMusic.slice(0,musicVisibleCount);
+  musicList.innerHTML=visibleTracks.map(track).join("");
+  const sentinel=$("#musicLoadSentinel");
+  if(sentinel){
+    sentinel.hidden=visibleTracks.length>=shownMusic.length;
+    if(musicLoadObserver)musicLoadObserver.disconnect();
+    if(!musicLoadObserver&&"IntersectionObserver" in window)musicLoadObserver=new IntersectionObserver(entries=>{
+      if(entries.some(entry=>entry.isIntersecting)){musicVisibleCount+=10;render();}
+    },{rootMargin:"220px"});
+    if(!sentinel.hidden&&musicLoadObserver)musicLoadObserver.observe(sentinel);
+  }
   const playAll=$("#playAllMusic");if(playAll){playAll.disabled=shownMusic.length===0;playAll.textContent=activeMusicAlbum!=="All Albums"?"▶ Play album":activeMusicArtist==="All Artists"?"▶ Play all":"▶ Play "+activeMusicArtist;}
   $("#emptyState").hidden = visible.length>0;
   if(visible.length===0) $("#emptyState").textContent=items.length===0?"No content has been added yet. Check back soon.":"No titles found. Try another search.";
   document.querySelectorAll(".cat-chip").forEach(b=>b.classList.toggle("selected",b.dataset.filter===activeFilter));
   document.querySelectorAll(".media-card").forEach(el=>el.addEventListener("click",e=>{if(e.target.closest("[data-offline-save]"))return;openPlayer(el.dataset.id);}));
   document.querySelectorAll("[data-track]").forEach(el=>el.addEventListener("click",()=>openPlayer(el.dataset.track)));
-  document.querySelectorAll("[data-artist-filter]").forEach(el=>el.addEventListener("click",()=>{activeMusicArtist=el.dataset.artistFilter;activeMusicAlbum="All Albums";render();}));
-  document.querySelectorAll("[data-album-filter]").forEach(el=>el.addEventListener("click",()=>{activeMusicAlbum=el.dataset.albumFilter;render();}));
+  document.querySelectorAll("[data-artist-filter]").forEach(el=>el.addEventListener("click",()=>{activeMusicArtist=el.dataset.artistFilter;activeMusicAlbum="All Albums";musicVisibleCount=10;render();}));
+  document.querySelectorAll("[data-album-filter]").forEach(el=>el.addEventListener("click",()=>{activeMusicAlbum=el.dataset.albumFilter;musicVisibleCount=10;render();}));
+  document.querySelectorAll("[data-library-folder]").forEach(el=>el.addEventListener("click",()=>{
+    if(el.dataset.libraryFolder==="music"){document.querySelector("#music")?.scrollIntoView({behavior:"smooth"});}
+    else{activeFilter="All";render();document.querySelector("#contentGrid")?.scrollIntoView({behavior:"smooth",block:"start"});}
+  }));
   $("#playAllMusic")?.addEventListener("click",()=>{const list=shownMusic.filter(x=>x.url&&isDirectMedia(x.url));if(list.length)openMusicPlayer(list[0].id,true,activeMusicArtist==="All Artists"?"":activeMusicArtist,activeMusicAlbum);});
   renderAdmin();
   renderDownloads();
@@ -176,6 +192,7 @@ $("#playerScreen")?.addEventListener("click",e=>{
 });
 function closeModal(id){const el=$("#"+id+"Modal");if(!el)return;if(id==="player")stopCurrentMedia(true);el.classList.remove("open","minimized");el.setAttribute("aria-hidden","true");}
 document.querySelectorAll(".cat-chip").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;render()}));
+$("#searchInput")?.addEventListener("input",()=>{musicVisibleCount=10;render();});
 $("#searchInput").addEventListener("input",render);
 $("#heroExplore").addEventListener("click",()=>$("#movies").scrollIntoView({behavior:"smooth"}));
 if($("#adminOpen")&&$("#adminModal"))$("#adminOpen").addEventListener("click",()=>{$("#adminModal").classList.add("open");$("#adminModal").setAttribute("aria-hidden","false");});

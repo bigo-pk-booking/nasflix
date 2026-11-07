@@ -96,6 +96,22 @@
   <div class="modal" id="playerModal" aria-hidden="true"><div class="modal-backdrop" data-close="player"></div><div class="modal-card player-card"><button class="player-minimize" id="playerMinimize" type="button" aria-label="Minimize player">−</button><button class="modal-close" data-close="player" aria-label="Close player">×</button><div class="player-screen" id="playerScreen"><div class="play-symbol">▶</div><p>SELECT A TITLE TO PLAY</p></div><div class="mini-player-bar"><span id="miniPlayerTitle">Now playing</span><button id="playerRestore" type="button" aria-label="Restore player">↗ Open player</button></div><div class="modal-info"><p class="eyebrow" id="playerType">FEATURE</p><h2 id="playerTitle">Title</h2><p id="playerDescription"></p><button class="offline-save-player" id="saveOfflinePlayer" type="button" data-id="" data-offline-save="">↓ Save offline</button><a class="download-link" id="downloadLink" href="#" download hidden>↓ Download file</a></div><div class="series-episodes" id="seriesEpisodes" hidden></div></div></div>
 
   <div class="modal" id="adminModal" aria-hidden="true"><div class="modal-backdrop" data-close="admin"></div><div class="modal-card admin-card"><button class="modal-close" data-close="admin" aria-label="Close">×</button><p class="eyebrow">PRIVATE WORKSPACE</p><h2>Admin <em>studio</em></h2><p class="admin-intro">Add authorized video and music links to your NASFLIX catalogue. Links and catalogue details are saved in the free D1 database.</p>
+    <div class="bulk-upload-panel" style="margin:22px 0;padding:18px;border:1px solid #51406a;border-radius:18px;background:linear-gradient(145deg,#21162f,#12101b)">
+      <p class="eyebrow">BATCH UPLOAD</p><h3 style="margin:0 0 8px">Upload music</h3><p class="upload-hint">Music files only. Select multiple songs from one artist; each filename becomes its own track title.</p>
+      <label>Artist / Singer name<input id="bulkMusicArtist" maxlength="90" placeholder="Artist name"></label>
+      <label>Music files (MP3, M4A, OGG, WAV)<input id="bulkMusicFiles" type="file" accept="audio/mpeg,audio/mp4,audio/ogg,audio/wav,.mp3,.m4a,.ogg,.wav" multiple></label>
+      <label>Shared artist poster (optional)<input id="bulkMusicPoster" type="file" accept="image/jpeg,image/png,image/webp"></label>
+      <button class="primary full" id="bulkMusicSubmit" type="button">Upload music batch</button>
+      <p class="upload-hint" id="bulkMusicStatus" role="status" aria-live="polite">Choose multiple music files to begin.</p>
+    </div>
+    <div class="bulk-upload-panel" style="margin:22px 0;padding:18px;border:1px solid #51406a;border-radius:18px;background:linear-gradient(145deg,#21162f,#12101b)">
+      <p class="eyebrow">BATCH UPLOAD</p><h3 style="margin:0 0 8px">Upload videos</h3><p class="upload-hint">Video files only. Select multiple videos; each filename becomes its own title.</p>
+      <label>Video collection / Creator name (optional)<input id="bulkVideoArtist" maxlength="90" placeholder="Creator or collection name"></label>
+      <label>Video files (MP4, WebM)<input id="bulkVideoFiles" type="file" accept="video/mp4,video/webm,.mp4,.webm" multiple></label>
+      <label>Shared video poster (optional)<input id="bulkVideoPoster" type="file" accept="image/jpeg,image/png,image/webp"></label>
+      <button class="primary full" id="bulkVideoSubmit" type="button">Upload video batch</button>
+      <p class="upload-hint" id="bulkVideoStatus" role="status" aria-live="polite">Choose multiple video files to begin.</p>
+    </div>
     <label>Admin access key<input id="adminToken" type="password" autocomplete="current-password" placeholder="Enter your private admin key"></label>
     <form id="contentForm">
       <label>Content title<input id="itemTitle" required maxlength="90" placeholder="Enter a title"></label>

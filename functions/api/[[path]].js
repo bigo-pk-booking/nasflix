@@ -1,47 +1,8 @@
-const MAX_FILE_SIZE = 50 * 1024 * 1024;
-const ALLOWED = new Set(["video/mp4","video/webm","audio/mpeg","audio/mp4","audio/ogg","audio/wav","image/jpeg","image/png","image/webp"]);
-const json = (data,status=200) => new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
-function authorized(request,env){
-  const expected=env.ADMIN_TOKEN, supplied=request.headers.get("authorization")||"";
-  if(!expected||!supplied.startsWith("Bearer "))return false;
-  const token=supplied.slice(7);if(token.length!==expected.length)return false;
-  let diff=0;for(let i=0;i<token.length;i++)diff|=token.charCodeAt(i)^expected.charCodeAt(i);
-  return diff===0;
-}
-function safeName(name){return String(name||"media").normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,100)||"media";}
-export async function onRequest({request,env,params}){
-  const path=new URL(request.url).pathname;
-  if(!env.DB||!env.MEDIA_BUCKET)return json({error:"Storage is not configured. Bind the D1 database and R2 bucket in Cloudflare Pages settings."},503);
-  if(request.method==="GET"&&path==="/api/media"){
-    const {results=[]}=await env.DB.prepare("SELECT id,title,type,genre,description,object_key,content_type,size,allow_download,created_at FROM media ORDER BY created_at DESC").all();
-    return json(results.map(x=>({...x,url:"/media/"+encodeURIComponent(x.object_key)})));
-  }
-  if(request.method==="POST"&&path==="/api/upload"){
-    if(!authorized(request,env))return json({error:"Unauthorized. Enter the correct admin access key."},401);
-    let form;try{form=await request.formData();}catch{return json({error:"Invalid upload form."},400);}
-    const file=form.get("file"),title=String(form.get("title")||"").trim(),type=String(form.get("type")||"Movie");
-    const genre=String(form.get("genre")||"Independent").trim().slice(0,35),description=String(form.get("description")||"").trim().slice(0,400);
-    const allowDownload=form.get("allowDownload")==="true";
-    if(!(file instanceof File)||!title)return json({error:"A title and media file are required."},400);
-    if(file.size<1||file.size>MAX_FILE_SIZE)return json({error:"File must be smaller than 50 MB in this starter uploader."},413);
-    if(!ALLOWED.has(file.type))return json({error:"Unsupported file type. Use MP4, WebM, MP3, M4A, OGG, WAV, JPG, PNG or WebP."},415);
-    if(!["Movie","AI Video","Series","Music"].includes(type))return json({error:"Invalid content type."},400);
-    const id=crypto.randomUUID(),objectKey=id+"-"+safeName(file.name);
-    await env.MEDIA_BUCKET.put(objectKey,file.stream(),{httpMetadata:{contentType:file.type,cacheControl:"public, max-age=3600"},customMetadata:{title}});
-    try{
-      await env.DB.prepare("INSERT INTO media (id,title,type,genre,description,object_key,content_type,size,allow_download) VALUES (?,?,?,?,?,?,?,?,?)")
-        .bind(id,title,type,genre,description,objectKey,file.type,file.size,allowDownload?1:0).run();
-    }catch(error){await env.MEDIA_BUCKET.delete(objectKey);throw error;}
-    return json({ok:true,item:{id,title,type,genre,description,url:"/media/"+encodeURIComponent(objectKey),download:allowDownload}},201);
-  }
-  if(request.method==="DELETE"&&path.startsWith("/api/media/")){
-    if(!authorized(request,env))return json({error:"Unauthorized."},401);
-    const id=path.slice("/api/media/".length);
-    const row=await env.DB.prepare("SELECT object_key FROM media WHERE id=?").bind(id).first();
-    if(!row)return json({error:"Content not found."},404);
-    await env.MEDIA_BUCKET.delete(row.object_key);
-    await env.DB.prepare("DELETE FROM media WHERE id=?").bind(id).run();
-    return json({ok:true});
-  }
-  return json({error:"Not found."},404);
-}
+const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
+function authorized(request,env){const expected=env.ADMIN_TOKEN||"",header=request.headers.get("authorization")||"";if(!expected||!header.startsWith("Bearer "))return false;const token=header.slice(7);if(token.length!==expected.length)return false;let diff=0;for(let i=0;i<token.length;i++)diff|=token.charCodeAt(i)^expected.charCodeAt(i);return diff===0;}
+async function ensureTable(db){await db.prepare("CREATE TABLE IF NOT EXISTS media_links (id TEXT PRIMARY KEY,title TEXT NOT NULL,type TEXT NOT NULL,genre TEXT NOT NULL DEFAULT 'Independent',description TEXT NOT NULL DEFAULT '',media_url TEXT NOT NULL,allow_download INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();}
+export async function onRequest({request,env}){if(!env.DB)return json({error:"D1 binding DB is not configured."},503);const path=new URL(request.url).pathname;
+if(path==="/api/media"&&request.method==="GET"){await ensureTable(env.DB);const {results=[]}=await env.DB.prepare("SELECT id,title,type,genre,description,media_url,allow_download,created_at FROM media_links ORDER BY created_at DESC").all();return json(results);}
+if(path==="/api/media"&&request.method==="POST"){if(!authorized(request,env))return json({error:"Admin access key is missing or incorrect."},401);await ensureTable(env.DB);let d;try{d=await request.json();}catch{return json({error:"Invalid JSON."},400);}const title=String(d.title||"").trim(),type=String(d.type||"Movie"),genre=String(d.genre||"Independent").trim().slice(0,35),description=String(d.description||"").trim().slice(0,400),url=String(d.url||"").trim();if(!title||!url)return json({error:"Title and media URL are required."},400);if(!/^https?:\/\//i.test(url)||url.length>2048)return json({error:"Enter a valid http or https URL."},400);if(!["Movie","AI Video","Series","Music"].includes(type))return json({error:"Invalid content type."},400);const id=crypto.randomUUID();await env.DB.prepare("INSERT INTO media_links (id,title,type,genre,description,media_url,allow_download) VALUES (?,?,?,?,?,?,?)").bind(id,title,type,genre,description,url,d.allowDownload?1:0).run();return json({ok:true,id},201);}
+if(path.startsWith("/api/media/")&&request.method==="DELETE"){if(!authorized(request,env))return json({error:"Admin access key is missing or incorrect."},401);await ensureTable(env.DB);const id=decodeURIComponent(path.slice("/api/media/".length));const result=await env.DB.prepare("DELETE FROM media_links WHERE id=?").bind(id).run();if(!result.meta?.changes)return json({error:"Entry not found."},404);return json({ok:true});}
+return json({error:"Not found."},404);}

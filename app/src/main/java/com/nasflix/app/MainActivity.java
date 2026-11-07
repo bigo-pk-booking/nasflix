@@ -153,13 +153,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, android.content.res.Configuration newConfig) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
-        if (webView != null) {
-            webView.setVisibility(isInPictureInPictureMode ? View.VISIBLE : View.VISIBLE);
-        }
-    }
-
     @Override public void onBackPressed() {
         if (customView != null) { hideCustomView(); return; }
         if (webView != null && webView.canGoBack()) webView.goBack();

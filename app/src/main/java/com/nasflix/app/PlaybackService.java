@@ -185,7 +185,9 @@ public class PlaybackService extends MediaSessionService {
         } catch (RuntimeException error) {
             android.util.Log.e("NASFLIX", "Playback command failed: " + action, error);
         }
-        return sessionResult;
+        // Ask Android to recreate the media service if the process is reclaimed.
+        // MediaSessionService still owns notification/foreground promotion and playback lifecycle.
+        return START_STICKY;
     }
 
     private void setQueue(String json, int requestedIndex, boolean autoplay) {

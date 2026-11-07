@@ -82,6 +82,8 @@ public class PlaybackService extends MediaSessionService {
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
+        // Let MediaSessionService process its own lifecycle and foreground-notification commands.
+        int sessionResult = super.onStartCommand(intent, flags, startId);
         if (intent != null) {
             String action = intent.getAction();
             boolean handledByNasflix = ACTION_SET_QUEUE.equals(action) || ACTION_PLAY.equals(action) ||
@@ -113,7 +115,7 @@ public class PlaybackService extends MediaSessionService {
                     player.setVolume(Math.max(0f, Math.min(1f, volume)));
                 }
             }
-            if (handledByNasflix) return START_STICKY;
+            if (handledByNasflix) return sessionResult;
         }
         return super.onStartCommand(intent, flags, startId);
     }

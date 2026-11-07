@@ -282,7 +282,7 @@ function closeModal(id){const el=$("#"+id+"Modal");if(!el)return;if(id==="player
 document.querySelectorAll(".cat-chip").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;render()}));
 $("#searchInput")?.addEventListener("input",()=>{musicVisibleCount=10;render();});
 $("#searchInput").addEventListener("input",render);
-$("#heroExplore").addEventListener("click",()=>$("#movies").scrollIntoView({behavior:"smooth"}));
+
 if($("#adminOpen")&&$("#adminModal"))$("#adminOpen").addEventListener("click",()=>{$("#adminModal").classList.add("open");$("#adminModal").setAttribute("aria-hidden","false");});
 const menuToggle=$("#menuToggle"),mainNav=$("#mainNav");
 function closeNav(){if(!menuToggle||!mainNav)return;menuToggle.setAttribute("aria-expanded","false");menuToggle.setAttribute("aria-label","Open navigation menu");mainNav.classList.remove("open");}

@@ -312,6 +312,7 @@ function setMediaTab(type){
   window.scrollTo({top:0,behavior:"smooth"});
 }
 document.querySelectorAll("[data-media-tab]").forEach(tab=>tab.addEventListener("click",()=>setMediaTab(tab.dataset.mediaTab)));
+setMediaTab("Movie");
 mainNav?.querySelectorAll("a").forEach(link=>link.addEventListener("click",event=>{
   const page=link.dataset.page,filter=link.dataset.menuFilter;
   if(page){event.preventDefault();showNasflixPage(page);}

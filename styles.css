@@ -75,3 +75,14 @@ body.app-mode .menu-toggle{display:flex;min-width:40px;min-height:40px;position:
 body.app-mode .main-nav{display:none;position:fixed;left:14px;top:76px;width:min(310px,calc(100vw - 28px));max-height:calc(100dvh - 96px);overflow-y:auto;z-index:100;background:#151220;border:1px solid #ffffff28;border-radius:16px;box-shadow:0 20px 60px #000d;padding:12px}
 body.app-mode .main-nav.open{display:flex}
 body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-action:manipulation}
+
+/* NASFLIX unified hamburger navigation: website + Android WebView */
+.topbar{position:sticky;top:0;z-index:100;justify-content:flex-start;gap:18px}
+.brand-group{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.menu-toggle{display:inline-flex!important;align-items:center;justify-content:center;position:relative;z-index:102;width:42px;height:42px;min-width:42px;border:1px solid #40364f;border-radius:12px;background:#171421;color:#f2eaff;cursor:pointer;touch-action:manipulation}
+.main-nav{display:none!important;position:fixed!important;left:14px!important;top:86px!important;right:auto!important;width:min(320px,calc(100vw - 28px))!important;max-height:calc(100dvh - 105px)!important;overflow-y:auto!important;flex-direction:column!important;align-items:stretch!important;gap:2px!important;padding:14px!important;background:#151220!important;border:1px solid #ffffff30!important;border-radius:17px!important;box-shadow:0 20px 60px #000c!important;z-index:101!important}
+.main-nav.open{display:flex!important}
+.main-nav>a{display:flex;align-items:center;min-height:44px;padding:10px 13px;border-radius:10px}
+.nav-categories{display:grid!important}
+.header-actions{margin-left:auto}
+@media(max-width:650px){.topbar{padding:0 16px;gap:10px}.brand-group{gap:10px}.brand{font-size:16px}.header-actions{margin-left:auto}.search input{width:78px}.main-nav{top:78px!important}}

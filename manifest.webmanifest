@@ -1,0 +1,15 @@
+{
+  "id": "/?app=1",
+  "name": "NASFLIX",
+  "short_name": "NASFLIX",
+  "description": "Movies, series, AI videos and music.",
+  "start_url": "/?app=1",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#090811",
+  "theme_color": "#090811",
+  "icons": [
+    {"src": "/nasflix-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}

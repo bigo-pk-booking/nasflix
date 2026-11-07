@@ -49,27 +49,58 @@ $("#adminOpen").addEventListener("click",()=>{$("#adminModal").classList.add("op
 document.addEventListener("click",async e=>{const btn=e.target.closest(".player-fullscreen");if(!btn)return;const screen=$("#playerScreen");try{if(!document.fullscreenElement)await screen.requestFullscreen();else await document.exitFullscreen();}catch{const media=screen.querySelector("iframe,video");if(media?.requestFullscreen)try{await media.requestFullscreen()}catch{}}});
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal("player");closeModal("admin")}});
+function setUploadProgress(percent,label,detail,state=""){
+  const box=$("#uploadProgress");if(!box)return;
+  box.hidden=false;box.classList.toggle("done",state==="done");box.classList.toggle("error",state==="error");
+  $("#uploadProgressBar").style.width=Math.max(0,Math.min(100,percent))+"%";
+  $("#uploadProgressPercent").textContent=Math.round(percent)+"%";
+  $("#uploadProgressLabel").textContent=label;
+  $("#uploadProgressDetail").textContent=detail;
+}
+function uploadWithProgress(url,formData,token,onProgress){
+  return new Promise((resolve,reject)=>{
+    const xhr=new XMLHttpRequest();xhr.open("POST",url);xhr.setRequestHeader("authorization","Bearer "+token);
+    xhr.upload.addEventListener("progress",event=>{if(event.lengthComputable)onProgress(event.loaded,event.total);});
+    xhr.addEventListener("load",()=>{let result={};try{result=JSON.parse(xhr.responseText||"{}");}catch{}if(xhr.status>=200&&xhr.status<300)resolve(result);else reject(new Error(result.error||"Upload failed ("+xhr.status+")."));});
+    xhr.addEventListener("error",()=>reject(new Error("Network error. Please try the upload again.")));
+    xhr.addEventListener("abort",()=>reject(new Error("Upload cancelled.")));
+    xhr.send(formData);
+  });
+}
 $("#contentForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  const token=$("#adminToken").value.trim(),status=$("#uploadStatus"),file=$("#itemFile").files[0];
+  const token=$("#adminToken").value.trim(),status=$("#uploadStatus"),file=$("#itemFile").files[0],submit=$("#contentSubmit");
+  const progress=$("#uploadProgress");
   const item={title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),allowDownload:$("#itemDownload").checked,seriesTitle:$("#seriesTitle").value.trim(),seasonNumber:Number($("#seasonNumber").value)||1,episodeNumber:Number($("#episodeNumber").value)||null,episodeTitle:$("#episodeTitle").value.trim()};
   if(!token){status.textContent="Enter your admin access key first.";return;}
   if(!item.title){status.textContent="Enter a title.";return;}
   if(!editingId&&file&&file.size>50*1024*1024){status.textContent="Maximum upload size is 50 MB.";return;}
   if(!file&&!item.url){status.textContent="Choose a media file or enter a media URL.";return;}
   if(!file&&item.url&&!/^https?:\/\//i.test(item.url)){status.textContent="Enter a valid http or https media URL.";return;}
-  status.textContent=file?"Uploading video to secure R2 storage...":"Saving to NASFLIX...";
+  submit.disabled=true;submit.textContent=file?"Uploading…":"Saving…";
+  if(progress){progress.hidden=true;progress.classList.remove("done","error");}
+  status.textContent=file?"Preparing secure upload…":"Saving to NASFLIX…";
   try{
-    let body,headers={"authorization":"Bearer "+token};
-    if(file&&!editingId){body=new FormData();Object.entries(item).forEach(([k,v])=>body.append(k,String(v??"")));body.append("file",file);}
-    else{headers["content-type"]="application/json";body=JSON.stringify(item);}
-    const response=await fetch(editingId?"/api/media/"+encodeURIComponent(editingId):"/api/media",{method:editingId?"PUT":"POST",headers,body});
-    const result=await response.json();
-    if(!response.ok)throw new Error(result.error||"Could not save this item.");
+    let result;
+    if(file&&!editingId){
+      const form=new FormData();Object.entries(item).forEach(([k,v])=>form.append(k,String(v??"")));form.append("file",file);
+      setUploadProgress(0,"Preparing upload…","Getting your file ready for secure R2 storage.");
+      result=await uploadWithProgress("/api/media",form,token,(loaded,total)=>{
+        const percent=total?loaded/total*100:0;
+        setUploadProgress(percent,percent>=100?"Upload sent — saving…":"Uploading your video…",Math.round(loaded/1024/1024*10)/10+" MB of "+Math.round(total/1024/1024*10)/10+" MB uploaded. Keep this page open.");
+        status.textContent="Uploading to secure R2 storage… "+Math.round(percent)+"%";
+      });
+      setUploadProgress(100,"Upload complete!","Your file was stored in R2 successfully.", "done");
+    }else{
+      const headers={"authorization":"Bearer "+token,"content-type":"application/json"};
+      const response=await fetch(editingId?"/api/media/"+encodeURIComponent(editingId):"/api/media",{method:editingId?"PUT":"POST",headers,body:JSON.stringify(item)});
+      result=await response.json();if(!response.ok)throw new Error(result.error||"Could not save this item.");
+    }
     status.textContent=editingId?"Changes saved successfully!":file?"Video uploaded securely to R2!":"Saved permanently to NASFLIX!";
     editingId=null;$("#contentForm").reset();$("#adminToken").value=token;$("#contentSubmit").textContent="Save to NASFLIX catalogue +";$("#cancelEdit").hidden=true;
     await loadRemote();
-  }catch(error){status.textContent=error.message;}
+  }catch(error){status.textContent=error.message;if(file)setUploadProgress(0,"Upload not completed",error.message,"error");}
+  finally{submit.disabled=false;if(submit.textContent==="Uploading…"||submit.textContent==="Saving…")submit.textContent="Save to NASFLIX catalogue +";}
 });
 async function loadRemote(){
   try{

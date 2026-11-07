@@ -194,3 +194,34 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .nas-link-source-grid b{font:600 11px Manrope;color:#f3eaff}
 .nas-link-source-grid small{font-size:9px;line-height:1.45;color:#a7a0b8}
 @media(max-width:420px){.nas-link-source-grid{grid-template-columns:1fr}}
+
+/* NASFLIX cinematic app startup screen */
+.nas-startup{position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 50% 42%,#28143f 0%,#120d20 42%,#07060d 100%);color:#f8f4ff;opacity:1;visibility:visible;transition:opacity .65s ease,visibility .65s ease}
+.nas-startup.startup-hidden{opacity:0;visibility:hidden;pointer-events:none}
+.startup-content{position:relative;z-index:2;width:min(360px,84vw);text-align:center;display:flex;align-items:center;flex-direction:column}
+.startup-logo{width:82px;height:82px;display:grid;place-items:center;border-radius:25px;background:linear-gradient(140deg,#a855f7,#7c3aed 55%,#db2777);box-shadow:0 0 35px #a855f755,0 15px 50px #0008;animation:startupLogoPulse 2s ease-in-out infinite}
+.startup-logo span{font:900 54px Manrope,sans-serif;color:#fff;text-shadow:0 3px 15px #310c55}
+.startup-kicker{font-size:9px;letter-spacing:3px;color:#c4a9ff;font-weight:700;margin:30px 0 8px}
+.startup-content h1{font:900 37px/1 Manrope,sans-serif;letter-spacing:4px;margin:0;color:#fff}
+.startup-content h1 span{color:#c4a9ff}
+.startup-tagline{font-size:11px;letter-spacing:1.3px;color:#a9a0bb;margin:12px 0 35px}
+.startup-progress{width:100%;height:5px;border-radius:20px;background:#ffffff19;overflow:hidden;box-shadow:0 0 15px #8b5cf633}
+.startup-progress span{display:block;width:12%;height:100%;border-radius:20px;background:linear-gradient(90deg,#8b5cf6,#e879f9);box-shadow:0 0 12px #c084fc;transition:width .45s ease}
+.startup-status{font:600 11px Manrope,sans-serif;color:#eadcff;letter-spacing:.5px;margin:15px 0 18px;min-height:16px}
+.startup-checklist{width:100%;display:grid;gap:11px;text-align:left;padding:15px 18px;border:1px solid #ffffff17;border-radius:14px;background:#ffffff08;backdrop-filter:blur(12px)}
+.startup-checklist>div{display:flex;align-items:center;gap:10px;color:#777087;font-size:10px;letter-spacing:.4px;transition:color .25s ease}
+.startup-checklist i{width:13px;height:13px;border:1px solid #655879;border-radius:50%;display:block;position:relative;flex:none}
+.startup-checklist .current{color:#f3eaff}
+.startup-checklist .current i{border-color:#c084fc;box-shadow:0 0 10px #c084fc88;animation:startupDot 1s ease-in-out infinite}
+.startup-checklist .complete{color:#c4b5fd}
+.startup-checklist .complete i{border-color:#a78bfa;background:#8b5cf6}
+.startup-checklist .complete i:after{content:"✓";position:absolute;inset:-2px 0 0;text-align:center;color:white;font-size:10px}
+.startup-foot{font-size:8px;letter-spacing:2.5px;color:#655b76;margin-top:28px}
+.startup-foot span{color:#c084fc;margin-left:5px}
+.startup-orbit{position:absolute;border:1px solid #c084fc17;border-radius:50%;pointer-events:none}
+.startup-orbit-one{width:min(95vw,650px);aspect-ratio:1;animation:startupOrbit 24s linear infinite}
+.startup-orbit-two{width:min(75vw,480px);aspect-ratio:1;border-color:#e879f912;animation:startupOrbit 32s linear infinite reverse}
+@keyframes startupLogoPulse{0%,100%{transform:translateY(0) scale(1);box-shadow:0 0 35px #a855f755,0 15px 50px #0008}50%{transform:translateY(-5px) scale(1.035);box-shadow:0 0 55px #a855f788,0 20px 60px #0009}}
+@keyframes startupDot{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes startupOrbit{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.startup-logo,.startup-orbit-one,.startup-orbit-two,.startup-checklist .current i{animation:none}.nas-startup,.startup-progress span{transition:none}}

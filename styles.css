@@ -614,3 +614,24 @@ body.app-mode .music-section .track-cover{width:48px;height:48px;flex-basis:48px
 .music-section .artist-search-empty{margin:8px 2px;color:#bcaec9;font-size:13px}
 .music-section .artist-search-empty[hidden]{display:none!important}
 .music-section .artist-filter[hidden]{display:none!important}
+
+/* Android WebView: lock the document to the device viewport and prevent
+   fixed-width ad creatives or grid children from widening the page. */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body.app-mode{width:100%;max-width:100%;overflow-x:hidden}
+body.app-mode #app,body.app-mode main,body.app-mode section,
+body.app-mode .content-section,body.app-mode .music-section{
+  min-width:0;max-width:100%;
+}
+body.app-mode .music-section{
+  width:100%;grid-template-columns:minmax(0,1fr);
+}
+body.app-mode .music-section>*{min-width:0;max-width:100%}
+body.app-mode .ad-section{width:calc(100% - 20px);max-width:100%;overflow:hidden}
+body.app-mode .ad-banner-slot{width:100%;max-width:100%;overflow:hidden}
+body.app-mode .ad-banner-slot iframe,
+body.app-mode .ad-banner-slot ins,
+body.app-mode .ad-banner-slot img{
+  display:block;max-width:100%!important;
+}
+body.app-mode .ad-banner-slot iframe{width:100%!important}

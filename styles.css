@@ -155,3 +155,19 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .artist-filter{flex:0 0 auto;border:1px solid #59416f;border-radius:22px;padding:8px 13px;background:#171321;color:#d9c8ed;font-size:11px}
 .artist-filter.selected{background:#7136a9;border-color:#c084fc;color:#fff}
 .track-info small{display:block;color:#a99bb9;font-size:10px;margin-top:4px}
+
+
+/* Dedicated Android app download section */
+.app-download-section{padding:20px 9vw 65px}
+.app-download-card{display:flex;align-items:center;gap:30px;padding:36px 42px;border:1px solid #64438b;border-radius:20px;background:radial-gradient(circle at 85% 20%,#7138a955,transparent 38%),linear-gradient(115deg,#21152f,#11101b);box-shadow:0 18px 55px #0004}
+.app-download-icon{flex:0 0 86px;width:86px;height:86px;display:grid;place-items:center;border-radius:22px;background:linear-gradient(145deg,#34204e,#171421);border:1px solid #ffffff20}
+.app-download-icon .brand-mark{width:56px;height:56px;border-radius:16px;font-size:34px}
+.app-download-copy{max-width:620px}
+.app-download-copy h2{font:800 clamp(27px,4vw,40px)/1.15 Manrope;margin:8px 0}
+.app-download-copy h2 em{font-style:normal;color:var(--purple)}
+.app-download-copy>p:not(.eyebrow){font-size:13px;line-height:1.7;color:var(--muted);margin:8px 0 14px}
+.app-download-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+.app-download-meta span{font-size:10px;color:#d8c9ff;border:1px solid #ffffff24;background:#ffffff09;padding:6px 10px;border-radius:20px}
+.app-download-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.app-download-copy>small{display:block;margin-top:12px;color:#958ba6;font-size:10px;line-height:1.5}
+@media(max-width:650px){.app-download-section{padding:10px 6vw 45px}.app-download-card{padding:26px 22px;gap:17px;align-items:flex-start}.app-download-icon{flex-basis:56px;width:56px;height:56px;border-radius:16px}.app-download-icon .brand-mark{width:40px;height:40px;font-size:24px;border-radius:12px}.app-download-button{width:100%;text-align:center}}

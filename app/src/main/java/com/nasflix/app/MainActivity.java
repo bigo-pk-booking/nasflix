@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.webkit.JavascriptInterface;
 import android.os.Bundle;
+import android.app.PictureInPictureParams;
+import android.util.Rational;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -23,6 +25,7 @@ public class MainActivity extends Activity {
     private View customView;
     private WebChromeClient.CustomViewCallback customViewCallback;
     private int normalUiVisibility;
+    private volatile boolean directVideoPlaying = false;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +86,7 @@ public class MainActivity extends Activity {
     }
 
     private class NasflixBridge {
+        @JavascriptInterface public void setVideoPlaying(boolean isPlaying) { directVideoPlaying = isPlaying; }
         @JavascriptInterface public void playQueue(String queueJson, int index, boolean autoplay) {
             Intent extras = new Intent();
             extras.putExtra(PlaybackService.EXTRA_QUEUE, queueJson);
@@ -133,6 +137,27 @@ public class MainActivity extends Activity {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (customViewCallback != null) customViewCallback.onCustomViewHidden();
         customViewCallback = null;
+    }
+
+    @Override public void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && directVideoPlaying && customView == null) {
+            try {
+                PictureInPictureParams params = new PictureInPictureParams.Builder()
+                    .setAspectRatio(new Rational(16, 9))
+                    .build();
+                enterPictureInPictureMode(params);
+            } catch (IllegalStateException error) {
+                android.util.Log.w("NASFLIX", "Unable to enter picture-in-picture", error);
+            }
+        }
+    }
+
+    @Override public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, android.content.res.Configuration newConfig) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+        if (webView != null) {
+            webView.setVisibility(isInPictureInPictureMode ? View.VISIBLE : View.VISIBLE);
+        }
     }
 
     @Override public void onBackPressed() {

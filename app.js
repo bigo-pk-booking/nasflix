@@ -30,7 +30,7 @@ function card(x){const yt=youtubeId(x.url);const thumb=x.thumbnail||(yt?`https:/
 function track(x){return `<div class="track"><div class="track-cover">♫</div><div class="track-info"><b>${esc(x.title)}</b><small>${esc(x.genre||"Music")} · ${esc(x.description||"Featured track")}</small></div><button data-track="${x.id}">▶ Listen</button></div>`}
 function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function youtubeId(value){try{const u=new URL(value);if(u.hostname==="youtu.be")return u.pathname.split("/").filter(Boolean)[0]||"";if(u.hostname==="youtube.com"||u.hostname.endsWith(".youtube.com")){const v=u.searchParams.get("v");if(v)return v;const parts=u.pathname.split("/").filter(Boolean);if(parts[0]==="embed"||parts[0]==="shorts")return parts[1]||"";}}catch{}return "";}
-function isDirectMedia(value){try{const path=new URL(value).pathname.toLowerCase();return [".mp4",".webm",".mp3",".ogg",".m4a",".wav"].some(ext=>path.endsWith(ext));}catch{return false;}}
+function isDirectMedia(value){if(String(value||"").startsWith("/api/file/"))return true;try{const path=new URL(value).pathname.toLowerCase();return [".mp4",".webm",".mp3",".ogg",".m4a",".wav"].some(ext=>path.endsWith(ext));}catch{return false;}}
 function renderEpisodeNav(current){
   const box=$("#seriesEpisodes");
   if(current.type!=="Series"||!current.seriesTitle){box.hidden=true;box.innerHTML="";return;}
@@ -51,17 +51,22 @@ document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal("player");closeModal("admin")}});
 $("#contentForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  const token=$("#adminToken").value.trim(),status=$("#uploadStatus");
+  const token=$("#adminToken").value.trim(),status=$("#uploadStatus"),file=$("#itemFile").files[0];
   const item={title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),allowDownload:$("#itemDownload").checked,seriesTitle:$("#seriesTitle").value.trim(),seasonNumber:Number($("#seasonNumber").value)||1,episodeNumber:Number($("#episodeNumber").value)||null,episodeTitle:$("#episodeTitle").value.trim()};
   if(!token){status.textContent="Enter your admin access key first.";return;}
-  if(!item.title||!item.url){status.textContent="Enter a title and a media URL.";return;}
-  if(!/^https?:\/\//i.test(item.url)){status.textContent="Enter a valid http or https media URL.";return;}
-  status.textContent="Saving to NASFLIX...";
+  if(!item.title){status.textContent="Enter a title.";return;}
+  if(!editingId&&file&&file.size>50*1024*1024){status.textContent="Maximum upload size is 50 MB.";return;}
+  if(!file&&!item.url){status.textContent="Choose a media file or enter a media URL.";return;}
+  if(!file&&item.url&&!/^https?:\/\//i.test(item.url)){status.textContent="Enter a valid http or https media URL.";return;}
+  status.textContent=file?"Uploading video to secure R2 storage...":"Saving to NASFLIX...";
   try{
-    const response=await fetch(editingId?"/api/media/"+encodeURIComponent(editingId):"/api/media",{method:editingId?"PUT":"POST",headers:{"content-type":"application/json","authorization":"Bearer "+token},body:JSON.stringify(item)});
+    let body,headers={"authorization":"Bearer "+token};
+    if(file&&!editingId){body=new FormData();Object.entries(item).forEach(([k,v])=>body.append(k,String(v??"")));body.append("file",file);}
+    else{headers["content-type"]="application/json";body=JSON.stringify(item);}
+    const response=await fetch(editingId?"/api/media/"+encodeURIComponent(editingId):"/api/media",{method:editingId?"PUT":"POST",headers,body});
     const result=await response.json();
     if(!response.ok)throw new Error(result.error||"Could not save this item.");
-    status.textContent=editingId?"Changes saved successfully!":"Saved permanently to NASFLIX!";
+    status.textContent=editingId?"Changes saved successfully!":file?"Video uploaded securely to R2!":"Saved permanently to NASFLIX!";
     editingId=null;$("#contentForm").reset();$("#adminToken").value=token;$("#contentSubmit").textContent="Save to NASFLIX catalogue +";$("#cancelEdit").hidden=true;
     await loadRemote();
   }catch(error){status.textContent=error.message;}

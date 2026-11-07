@@ -132,7 +132,7 @@ function openMusicPlayer(id,shouldPlay=true){
   }
  });
  seek.addEventListener("input",()=>{if(window.NasflixAndroid?.seekTo){const duration=Number(window.NasflixAndroid.getDuration());window.NasflixAndroid.seekTo(Math.round((Number(seek.value)/1000)*duration));}else if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=(Number(seek.value)/1000)*audio.duration;});$("#musicVolume").addEventListener("input",e=>{const v=Number(e.target.value);if(window.NasflixAndroid?.setVolume)window.NasflixAndroid.setVolume(v);else audio.volume=v;});
- if(window.NasflixAndroid?.getCurrentPosition){nativeMusicPoll=setInterval(()=>{const duration=Number(window.NasflixAndroid.getDuration()),position=Number(window.NasflixAndroid.getCurrentPosition());if(duration>0){seek.value=String(Math.round(position/duration*1000));$("#musicCurrent").textContent=time(position/1000);$("#musicDuration").textContent=time(duration/1000);}const active=window.NasflixAndroid.isPlaying();play.textContent=active?"Ⅱ":"▶";play.setAttribute("aria-label",active?"Pause":"Play");const playbackError=window.NasflixAndroid.getPlaybackError?.();const diagnostics=window.NasflixAndroid.getPlaybackDiagnostics?.();const status=$("#musicTrackGenre");if(playbackError){if(status)status.textContent="Playback error: "+playbackError;play.textContent="▶";}else if(status&&diagnostics){status.textContent="Audio status: "+diagnostics;}},500);}
+ if(window.NasflixAndroid?.getCurrentPosition){nativeMusicPoll=setInterval(()=>{const duration=Number(window.NasflixAndroid.getDuration()),position=Number(window.NasflixAndroid.getCurrentPosition());if(duration>0){seek.value=String(Math.round(position/duration*1000));$("#musicCurrent").textContent=time(position/1000);$("#musicDuration").textContent=time(duration/1000);}const active=window.NasflixAndroid.isPlaying();play.textContent=active?"Ⅱ":"▶";play.setAttribute("aria-label",active?"Pause":"Play");const status=$("#musicTrackGenre");if(status&&!status.textContent.trim())status.textContent="Music";},500);}
  renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");$("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";requestAnimationFrame(()=>{resizeCanvas();draw();});if(shouldPlay&&!window.NasflixAndroid?.playQueue){if(activeMusicContext?.state==="suspended")activeMusicContext.resume();audio.play().catch(()=>{play.textContent="▶";});}
 }
 
@@ -153,7 +153,7 @@ $("#playerRestore")?.addEventListener("click",restorePlayer);
 $("#playerScreen")?.addEventListener("click",e=>{
   if($("#playerModal").classList.contains("minimized")&&!e.target.closest("video,iframe,button,a"))restorePlayer();
 });
-function closeModal(id){const el=$("#"+id+"Modal");if(!el)return;/* Closing the player UI must not stop the native background playback session. */el.classList.remove("open","minimized");el.setAttribute("aria-hidden","true");}
+function closeModal(id){const el=$("#"+id+"Modal");if(!el)return;if(id==="player")stopCurrentMedia(true);el.classList.remove("open","minimized");el.setAttribute("aria-hidden","true");}
 document.querySelectorAll(".cat-chip").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;render()}));
 $("#searchInput").addEventListener("input",render);
 $("#heroExplore").addEventListener("click",()=>$("#movies").scrollIntoView({behavior:"smooth"}));

@@ -59,7 +59,7 @@ function setUploadProgress(percent,label,detail,state=""){
 }
 function uploadWithProgress(url,formData,token,onProgress,method="POST"){
   return new Promise((resolve,reject)=>{
-    const xhr=new XMLHttpRequest();xhr.open(method,url);xhr.setRequestHeader("authorization","Bearer "+token);
+    const xhr=new XMLHttpRequest();const requestMethod=method||"POST";xhr.open(requestMethod,url);xhr.setRequestHeader("authorization","Bearer "+token);
     xhr.upload.addEventListener("progress",event=>{if(event.lengthComputable)onProgress(event.loaded,event.total);});
     xhr.addEventListener("load",()=>{let result={};try{result=JSON.parse(xhr.responseText||"{}");}catch{}if(xhr.status>=200&&xhr.status<300)resolve(result);else reject(new Error(result.error||"Upload failed ("+xhr.status+")."));});
     xhr.addEventListener("error",()=>reject(new Error("Network error. Please try the upload again.")));

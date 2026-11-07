@@ -294,7 +294,10 @@ async function finishStartupLoading(){
     img.addEventListener("load",resolve,{once:true});
     img.addEventListener("error",resolve,{once:true});
   }));
-  await Promise.race([Promise.all(imageLoads),new Promise(resolve=>setTimeout(resolve,2200))]);
+  await Promise.all([
+    Promise.race([Promise.all(imageLoads),new Promise(resolve=>setTimeout(resolve,2200))]),
+    new Promise(resolve=>setTimeout(resolve,2600))
+  ]);
   if(startupStepTimer){clearInterval(startupStepTimer);startupStepTimer=null;}
   setStartupStep(4);
   const bar=$("#startupProgressBar");if(bar)bar.style.width="100%";

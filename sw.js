@@ -1,11 +1,7 @@
-const CACHE="nasflix-shell-v5";
+const CACHE="nasflix-shell-v6";
+const MEDIA_CACHE="nasflix-offline-media-v1";
 const SHELL=["/","/index.html","/styles.css","/app.js","/manifest.webmanifest","/nasflix-icon.svg"];
 self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting();});
-self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim();});
-self.addEventListener("fetch",event=>{
-  const url=new URL(event.request.url);
-  if(event.request.method!=="GET"||url.origin!==self.location.origin||url.pathname.startsWith("/api/"))return;
-  if(["document","script","style"].includes(event.request.destination)){
-    event.respondWith(fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));return response;}).catch(()=>caches.match(event.request).then(hit=>hit||caches.match("/"))));
-  }
-});
+self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith("nasflix-shell-")&&key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim();});
+async function cachedMediaResponse(request){const cache=await caches.open(MEDIA_CACHE);const key=new Request(request.url,{method:"GET"});const saved=await cache.match(key);if(!saved)return null;const range=request.headers.get("range");if(!range)return saved;const match=/bytes=(\\d*)-(\\d*)/i.exec(range);if(!match)return saved;const blob=await saved.blob();const start=match[1]?Number(match[1]):0;const end=match[2]?Math.min(Number(match[2]),blob.size-1):blob.size-1;if(start>=blob.size||end<start)return new Response(null,{status:416,headers:{"Content-Range":"bytes */"+blob.size}});const part=blob.slice(start,end+1);return new Response(part,{status:206,statusText:"Partial Content",headers:{"Content-Type":saved.headers.get("Content-Type")||"application/octet-stream","Content-Length":String(part.size),"Content-Range":"bytes "+start+"-"+end+"/"+blob.size,"Accept-Ranges":"bytes","Cache-Control":"no-store"}});}
+self.addEventListener("fetch",event=>{const url=new URL(event.request.url);if(event.request.method!=="GET"||url.origin!==self.location.origin)return;if(url.pathname.startsWith("/api/file/")){event.respondWith((async()=>{const saved=await cachedMediaResponse(event.request);if(saved)return saved;try{return await fetch(event.request);}catch{return new Response("This media has not been saved for offline playback.",{status:503,headers:{"Content-Type":"text/plain"}});}})());return;}if(url.pathname.startsWith("/api/"))return;if(["document","script","style"].includes(event.request.destination)){event.respondWith(fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));return response;}).catch(()=>caches.match(event.request).then(hit=>hit||caches.match("/"))));}});

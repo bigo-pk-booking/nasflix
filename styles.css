@@ -180,3 +180,17 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .ad-banner-section{margin-top:28px;margin-bottom:38px}
 .ad-banner-slot{width:100%;max-width:468px;min-height:60px;display:flex;justify-content:center;align-items:center;overflow-x:auto;overflow-y:hidden}
 @media(max-width:520px){.ad-section{width:calc(100% - 20px);margin:16px auto 26px;padding:12px 8px}.ad-native-slot{min-height:80px}}
+
+/* Admin video link library */
+.nas-link-library{padding:15px;border:1px solid #5b4378;border-radius:13px;background:linear-gradient(135deg,#211633,#151220);display:grid;gap:12px}
+.nas-link-library-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nas-link-library-head .eyebrow{margin:0 0 4px}
+.nas-link-library-head h3{font:700 16px Manrope;margin:0;color:#f7f4ff}
+.nas-link-library-head>span{font-size:8px;letter-spacing:1px;color:#c4b5fd;border:1px solid #7754a9;padding:6px 8px;border-radius:20px;white-space:nowrap}
+.nas-link-library>p{font-size:11px;line-height:1.65;color:#c4bbd1;margin:0}
+.nas-link-source-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nas-link-source-grid a{display:grid;gap:5px;padding:11px;border:1px solid #ffffff1b;border-radius:9px;background:#0e0c16}
+.nas-link-source-grid a:hover{border-color:#a78bfa;background:#241a35}
+.nas-link-source-grid b{font:600 11px Manrope;color:#f3eaff}
+.nas-link-source-grid small{font-size:9px;line-height:1.45;color:#a7a0b8}
+@media(max-width:420px){.nas-link-source-grid{grid-template-columns:1fr}}

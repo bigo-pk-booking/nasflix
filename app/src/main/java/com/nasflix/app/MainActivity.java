@@ -33,7 +33,28 @@ public class MainActivity extends Activity {
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
         settings.setMediaPlaybackRequiresUserGesture(true);
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                String js = "(function(){"
+                    + "var group=document.querySelector('.brand-group'),brand=document.querySelector('.brand'),nav=document.querySelector('.main-nav');"
+                    + "if(!group||!brand||!nav)return;"
+                    + "nav.style.setProperty('display','none','important');"
+                    + "if(document.getElementById('nasflixAppMenuButton'))return;"
+                    + "var b=document.createElement('button');b.id='nasflixAppMenuButton';b.type='button';b.textContent='☰';b.setAttribute('aria-label','Open menu');"
+                    + "b.style.cssText='display:inline-flex!important;width:42px;height:42px;min-width:42px;align-items:center;justify-content:center;margin-right:10px;border:1px solid #40364f;border-radius:12px;background:#171421;color:#f2eaff;font-size:24px;';"
+                    + "group.insertBefore(b,brand);"
+                    + "var overlay=document.createElement('div');overlay.id='nasflixAppMenu';overlay.style.cssText='display:none;position:fixed;inset:0;z-index:2147483000;background:#0009;padding:82px 14px 16px;';"
+                    + "var panel=document.createElement('div');panel.style.cssText='width:min(320px,88vw);max-height:calc(100vh - 100px);overflow:auto;background:#151220;border:1px solid #ffffff30;border-radius:17px;padding:14px;box-shadow:0 20px 60px #000;';"
+                    + "var names=[['Home','#home'],['Movies','#movies'],['AI Videos','#videos'],['Series','#series'],['Music','#music'],['For you','#movies'],['Animation','#movies'],['Anime','#movies'],['Action','#movies'],['Comedy','#movies'],['Horror','#movies'],['Romance','#movies'],['Fantasy','#movies'],['Sci-Fi','#movies']];"
+                    + "names.forEach(function(n){var a=document.createElement('a');a.href=n[1];a.textContent=n[0];a.style.cssText='display:flex;align-items:center;min-height:44px;padding:0 13px;margin:2px 0;border-radius:9px;color:#f1eaff;text-decoration:none;font:14px sans-serif;';a.addEventListener('click',function(){overlay.style.display='none';});panel.appendChild(a);});"
+                    + "overlay.appendChild(panel);document.body.appendChild(overlay);"
+                    + "b.addEventListener('click',function(){overlay.style.display=overlay.style.display==='block'?'none':'block';});"
+                    + "overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.style.display='none';});"
+                    + "})();";
+                view.evaluateJavascript(js, null);
+            }
+        });
         webView.setWebChromeClient(new WebChromeClient() {
             @Override public void onShowCustomView(View view, CustomViewCallback callback) {
                 showCustomView(view, callback);

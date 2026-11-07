@@ -82,19 +82,21 @@ public class PlaybackService extends MediaSessionService {
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
-        // Let MediaSessionService process its own lifecycle and foreground-notification commands.
+        // Let MediaSessionService process its lifecycle exactly once.
         int sessionResult = super.onStartCommand(intent, flags, startId);
-        if (intent != null) {
-            String action = intent.getAction();
-            boolean handledByNasflix = ACTION_SET_QUEUE.equals(action) || ACTION_PLAY.equals(action) ||
-                ACTION_PAUSE.equals(action) || ACTION_STOP.equals(action) ||
-                ACTION_SEEK.equals(action) || ACTION_VOLUME.equals(action);
+        if (intent == null) return sessionResult;
+
+        String action = intent.getAction();
+        try {
             if (ACTION_SET_QUEUE.equals(action)) {
                 setQueue(intent.getStringExtra(EXTRA_QUEUE),
                     intent.getIntExtra(EXTRA_INDEX, 0),
                     intent.getBooleanExtra(EXTRA_AUTOPLAY, true));
             } else if (ACTION_PLAY.equals(action)) {
-                if (player != null && player.getMediaItemCount() > 0) player.play();
+                if (player != null && player.getMediaItemCount() > 0) {
+                    player.prepare();
+                    player.play();
+                }
             } else if (ACTION_PAUSE.equals(action)) {
                 if (player != null) player.pause();
             } else if (ACTION_STOP.equals(action)) {
@@ -108,15 +110,17 @@ public class PlaybackService extends MediaSessionService {
                 stopForeground(true);
                 stopSelf();
             } else if (ACTION_SEEK.equals(action)) {
-                if (player != null) player.seekTo(Math.max(0, intent.getLongExtra(EXTRA_POSITION, 0)));
+                if (player != null && player.getMediaItemCount() > 0) {
+                    player.seekTo(Math.max(0, intent.getLongExtra(EXTRA_POSITION, 0)));
+                }
             } else if (ACTION_VOLUME.equals(action)) {
                 if (player != null) {
                     float volume = intent.getFloatExtra(EXTRA_VOLUME, 0.85f);
                     player.setVolume(Math.max(0f, Math.min(1f, volume)));
                 }
             }
-            // MediaSessionService must receive each start command exactly once.
-            return sessionResult;
+        } catch (RuntimeException error) {
+            android.util.Log.e("NASFLIX", "Playback command failed: " + action, error);
         }
         return sessionResult;
     }

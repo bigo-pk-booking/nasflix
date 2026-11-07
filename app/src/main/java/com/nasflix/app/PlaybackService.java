@@ -64,6 +64,9 @@ public class PlaybackService extends MediaSessionService {
         // Keep the CPU awake during active playback so audio can continue with the screen off.
         player.setWakeMode(C.WAKE_MODE_LOCAL);
         player.setHandleAudioBecomingNoisy(true);
+        // Expose predictable 10-second seek actions to Android media controls.
+        player.setSeekBackIncrementMs(10_000);
+        player.setSeekForwardIncrementMs(10_000);
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
         player.addListener(new Player.Listener() {
             @Override public void onIsPlayingChanged(boolean isPlaying) {

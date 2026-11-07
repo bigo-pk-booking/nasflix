@@ -15,6 +15,8 @@ import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.session.MediaSession;
 import androidx.media3.session.MediaSessionService;
+import androidx.media3.session.DefaultMediaNotificationProvider;
+import androidx.media3.common.util.UnstableApi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,6 +24,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+@UnstableApi
 public class PlaybackService extends MediaSessionService {
     public static final String ACTION_SET_QUEUE = "com.nasflix.app.action.SET_QUEUE";
     public static final String ACTION_PLAY = "com.nasflix.app.action.PLAY";
@@ -59,6 +62,11 @@ public class PlaybackService extends MediaSessionService {
 
     @Override public void onCreate() {
         super.onCreate();
+        setMediaNotificationProvider(new DefaultMediaNotificationProvider.Builder(this)
+            .setChannelId("nasflix_media_playback")
+            .setChannelName(R.string.nasflix_media_channel)
+            .setNotificationId(5201)
+            .build());
         player = new ExoPlayer.Builder(this).build();
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)

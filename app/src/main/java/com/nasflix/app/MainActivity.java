@@ -1,6 +1,13 @@
 package com.nasflix.app;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.widget.Toast;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
@@ -39,6 +46,7 @@ public class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        installCrashLogger();
         activeInstance = this;
         getWindow().setStatusBarColor(android.graphics.Color.rgb(9,8,17));
         getWindow().setNavigationBarColor(android.graphics.Color.rgb(9,8,17));
@@ -83,8 +91,48 @@ public class MainActivity extends Activity {
         webView.clearCache(true);
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261107-nativeaudio4");
+        showPreviousCrashIfAny();
     }
 
+
+
+    private void installCrashLogger() {
+        final Thread.UncaughtExceptionHandler previous = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler((thread, error) -> {
+            try (PrintWriter writer = new PrintWriter(new FileWriter(new File(getFilesDir(), "nasflix-crash.txt")))) {
+                writer.println("NASFLIX crash diagnostic");
+                writer.println("Android SDK: " + Build.VERSION.SDK_INT);
+                writer.println("Device: " + Build.MANUFACTURER + " " + Build.MODEL);
+                writer.println("Thread: " + thread.getName());
+                error.printStackTrace(writer);
+            } catch (Exception ignored) { }
+            if (previous != null) previous.uncaughtException(thread, error);
+        });
+    }
+
+    private void showPreviousCrashIfAny() {
+        File report = new File(getFilesDir(), "nasflix-crash.txt");
+        if (!report.exists()) return;
+        try {
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(report));
+            StringBuilder body = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) body.append(line).append("\n");
+            reader.close();
+            String details = body.toString();
+            new AlertDialog.Builder(this)
+                .setTitle("NASFLIX crash report")
+                .setMessage("May na-detect na error noong nakaraang pagbukas. Pindutin ang COPY REPORT at ipadala rito ang nakopyang text.\n\n" + details)
+                .setPositiveButton("COPY REPORT", (dialog, which) -> {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    clipboard.setPrimaryClip(ClipData.newPlainText("NASFLIX crash report", details));
+                    Toast.makeText(this, "Crash report copied. I-paste dito sa chat.", Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton("CLOSE", (dialog, which) -> { })
+                .show();
+            report.delete();
+        } catch (Exception ignored) { }
+    }
 
     private void sendPlaybackCommand(String action, Intent extras) {
         Intent command = new Intent(this, PlaybackService.class);

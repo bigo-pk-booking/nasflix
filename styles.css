@@ -5,3 +5,13 @@
 @media(max-width:650px){.topbar{height:auto;min-height:65px;padding:12px 5vw;flex-wrap:wrap;gap:12px}.main-nav{order:3;width:100%;overflow:auto;padding:5px 0;gap:20px}.main-nav a{white-space:nowrap}.header-actions{margin-left:auto}.search input{width:85px}.hero{min-height:540px;padding:75px 7vw}.hero-art{right:-90px;top:55%;transform:translateY(-50%) scale(.8);opacity:.35}.hero-content{max-width:100%}.hero h1{font-size:51px}.hero-meta{font-size:9px;flex-wrap:wrap}.quick-cats{padding:20px 6vw}.content-section,.music-section{padding:48px 6vw}.content-grid{grid-template-columns:repeat(2,1fr);gap:16px}.poster{height:205px}.section-note{display:none}.wide-promo{margin:0 6vw 20px;padding:30px 25px}.promo-symbol{font-size:90px}.join-banner{margin:15px 6vw 55px;padding:28px;gap:20px}.join-banner .primary{white-space:nowrap}footer{padding:25px 6vw;flex-wrap:wrap;gap:18px}footer p{order:3;width:100%}.player-screen{height:auto;aspect-ratio:16/9}}
 
 .upload-hint{display:block;color:#a7a0b8;font-size:10px;line-height:1.6;margin-top:-5px}.admin-card input[type=file]{padding:9px;font-size:11px}.admin-card #adminToken{border-color:#7754a9}
+
+
+.player-screen{position:relative}
+.player-screen iframe,.player-screen video{position:absolute;inset:0}
+.player-fullscreen{position:absolute;right:12px;bottom:12px;z-index:3;width:42px;height:42px;border:1px solid #ffffff55;border-radius:50%;background:#090811bb;color:#fff;font-size:25px;line-height:1;display:grid;place-items:center}
+.player-fullscreen:active{transform:scale(.95)}
+.player-loading{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;background:#090811;color:#d8b4fe;font-size:12px;letter-spacing:1px;pointer-events:none}
+.player-loading span{width:28px;height:28px;border:3px solid #ffffff30;border-top-color:#c084fc;border-radius:50%;animation:nasflix-spin .8s linear infinite}
+@keyframes nasflix-spin{to{transform:rotate(360deg)}}
+@media(max-width:650px){.modal{padding:8px}.modal-card.player-card{width:100%;padding:14px;border-radius:15px}.player-screen{width:100%;aspect-ratio:16/9}.player-fullscreen{right:8px;bottom:8px;width:38px;height:38px}}

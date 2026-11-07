@@ -40,11 +40,7 @@ public class PlaybackService extends MediaSessionService {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable progressUpdater = new Runnable() {
         @Override public void run() {
-            if (player != null) {
-                currentPositionMs = Math.max(0, player.getCurrentPosition());
-                durationMs = player.getDuration() == C.TIME_UNSET ? 0 : Math.max(0, player.getDuration());
-                playing = player.isPlaying();
-            }
+            updatePlaybackState();
             handler.postDelayed(this, 500);
         }
     };
@@ -67,13 +63,40 @@ public class PlaybackService extends MediaSessionService {
         player.setAudioAttributes(audioAttributes, true);
         player.setHandleAudioBecomingNoisy(true);
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
+        player.addListener(new Player.Listener() {
+            @Override public void onIsPlayingChanged(boolean isPlaying) {
+                updatePlaybackState();
+            }
+
+            @Override public void onPlaybackStateChanged(int playbackState) {
+                updatePlaybackState();
+            }
+
+            @Override public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
+                updatePlaybackState();
+            }
+        });
         Intent activityIntent = new Intent(this, MainActivity.class);
         PendingIntent sessionActivity = PendingIntent.getActivity(this, 0, activityIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         mediaSession = new MediaSession.Builder(this, player)
             .setSessionActivity(sessionActivity)
             .build();
+        updatePlaybackState();
         handler.post(progressUpdater);
+    }
+
+    private void updatePlaybackState() {
+        if (player == null) {
+            currentPositionMs = 0;
+            durationMs = 0;
+            playing = false;
+            return;
+        }
+        currentPositionMs = Math.max(0, player.getCurrentPosition());
+        long currentDuration = player.getDuration();
+        durationMs = currentDuration == C.TIME_UNSET ? 0 : Math.max(0, currentDuration);
+        playing = player.isPlaying();
     }
 
     @Nullable

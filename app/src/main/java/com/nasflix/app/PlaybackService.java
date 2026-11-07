@@ -57,7 +57,8 @@ public class PlaybackService extends MediaSessionService {
     private static volatile String lastPlaybackError = "";
     public static String getLastPlaybackError() { return lastPlaybackError; }
     public static volatile String playbackDiagnostics = "Player not initialized";
-    public static String getPlaybackDiagnostics() { return playbackDiagnostics; }
+    private static volatile String notificationDiagnostics = "Notification callback not reached";
+    public static String getPlaybackDiagnostics() { return playbackDiagnostics + "; notification=" + notificationDiagnostics; }
 
     public static long getCurrentPositionMs() { return currentPositionMs; }
     public static long getDurationMs() { return durationMs; }
@@ -127,6 +128,16 @@ public class PlaybackService extends MediaSessionService {
         long currentDuration = player.getDuration();
         durationMs = currentDuration == C.TIME_UNSET ? 0 : Math.max(0, currentDuration);
         playing = player.isPlaying();
+    }
+
+    @Override
+    public void onUpdateNotification(MediaSession session, boolean startInForegroundRequired) {
+        notificationDiagnostics = "callback reached; foregroundRequired=" + startInForegroundRequired
+            + "; state=" + (player == null ? "null" : player.getPlaybackState())
+            + "; playing=" + (player != null && player.isPlaying())
+            + "; items=" + (player == null ? 0 : player.getMediaItemCount());
+        android.util.Log.i("NASFLIX", "Media notification update: " + notificationDiagnostics);
+        super.onUpdateNotification(session, startInForegroundRequired);
     }
 
     @Nullable

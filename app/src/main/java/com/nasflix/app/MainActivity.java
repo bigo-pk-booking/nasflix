@@ -154,7 +154,7 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, PipActionReceiver.class).setAction(action);
         PendingIntent pending = PendingIntent.getBroadcast(this, requestCode, intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        return new RemoteAction(Icon.createWithResource(this, iconRes), title, pending);
+        return new RemoteAction(Icon.createWithResource(this, iconRes), title, title, pending);
     }
 
     private void handlePipAction(String action) {

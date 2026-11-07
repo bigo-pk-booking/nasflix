@@ -28,6 +28,7 @@
     </nav>
     <div class="header-actions">
       <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search titles..." aria-label="Search titles"></label>
+      <button type="button" class="header-logout" id="accountLogoutHeader" hidden>Log out</button>
       <button class="admin-open" id="adminOpen">Admin</button>
     </div>
   </header>
@@ -90,7 +91,7 @@
             <div class="account-playlist-panel" id="accountPlaylistPanel" hidden>
         <div class="playlist-heading"><div><p class="eyebrow">YOUR NASFLIX ACCOUNT</p><h3>Playlists that <em>travel with you</em></h3></div><span id="accountStatus" class="account-status">Not signed in</span></div>
 
-        <div id="accountSignedIn" hidden><div class="account-user-row"><span id="accountEmailLabel"></span><button type="button" id="accountLogout">Log out</button></div>
+        <div id="accountSignedIn" hidden><div class="account-user-row"><span id="accountEmailLabel"></span></div>
           <div class="playlist-create"><input id="newPlaylistName" maxlength="60" placeholder="Name your playlist"><button type="button" id="createPlaylist">＋ Create playlist</button></div>
           <div class="playlist-controls"><label for="activePlaylistSelect">Selected playlist</label><select id="activePlaylistSelect"><option value="">No playlist yet</option></select><button type="button" id="playSelectedPlaylist" disabled>▶ Play playlist</button></div><div id="myPlaylistList" class="my-playlist-list"></div>
         </div>

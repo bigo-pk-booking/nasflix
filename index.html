@@ -33,16 +33,22 @@
       <button class="admin-open" id="adminOpen">Admin</button>
     </div>
   </header>
+  <nav class="media-tabs" id="mediaTabs" aria-label="Media sections">
+    <button type="button" class="media-tab active" data-media-tab="Movie">▣ <span>Movies</span></button>
+    <button type="button" class="media-tab" data-media-tab="Series">▤ <span>Series</span></button>
+    <button type="button" class="media-tab" data-media-tab="AI Video">▷ <span>Videos</span></button>
+    <button type="button" class="media-tab" data-media-tab="Music">♫ <span>Music</span></button>
+  </nav>
 
   <main id="home">
 
-    <section class="trending-section" data-page-section="home" id="trending" aria-label="Popular on NASFLIX">
+    <section class="trending-section page-hidden" data-page-section="home" id="trending" aria-label="Popular on NASFLIX">
       <div class="section-heading"><div><p class="eyebrow">COMMUNITY FAVORITES</p><h2>Most <em>Viewed</em></h2></div><span class="section-note">Based on actual user plays</span></div>
       <div class="trending-grid" id="mostViewedGrid"><div class="trending-skeletons" aria-hidden="true"><div class="trending-skeleton"><span></span><i></i><b></b></div><div class="trending-skeleton"><span></span><i></i><b></b></div><div class="trending-skeleton"><span></span><i></i><b></b></div><div class="trending-skeleton"><span></span><i></i><b></b></div></div><button type="button" class="trending-see-more" data-see-more="mostViewedGrid" hidden>See more</button>
       <div class="section-heading trending-second-heading"><div><p class="eyebrow">TOP MUSIC</p><h2>Most <em>Listened</em></h2></div><span class="section-note">Based on actual song plays</span></div>
       <div class="trending-grid music-trending-grid" id="mostListenedGrid"><div class="trending-skeletons" aria-hidden="true"><div class="trending-skeleton"><span></span><i></i><b></b></div><div class="trending-skeleton"><span></span><i></i><b></b></div><div class="trending-skeleton"><span></span><i></i><b></b></div><div class="trending-skeleton"><span></span><i></i><b></b></div></div><button type="button" class="trending-see-more" data-see-more="mostListenedGrid" hidden>See more</button>
     </section>
-    <section class="trending-section recent-section" data-page-section="home" id="recentActivity" aria-label="Recent activity">
+    <section class="trending-section recent-section page-hidden" data-page-section="home" id="recentActivity" aria-label="Recent activity">
       <div class="section-heading"><div><p class="eyebrow">LATEST VIDEO PLAYS</p><h2>Recently <em>Viewed</em></h2></div><span class="section-note">Latest watched titles</span></div>
       <div class="trending-grid" id="recentViewedGrid"><div class="trending-skeletons" aria-hidden="true"><div class="trending-skeleton"><span></span><i></i><b></b></div><div class="trending-skeleton"><span></span><i></i><b></b></div><div class="trending-skeleton"><span></span><i></i><b></b></div><div class="trending-skeleton"><span></span><i></i><b></b></div></div><button type="button" class="trending-see-more" data-see-more="recentViewedGrid" hidden>See more</button>
       <div class="section-heading trending-second-heading"><div><p class="eyebrow">LATEST SONG PLAYS</p><h2>Recently <em>Listened</em></h2></div><span class="section-note">Latest played songs</span></div>

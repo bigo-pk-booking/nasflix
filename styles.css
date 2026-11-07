@@ -50,7 +50,9 @@
 .upload-progress.error{border-color:#f87171}
 @keyframes uploadShimmer{to{transform:translateX(100%)}}
 
-body.app-mode #adminOpen,body.app-mode #adminModal{display:none!important}
+body.app-mode #adminOpen{display:none!important}
+/* Admins can still be routed into the private studio after server-side role verification. */
+body.app-mode #adminModal.open{display:flex!important}
 
 /* Hamburger navigation */
 .brand-group{display:flex;align-items:center;gap:15px;min-width:0}

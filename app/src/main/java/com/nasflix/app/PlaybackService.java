@@ -50,6 +50,8 @@ public class PlaybackService extends MediaSessionService {
     private static volatile boolean playing = false;
     private static volatile String lastPlaybackError = "";
     public static String getLastPlaybackError() { return lastPlaybackError; }
+    public static volatile String playbackDiagnostics = "Player not initialized";
+    public static String getPlaybackDiagnostics() { return playbackDiagnostics; }
 
     public static long getCurrentPositionMs() { return currentPositionMs; }
     public static long getDurationMs() { return durationMs; }
@@ -105,6 +107,7 @@ public class PlaybackService extends MediaSessionService {
             return;
         }
         currentPositionMs = Math.max(0, player.getCurrentPosition());
+        playbackDiagnostics = "state=" + player.getPlaybackState() + ", items=" + player.getMediaItemCount() + ", playWhenReady=" + player.getPlayWhenReady() + ", isPlaying=" + player.isPlaying() + ", url=" + (player.getCurrentMediaItem() == null || player.getCurrentMediaItem().localConfiguration == null ? "none" : String.valueOf(player.getCurrentMediaItem().localConfiguration.uri));
         long currentDuration = player.getDuration();
         durationMs = currentDuration == C.TIME_UNSET ? 0 : Math.max(0, currentDuration);
         playing = player.isPlaying();
@@ -178,15 +181,17 @@ public class PlaybackService extends MediaSessionService {
                     .setMediaMetadata(metadata.build())
                     .build());
             }
-            if (mediaItems.isEmpty()) return;
+            if (mediaItems.isEmpty()) { lastPlaybackError = "Queue is empty: no valid audio URL"; playbackDiagnostics = lastPlaybackError; return; }
             int index = Math.max(0, Math.min(requestedIndex, mediaItems.size() - 1));
             lastPlaybackError = "";
+            playbackDiagnostics = "Queue received: " + mediaItems.size() + " tracks; URL=" + mediaItems.get(index).localConfiguration.uri;
             player.setMediaItems(mediaItems, index, 0);
             player.prepare();
             player.setPlayWhenReady(autoplay);
             if (!autoplay) player.pause();
         } catch (Exception error) {
             lastPlaybackError = error.getClass().getSimpleName() + ": " + String.valueOf(error.getMessage());
+            playbackDiagnostics = lastPlaybackError;
             android.util.Log.e("NASFLIX", "Unable to start native media queue", error);
         }
     }

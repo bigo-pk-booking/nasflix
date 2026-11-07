@@ -41,6 +41,14 @@
       <button class="cat-chip" data-filter="AI Video">✧ <span>AI Videos</span></button>
       <button class="cat-chip" data-filter="Series">▤ <span>Series</span></button>
       <button class="cat-chip" data-filter="Music">♫ <span>Music</span></button>
+      <button class="cat-chip" data-filter="Animation">🎞 <span>Animation</span></button>
+      <button class="cat-chip" data-filter="Anime">✦ <span>Anime</span></button>
+      <button class="cat-chip" data-filter="Action">⚡ <span>Action</span></button>
+      <button class="cat-chip" data-filter="Comedy">☻ <span>Comedy</span></button>
+      <button class="cat-chip" data-filter="Horror">☾ <span>Horror</span></button>
+      <button class="cat-chip" data-filter="Romance">♥ <span>Romance</span></button>
+      <button class="cat-chip" data-filter="Fantasy">✧ <span>Fantasy</span></button>
+      <button class="cat-chip" data-filter="Sci-Fi">✦ <span>Sci-Fi</span></button>
     </section>
 
     <section class="content-section" id="movies">
@@ -66,7 +74,7 @@
     <label>Admin access key<input id="adminToken" type="password" autocomplete="current-password" placeholder="Enter your private admin key"></label>
     <form id="contentForm">
       <label>Content title<input id="itemTitle" required maxlength="90" placeholder="Enter a title"></label>
-      <div class="form-row"><label>Type<select id="itemType"><option>Movie</option><option>AI Video</option><option>Series</option><option>Music</option></select></label><label>Genre<input id="itemGenre" maxlength="35" placeholder="e.g. Sci-Fi"></label></div>
+      <div class="form-row"><label>Type<select id="itemType"><option>Movie</option><option>AI Video</option><option>Series</option><option>Music</option></select></label><label>Genre<select id="itemGenre"><option>Animation</option><option>Anime</option><option>Action</option><option>Comedy</option><option>Horror</option><option>Romance</option><option>Fantasy</option><option>Sci-Fi</option><option>Documentary</option><option>Drama</option><option>Thriller</option><option>Music</option><option>Independent</option></select></label></div>
       <label>Description<textarea id="itemDescription" rows="3" maxlength="400" placeholder="Tell viewers about this content"></textarea></label>
       <label>Media file <input id="itemFile" type="file" accept="video/mp4,video/webm,audio/mpeg,audio/mp4,audio/ogg,audio/wav,image/jpeg,image/png,image/webp"></label>
       <small class="upload-hint">MP4, WebM, MP3, M4A, OGG, WAV, JPG, PNG or WebP · Maximum 50 MB</small>

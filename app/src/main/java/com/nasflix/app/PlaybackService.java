@@ -93,10 +93,7 @@ public class PlaybackService extends MediaSessionService {
                     intent.getIntExtra(EXTRA_INDEX, 0),
                     intent.getBooleanExtra(EXTRA_AUTOPLAY, true));
             } else if (ACTION_PLAY.equals(action)) {
-                if (player != null && player.getMediaItemCount() > 0) {
-                    player.prepare();
-                    player.play();
-                }
+                if (player != null && player.getMediaItemCount() > 0) player.play();
             } else if (ACTION_PAUSE.equals(action)) {
                 if (player != null) player.pause();
             } else if (ACTION_STOP.equals(action)) {

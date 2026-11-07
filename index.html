@@ -84,6 +84,16 @@
 
     <section class="music-section" id="music">
       <div class="section-heading"><div><p class="eyebrow">PRESS PLAY</p><h2>Soundtrack <em>your day</em></h2></div><span class="section-note">Music from the NASFLIX library</span></div>
+            <div class="account-playlist-panel" id="accountPlaylistPanel">
+        <div class="playlist-heading"><div><p class="eyebrow">YOUR NASFLIX ACCOUNT</p><h3>Playlists that <em>travel with you</em></h3></div><span id="accountStatus" class="account-status">Not signed in</span></div>
+        <div id="accountAuth">
+          <div class="account-form"><label>Email<input id="accountEmail" type="email" autocomplete="email" placeholder="you@example.com"></label><label>Password<input id="accountPassword" type="password" minlength="8" autocomplete="current-password" placeholder="At least 8 characters"></label><div class="account-actions"><button type="button" id="accountLogin">Log in</button><button type="button" id="accountRegister">Create account</button></div><p id="accountMessage" role="status" aria-live="polite">Create an account to keep your playlists synced across devices.</p></div>
+        </div>
+        <div id="accountSignedIn" hidden><div class="account-user-row"><span id="accountEmailLabel"></span><button type="button" id="accountLogout">Log out</button></div>
+          <div class="playlist-create"><input id="newPlaylistName" maxlength="60" placeholder="Name your playlist"><button type="button" id="createPlaylist">＋ Create playlist</button></div>
+          <div class="playlist-controls"><label for="activePlaylistSelect">Selected playlist</label><select id="activePlaylistSelect"><option value="">No playlist yet</option></select><button type="button" id="playSelectedPlaylist" disabled>▶ Play playlist</button></div><div id="myPlaylistList" class="my-playlist-list"></div>
+        </div>
+      </div>
       <div class="artist-browser"><div class="artist-browser-heading"><div><p class="eyebrow">YOUR MUSIC LIBRARY</p><h3>Browse by <em>artist</em></h3></div><button type="button" id="playAllMusic">▶ Play all</button></div><div class="artist-filters" id="artistFilters"></div><div class="album-browser" id="albumBrowser" hidden></div></div><div class="music-list" id="musicList"></div><div id="musicLoadSentinel" class="music-load-sentinel" aria-hidden="true"></div>
     </section>
     <section class="join-banner"><div><p class="eyebrow">THE NEXT SCENE STARTS HERE</p><h2>Find your next<br><em>favorite thing.</em></h2></div><a href="#home" class="primary">Back to top ↑</a></section>

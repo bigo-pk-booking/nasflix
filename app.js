@@ -519,6 +519,7 @@ setStartupStep(0);
 let startupStep=0;
 startupStepTimer=setInterval(()=>{startupStep=Math.min(4,startupStep+1);setStartupStep(startupStep);},650);
 loadRemote().finally(finishStartupLoading);
+loadTrending();
 refreshAccount();
 
 $("#cancelEdit").addEventListener("click",()=>{editingId=null;$("#contentForm").reset();$("#contentSubmit").textContent="Save to NASFLIX catalogue +";$("#cancelEdit").hidden=true;$("#uploadStatus").textContent="Edit cancelled.";});

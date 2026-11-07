@@ -26,7 +26,9 @@ function render(){
   const artists=[...new Set(musicItems.map(x=>String(x.artist||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   if(activeMusicArtist!=="All Artists"&&!artists.includes(activeMusicArtist)){activeMusicArtist="All Artists";activeMusicAlbum="All Albums";}
   const artistBox=$("#artistFilters");
-  if(artistBox)artistBox.innerHTML=["All Artists",...artists].map(name=>'<button type="button" class="artist-filter '+(name===activeMusicArtist?'selected':'')+'" data-artist-filter="'+esc(name)+'">'+esc(name)+'</button>').join("");
+  if(artistBox)artistBox.innerHTML=artists.map((name,i)=>'<button type="button" class="artist-filter '+(name===activeMusicArtist?'selected':'')+'" data-artist-filter="'+esc(name)+'"><span class="artist-avatar" style="--artist-hue:'+((i*67+275)%360)+'deg">'+esc(name.split(/\\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase())+'</span><b>'+esc(name)+'</b></button>').join("")||'<p class="playlist-empty">Artists will appear here when music is added.</p>';
+  const categoryBox=$("#musicCategoryGrid");
+  if(categoryBox){const categories=[...new Set(musicItems.map(x=>String(x.genre||"Music").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));const albumsAll=[...new Set(musicItems.map(x=>String(x.albumTitle||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));categoryBox.innerHTML=[...categories.map((name,i)=>({name,kind:"genre",count:musicItems.filter(x=>String(x.genre||"Music").trim()===name).length,index:i})),...albumsAll.map((name,i)=>({name,kind:"album",count:musicItems.filter(x=>String(x.albumTitle||"").trim()===name).length,index:i+categories.length}))].map(c=>'<button type="button" class="music-category-card" data-music-category="'+esc(c.name)+'" data-category-kind="'+c.kind+'" style="--category-hue:'+((c.index*61+275)%360)+'deg"><span>'+esc(c.name)+'</span><small>'+c.count+' tracks</small></button>').join("")||'<p class="playlist-empty">Genres and albums will appear here.</p>';}
   const artistTracks=activeMusicArtist==="All Artists"?musicItems:musicItems.filter(x=>String(x.artist||"").trim()===activeMusicArtist);
   const albums=[...new Set(artistTracks.map(x=>String(x.albumTitle||"").trim()||"Singles"))].sort((a,b)=>a.localeCompare(b));
   if(activeMusicAlbum!=="All Albums"&&!albums.includes(activeMusicAlbum))activeMusicAlbum="All Albums";
@@ -48,6 +50,7 @@ function render(){
   document.querySelectorAll("[data-album-filter]").forEach(el=>el.addEventListener("click",()=>{activeMusicAlbum=el.dataset.albumFilter;musicVisibleCount=10;render();}));
   $("#playAllMusic")?.addEventListener("click",()=>{const list=shownMusic.filter(x=>x.url&&isDirectMedia(x.url));if(list.length)openMusicPlayer(list[0].id,true,activeMusicArtist==="All Artists"?"":activeMusicArtist,activeMusicAlbum);});
   $("#shuffleAllMusic")?.addEventListener("click",()=>{const list=shownMusic.filter(x=>x.url&&isDirectMedia(x.url));if(list.length){const first=list[Math.floor(Math.random()*list.length)];openMusicPlayer(first.id,true,activeMusicArtist==="All Artists"?"":activeMusicArtist,activeMusicAlbum,true);}});
+  document.querySelectorAll("[data-music-category]").forEach(el=>el.addEventListener("click",()=>{const kind=el.dataset.categoryKind,name=el.dataset.musicCategory;if(kind==="genre"){activeFilter=name;activeMusicArtist="All Artists";activeMusicAlbum="All Albums";}else{activeFilter="All";activeMusicArtist="All Artists";activeMusicAlbum=name;}musicVisibleCount=10;render();$("#musicList")?.scrollIntoView({behavior:"smooth",block:"start"});}));
   renderAdmin();
   renderDownloads();
 }
@@ -122,7 +125,12 @@ $("#forgotPassword")?.addEventListener("click",async()=>{const email=$("#account
 $("#resetPasswordSubmit")?.addEventListener("click",async()=>{const token=new URLSearchParams(location.search).get("reset"),password=$("#resetNewPassword").value;if(!token){accountMessage("Reset link is missing.");return;}try{const result=await accountRequest("reset-password",{token,password});$("#resetPasswordBox").hidden=true;history.replaceState({},"",location.pathname);accountMessage(result.message);}catch(e){accountMessage(e.message);}});
 if(new URLSearchParams(location.search).has("reset")){$("#resetPasswordBox").hidden=false;accountMessage("Enter a new password to reset your account.");}else{$("#resetPasswordBox").hidden=true;}
 $("#accountLogoutHeader")?.addEventListener("click",async()=>{try{await accountRequest("logout",{});accountUser=null;userPlaylists=[];guestMode=false;renderUserPlaylists();await refreshAccount();}catch(e){accountMessage(e.message);}});
-$("#createPlaylist")?.addEventListener("click",()=>{if(!accountUser){accountMessage("Log in to create synced playlists.");return;}const input=$("#newPlaylistName"),name=input.value.trim();if(!name)return;if(userPlaylists.some(p=>p.name.toLowerCase()===name.toLowerCase())){accountMessage("That playlist name already exists.");return;}const p={id:"pl-"+crypto.randomUUID(),name,trackIds:[]};userPlaylists.push(p);activePlaylistId=p.id;viewingPlaylistId="";input.value="";renderUserPlaylists();schedulePlaylistSync();});
+function closePlaylistCreate(){const modal=$("#playlistCreateModal");if(modal)modal.hidden=true;}
+function createPlaylistNow(){if(!accountUser){accountMessage("Log in to create synced playlists.");return;}const input=$("#newPlaylistName"),name=input.value.trim();if(!name){input.focus();return;}if(userPlaylists.some(p=>p.name.toLowerCase()===name.toLowerCase())){input.setCustomValidity("That playlist name already exists.");input.reportValidity();return;}const p={id:"pl-"+crypto.randomUUID(),name,trackIds:[]};userPlaylists.push(p);activePlaylistId=p.id;viewingPlaylistId="";input.value="";closePlaylistCreate();renderUserPlaylists();schedulePlaylistSync();}
+$("#createPlaylist")?.addEventListener("click",()=>{if(!accountUser){accountMessage("Log in to create synced playlists.");$("#accountLoginHeader")?.click();return;}const modal=$("#playlistCreateModal");if(modal)modal.hidden=false;$("#newPlaylistName")?.focus();});
+$("#confirmCreatePlaylist")?.addEventListener("click",createPlaylistNow);
+$("#newPlaylistName")?.addEventListener("keydown",e=>{if(e.key==="Enter")createPlaylistNow();});
+document.querySelectorAll("[data-close-playlist-create]").forEach(el=>el.addEventListener("click",closePlaylistCreate));
 $("#playlistPickerClose")?.addEventListener("click",closePlaylistPicker);
 $("#playlistPicker")?.addEventListener("click",e=>{if(e.target.id==="playlistPicker")closePlaylistPicker();});
 document.addEventListener("click",e=>{

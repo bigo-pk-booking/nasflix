@@ -138,7 +138,7 @@ public class MainActivity extends Activity {
         // Preserve the WebView's Service Worker Cache Storage so the app shell and
         // downloaded media remain available when the device is offline.
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261107-nativeaudio4");
+        webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261108-androidlayout1");
         showPreviousCrashIfAny();
     }
 

@@ -11,7 +11,7 @@ const demoItems = [
 let items = [...demoItems];
 const $ = s => document.querySelector(s);
 const NASFLIX_APP_MODE=new URLSearchParams(location.search).get("app")==="1";
-if(NASFLIX_APP_MODE){document.body.classList.add("app-mode");const adminButton=document.querySelector("#adminOpen");if(adminButton)adminButton.remove();const adminModal=document.querySelector("#adminModal");if(adminModal)adminModal.remove();}
+if(NASFLIX_APP_MODE){document.body.classList.add("app-mode");}
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));}
 const grid = $("#contentGrid"), musicList = $("#musicList");
 let activeFilter = "All";
@@ -48,7 +48,7 @@ function closeModal(id){const el=$("#"+id+"Modal");el.classList.remove("open");e
 document.querySelectorAll(".cat-chip").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;render()}));
 $("#searchInput").addEventListener("input",render);
 $("#heroExplore").addEventListener("click",()=>$("#movies").scrollIntoView({behavior:"smooth"}));
-$("#adminOpen").addEventListener("click",()=>{$("#adminModal").classList.add("open");$("#adminModal").setAttribute("aria-hidden","false");});
+if($("#adminOpen")&&$("#adminModal"))$("#adminOpen").addEventListener("click",()=>{$("#adminModal").classList.add("open");$("#adminModal").setAttribute("aria-hidden","false");});
 document.addEventListener("click",async e=>{const btn=e.target.closest(".player-fullscreen");if(!btn)return;const screen=$("#playerScreen");try{if(!document.fullscreenElement)await screen.requestFullscreen();else await document.exitFullscreen();}catch{const media=screen.querySelector("iframe,video");if(media?.requestFullscreen)try{await media.requestFullscreen()}catch{}}});
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal("player");closeModal("admin")}});

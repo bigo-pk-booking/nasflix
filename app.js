@@ -12,7 +12,9 @@ let activeFilter = "All";
 let activeMusicArtist = "All Artists";
 let activeMusicAlbum = "All Albums";
 let musicVisibleCount = 10;
-let activeDownloadFolder = "all";
+let activeDownloadFolder = "none";
+let musicBatchLoading = true;
+let musicBatchTimer = null;
 let editingId = null;
 function render(){
   const term = $("#searchInput").value.trim().toLowerCase();
@@ -32,9 +34,10 @@ function render(){
   if(albumBox){albumBox.hidden=activeMusicArtist==="All Artists"||albums.length===0;albumBox.innerHTML=(activeMusicArtist!=="All Artists"?'<button class="album-back" type="button" data-album-filter="All Albums">← All albums</button>':"")+albums.map(name=>'<button type="button" class="album-tile '+(name===activeMusicAlbum?'selected':'')+'" data-album-filter="'+esc(name)+'"><b>▣ '+esc(name)+'</b><small>'+artistTracks.filter(x=>(String(x.albumTitle||"").trim()||"Singles")===name).length+' tracks</small></button>').join("");}
   const shownMusic=activeMusicAlbum==="All Albums"?artistTracks:artistTracks.filter(x=>(String(x.albumTitle||"").trim()||"Singles")===activeMusicAlbum);
   const visibleTracks=shownMusic.slice(0,musicVisibleCount);
-  musicList.innerHTML=visibleTracks.map(track).join("");
+  const skeletons='<div class="track track-skeleton"><div class="track-cover skeleton-block"></div><div class="track-info"><b class="skeleton-line"></b><small class="skeleton-line short"></small></div><span class="skeleton-button"></span><span class="skeleton-button round"></span></div>';
+  musicList.innerHTML=musicBatchLoading?Array.from({length:10},()=>skeletons).join(""):visibleTracks.map(track).join("");
   const sentinel=$("#musicLoadSentinel");
-  if(sentinel)sentinel.hidden=visibleTracks.length>=shownMusic.length;
+  if(sentinel)sentinel.hidden=musicBatchLoading||visibleTracks.length>=shownMusic.length;
   const playAll=$("#playAllMusic");if(playAll){playAll.disabled=shownMusic.length===0;playAll.textContent=activeMusicAlbum!=="All Albums"?"▶ Play album":activeMusicArtist==="All Artists"?"▶ Play all":"▶ Play "+activeMusicArtist;}
   $("#emptyState").hidden = visible.length>0;
   if(visible.length===0) $("#emptyState").textContent=items.length===0?"No content has been added yet. Check back soon.":"No titles found. Try another search.";
@@ -326,8 +329,8 @@ async function loadRemote(){
     const response=await fetch("/api/media");if(!response.ok)throw new Error("Catalogue unavailable offline.");
     const data=await response.json();
     const remote=data.map((x,i)=>({...x,id:x.id,url:x.media_url,download:!!x.allow_download,seriesTitle:x.series_title||"",seasonNumber:x.season_number||1,albumTitle:x.album_title||"",episodeNumber:x.episode_number||null,episodeTitle:x.episode_title||"",remote:true,art:"✦",c1:["#6d28d9","#be185d","#0369a1","#0f766e"][i%4],c2:"#171026"}));
-    items=remote;localStorage.setItem("nasflix-catalogue-cache",JSON.stringify(remote));render();
-  }catch(error){console.warn("NASFLIX media API is not configured yet.",error);try{items=JSON.parse(localStorage.getItem("nasflix-catalogue-cache")||"[]");render();}catch{items=[];render();}}
+    items=remote;localStorage.setItem("nasflix-catalogue-cache",JSON.stringify(remote));musicBatchLoading=false;render();
+  }catch(error){console.warn("NASFLIX media API is not configured yet.",error);try{items=JSON.parse(localStorage.getItem("nasflix-catalogue-cache")||"[]");}catch{items=[];}musicBatchLoading=false;render();}
 }
 async function saveOffline(id){
  const item=items.find(x=>String(x.id)===String(id));
@@ -344,12 +347,12 @@ async function saveOffline(id){
 }
 async function removeOffline(id){const entry=offlineItems.find(s=>String(s.id)===String(id));if(entry?.url){const cache=await caches.open(OFFLINE_CACHE_NAME);await cache.delete(new URL(entry.url,location.href).href);}offlineItems=offlineItems.filter(s=>String(s.id)!==String(id));saveOfflineList();renderDownloads();render();}
 function loadMoreMusicOnScroll(){
- const sentinel=$("#musicLoadSentinel");if(!sentinel||sentinel.hidden)return;
+ const sentinel=$("#musicLoadSentinel");if(!sentinel||musicBatchLoading||sentinel.hidden)return;
  const term=$("#searchInput").value.trim().toLowerCase();
  const filtered=items.filter(x=>x.type==="Music"&&(activeFilter==="All"||x.type===activeFilter||String(x.genre||"").toLowerCase()===activeFilter.toLowerCase())&&[x.title,x.seriesTitle,x.type,x.genre,x.description,x.artist,x.albumTitle].join(" ").toLowerCase().includes(term));
  const artistTracks=activeMusicArtist==="All Artists"?filtered:filtered.filter(x=>String(x.artist||"").trim()===activeMusicArtist);
  const shown=activeMusicAlbum==="All Albums"?artistTracks:artistTracks.filter(x=>(String(x.albumTitle||"").trim()||"Singles")===activeMusicAlbum);
- if(musicVisibleCount<shown.length&&sentinel.getBoundingClientRect().top<=window.innerHeight+260){musicVisibleCount+=10;render();}
+ if(musicVisibleCount<shown.length&&sentinel.getBoundingClientRect().top<=window.innerHeight+260){musicBatchLoading=true;render();clearTimeout(musicBatchTimer);musicBatchTimer=setTimeout(()=>{musicVisibleCount=Math.min(shown.length,musicVisibleCount+10);musicBatchLoading=false;render();},450);}
 }
 window.addEventListener("scroll",loadMoreMusicOnScroll,{passive:true});
 window.addEventListener("resize",loadMoreMusicOnScroll);
@@ -358,6 +361,9 @@ function renderDownloads(){
  const box=$("#downloadsGrid"),empty=$("#downloadsEmpty"),count=$("#downloadsCount");if(!box)return;
  const filtered=offlineItems.filter(x=>activeDownloadFolder==="all"||(activeDownloadFolder==="music"?String(x.type).toLowerCase()==="music":String(x.type).toLowerCase()!=="music"));
  count.textContent=offlineItems.length+" saved";
+ box.hidden=activeDownloadFolder==="none";
+ empty.hidden=activeDownloadFolder==="none"||filtered.length>0;
+ if(activeDownloadFolder==="none"){box.innerHTML="";document.querySelectorAll("[data-download-folder]").forEach(button=>button.classList.remove("active"));return;}
  box.innerHTML=filtered.map(x=>"<div class=\"download-card\"><div class=\"download-card-main\" data-offline-play=\""+esc(x.id)+"\"><span class=\"download-type\">"+esc(x.type)+"</span><b>"+esc(x.episodeTitle||x.title)+"</b><small>"+esc(x.seriesTitle||x.genre||"NASFLIX")+"</small><span class=\"download-play\">▶ Play offline</span></div><button type=\"button\" data-offline-delete=\""+esc(x.id)+"\" aria-label=\"Delete saved download\">×</button></div>").join("");
  empty.hidden=filtered.length>0;
  document.querySelectorAll("[data-download-folder]").forEach(button=>button.classList.toggle("active",button.dataset.downloadFolder===activeDownloadFolder));

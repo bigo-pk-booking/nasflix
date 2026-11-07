@@ -390,7 +390,7 @@ async function uploadBulkBatch(kind){
     for(const file of files){
       const tags=music?await readMusicTags(file):{};
       const title=(music&&tags.title)||cleanFileTitle(file.name);
-      const detectedArtist=music?(tags.artist||artist):artist;
+      const detectedArtist=music?(artist||tags.artist||""):artist;
       const detectedAlbum=music?(tags.album||$("#bulkMusicAlbum").value.trim()):"";
       const form=new FormData();
       const data={title,type:music?"Music":"Movie",genre:music?"Music":"Independent",artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};

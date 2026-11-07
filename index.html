@@ -15,9 +15,13 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#"><span class="brand-mark">N</span> NAS<span>FLIX</span></a>
-    <nav class="main-nav" aria-label="Main navigation">
+    <div class="brand-group">
+      <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mainNav"><span></span><span></span><span></span></button>
+      <a class="brand" href="#home"><span class="brand-mark">N</span> NAS<span>FLIX</span></a>
+    </div>
+    <nav class="main-nav" id="mainNav" aria-label="Main navigation">
       <a class="active" href="#home">Home</a><a href="#movies">Movies</a><a href="#videos">AI Videos</a><a href="#series">Series</a><a href="#music">Music</a>
+      <div class="nav-categories"><span>Browse categories</span><a href="#movies" data-menu-filter="All">For you</a><a href="#movies" data-menu-filter="Movie">Movies</a><a href="#videos" data-menu-filter="AI Video">AI Videos</a><a href="#series" data-menu-filter="Series">Series</a><a href="#music" data-menu-filter="Music">Music</a><a href="#movies" data-menu-filter="Animation">Animation</a><a href="#movies" data-menu-filter="Anime">Anime</a><a href="#movies" data-menu-filter="Action">Action</a><a href="#movies" data-menu-filter="Comedy">Comedy</a><a href="#movies" data-menu-filter="Horror">Horror</a><a href="#movies" data-menu-filter="Romance">Romance</a><a href="#movies" data-menu-filter="Fantasy">Fantasy</a><a href="#movies" data-menu-filter="Sci-Fi">Sci-Fi</a></div>
     </nav>
     <div class="header-actions">
       <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search titles..." aria-label="Search titles"></label>

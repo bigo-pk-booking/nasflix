@@ -138,10 +138,11 @@ public class MainActivity extends Activity {
         Intent command = new Intent(this, PlaybackService.class);
         command.setAction(action);
         if (extras != null) command.putExtras(extras);
-        boolean needsForeground = PlaybackService.ACTION_PLAY.equals(action) ||
-            (PlaybackService.ACTION_SET_QUEUE.equals(action) && extras != null && extras.getBooleanExtra(PlaybackService.EXTRA_AUTOPLAY, true));
-        if (Build.VERSION.SDK_INT >= 26 && needsForeground) startForegroundService(command);
-        else startService(command);
+        // Commands originate from the visible WebView Activity. Start the service normally;
+        // MediaSessionService promotes itself to a media foreground service when playback begins.
+        // Calling startForegroundService here creates a strict promotion deadline before Media3
+        // has initialized playback, which can crash newer Android/HyperOS devices.
+        startService(command);
     }
 
     private class NasflixBridge {

@@ -604,3 +604,13 @@ body.app-mode .music-section .track-cover{width:48px;height:48px;flex-basis:48px
 .music-section .artist-avatar{position:relative;display:grid;place-items:center;overflow:hidden;border-radius:50%;isolation:isolate;flex:0 0 64px;}
 .music-section .artist-avatar img{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center!important;border-radius:50%!important;z-index:2!important;}
 .music-section .artist-avatar-initials{position:relative;z-index:1;}
+
+
+/* Artist name search */
+.music-section .artist-search{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 10px;padding:0 13px;min-height:44px;border:1px solid #59416d;border-radius:13px;background:#100d18;color:#bfa7d4}
+.music-section .artist-search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#fff;font:inherit;font-size:14px}
+.music-section .artist-search input::placeholder{color:#8f809d}
+.music-section .artist-search button{border:0;background:transparent;color:#ead8fa;font-size:22px;padding:2px 5px}
+.music-section .artist-search-empty{margin:8px 2px;color:#bcaec9;font-size:13px}
+.music-section .artist-search-empty[hidden]{display:none!important}
+.music-section .artist-filter[hidden]{display:none!important}

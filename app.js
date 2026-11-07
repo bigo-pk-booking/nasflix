@@ -77,6 +77,7 @@ async function accountAction(kind){
  }catch(e){accountMessage(e.message||"Something went wrong. Please try again.");}
  finally{accountActionBusy=false;if(button){button.disabled=false;button.textContent=original;}}
 }
+window.NASFLIXAccountAction=accountAction;
 async function addTrackToPlaylist(id){if(!accountUser){accountMessage("Log in first to create and save playlists.");$("#accountEmail").focus();return;}const p=userPlaylists.find(x=>x.id===activePlaylistId);if(!p){accountMessage("Create and select a playlist first.");return;}if(!p.trackIds.includes(String(id)))p.trackIds.push(String(id));renderUserPlaylists();schedulePlaylistSync();}
 function playUserPlaylist(){const p=userPlaylists.find(x=>x.id===activePlaylistId);if(!p)return;const queue=p.trackIds.map(id=>items.find(x=>String(x.id)===id)).filter(x=>x&&x.url&&isDirectMedia(x.url));if(!queue.length){accountMessage("No playable songs in this playlist yet.");return;}openMusicPlayer(queue[0].id,true,"","All Albums");}
 // Resilient delegated account controls: handle clicks even if a button listener was missed.

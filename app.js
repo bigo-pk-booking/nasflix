@@ -314,9 +314,10 @@ function setMediaTab(type){
   const isMusic=type==="Music";
   document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",isMusic?section.dataset.pageSection!=="music":section.dataset.pageSection!=="movies"));
   $("#quickCats")?.classList.toggle("page-hidden",isMusic);
-  activeFilter=type==="Movie"?"Movie":type==="Series"?"Series":type==="AI Video"?"AI Video":"All";
+  activeFilter=isMusic?"All":type==="Movie"?"Movie":type==="Series"?"Series":type==="AI Video"?"AI Video":"All";
+  if(isMusic){activeMusicArtist="All Artists";activeMusicAlbum="All Albums";musicVisibleCount=10;musicBatchLoading=false;}
   document.querySelectorAll(".media-tab").forEach(tab=>tab.classList.toggle("active",tab.dataset.mediaTab===type));
-  if(!isMusic)render();
+  render();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 document.querySelectorAll("[data-media-tab]").forEach(tab=>tab.addEventListener("click",()=>setMediaTab(tab.dataset.mediaTab)));

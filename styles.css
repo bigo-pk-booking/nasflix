@@ -374,3 +374,5 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .track-cover{overflow:hidden;flex:0 0 48px}
 .track-cover img{display:block;width:100%;height:100%;object-fit:cover}
 @media(max-width:650px){.music-visual-stage{height:115px}}
+
+.music-library-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.shuffle-music-button{border:1px solid #8b5cf6!important;background:#211632!important;color:#e9d5ff!important;border-radius:28px!important;padding:11px 16px!important;font-weight:700!important;font-size:12px!important}.shuffle-music-button:active{transform:scale(.97)}

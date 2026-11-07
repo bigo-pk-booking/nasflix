@@ -20,3 +20,20 @@
 .admin-actions button{padding:5px 8px;border:1px solid #ffffff20;border-radius:6px}
 .admin-actions button[data-edit]{color:#c4b5fd}
 .admin-cancel{width:100%;padding:10px;border:1px solid #ffffff25;border-radius:9px;background:#211a30;color:#d8b4fe;font:12px 'DM Sans',sans-serif}
+
+
+.series-episodes{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}
+.episode-heading{display:flex;align-items:end;justify-content:space-between;margin-bottom:12px}
+.episode-heading h3{font:700 18px Manrope;margin:4px 0}
+.episode-heading small{font-size:10px;color:var(--muted)}
+.episode-row{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 10px;border:1px solid transparent;border-bottom-color:var(--line);background:transparent;color:var(--text);border-radius:9px}
+.episode-row.current{background:#2a1c40;border-color:#7754a9}
+.episode-number{width:38px;height:38px;display:grid;place-items:center;border-radius:8px;background:#ffffff12;color:#d8b4fe;font:700 12px Manrope;flex-shrink:0}
+.episode-copy{flex:1;min-width:0}
+.episode-copy b,.episode-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.episode-copy b{font:600 12px Manrope}
+.episode-copy small{font-size:10px;color:var(--muted);margin-top:4px}
+.episode-play{font-size:9px;color:#c4b5fd;flex-shrink:0}
+.episode-nav-buttons{display:flex;justify-content:space-between;gap:12px;padding-top:14px}
+.episode-nav-buttons button{border:1px solid #ffffff25;background:#211a30;color:#d8b4fe;border-radius:22px;padding:10px 14px;font-size:11px}
+.episode-nav-buttons button:disabled{opacity:.35;cursor:not-allowed}

@@ -196,6 +196,25 @@ function setUploadProgress(percent,label,detail,state=""){
   $("#uploadProgressLabel").textContent=label;
   $("#uploadProgressDetail").textContent=detail;
 }
+async function readMusicTags(file){
+ try{
+  const head=new Uint8Array(await file.slice(0,10).arrayBuffer());
+  if(head.length<10||String.fromCharCode(...head.slice(0,3))!=="ID3")return {};
+  const version=head[3],tagSize=(head[6]&127)<<21|(head[7]&127)<<14|(head[8]&127)<<7|(head[9]&127);
+  if(![2,3,4].includes(version)||tagSize<=0)return {};
+  const bytes=new Uint8Array(await file.slice(10,Math.min(file.size,10+tagSize)).arrayBuffer()),tags={};let offset=0;
+  const decode=data=>{if(!data.length)return "";const enc=data[0],body=data.slice(1);try{const label=enc===0?"windows-1252":enc===3?"utf-8":enc===1?"utf-16":enc===2?"utf-16be":"";return label?new TextDecoder(label).decode(body).replace(/\0/g,"").trim():"";}catch{return "";}};
+  while(offset+10<=bytes.length){
+   const id=String.fromCharCode(...bytes.slice(offset,offset+4));if(!id.trim()||/^\0+$/.test(id))break;
+   const size=version===4?((bytes[offset+4]&127)<<21|(bytes[offset+5]&127)<<14|(bytes[offset+6]&127)<<7|(bytes[offset+7]&127)):((bytes[offset+4]<<24)|(bytes[offset+5]<<16)|(bytes[offset+6]<<8)|bytes[offset+7]);
+   if(size<=0||offset+10+size>bytes.length)break;
+   const key=version===2?({TT2:"title",TP1:"artist",TAL:"album"}[id]):({TIT2:"title",TPE1:"artist",TALB:"album"}[id]);
+   if(key&&!tags[key])tags[key]=decode(bytes.slice(offset+10,offset+10+size));offset+=10+size;
+  }
+  return tags;
+ }catch(error){console.warn("Could not read audio tags",error);return {};}
+}
+function cleanFileTitle(name){return name.replace(/\.[^.]+$/,"").replace(/[._]+/g," ").trim()||name;}
 function uploadWithProgress(url,formData,token,onProgress,method="POST"){
   return new Promise((resolve,reject)=>{
     const xhr=new XMLHttpRequest();const requestMethod=method||"POST";xhr.open(requestMethod,url);xhr.setRequestHeader("authorization","Bearer "+token);
@@ -224,13 +243,16 @@ async function uploadBulkBatch(kind){
   let completed=0;
   try{
     for(const file of files){
-      const title=file.name.replace(/\.[^.]+$/,"").replace(/[._]+/g," ").trim()||file.name;
+      const tags=music?await readMusicTags(file):{};
+      const title=(music&&tags.title)||cleanFileTitle(file.name);
+      const detectedArtist=music?(tags.artist||artist):artist;
+      const detectedAlbum=music?(tags.album||$("#bulkMusicAlbum").value.trim()):"";
       const form=new FormData();
-      const data={title,type:music?"Music":"Movie",genre:music?"Music":"Independent",artist,albumTitle:music?$("#bulkMusicAlbum").value.trim():"",description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
+      const data={title,type:music?"Music":"Movie",genre:music?"Music":"Independent",artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
       Object.entries(data).forEach(([key,value])=>form.append(key,String(value)));
       form.append("file",file);
       if(poster&&completed===0)form.append("posterFile",poster);
-      status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+file.name;
+      status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+title+(tags.title?" · title detected from music tags":" · using filename");
       await uploadWithProgress("/api/media",form,token,(loaded,total)=>{
         const pct=total?Math.round(loaded/total*100):0;
         status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+file.name+" ("+pct+"%)";
@@ -248,6 +270,16 @@ async function uploadBulkBatch(kind){
 $("#bulkMusicSubmit")?.addEventListener("click",()=>uploadBulkBatch("music"));
 $("#bulkVideoSubmit")?.addEventListener("click",()=>uploadBulkBatch("video"));
 
+$("#itemFile")?.addEventListener("change",async e=>{
+ const file=e.target.files?.[0];if(!file)return;const status=$("#uploadStatus");
+ if(/^audio\//i.test(file.type)||/\.(mp3|m4a|ogg|wav)$/i.test(file.name)){
+  const tags=await readMusicTags(file);
+  if(tags.title&&!$("#itemTitle").value.trim())$("#itemTitle").value=tags.title;
+  if(tags.artist&&!$("#itemArtist").value.trim())$("#itemArtist").value=tags.artist;
+  if(tags.album&&!$("#albumTitle").value.trim())$("#albumTitle").value=tags.album;
+  status.textContent=tags.title?"Music details detected. You can still edit the title, artist, and album before saving.":"No embedded music title found. You can enter or edit the title manually.";
+ }else if(!$("#itemTitle").value.trim())$("#itemTitle").value=cleanFileTitle(file.name);
+});
 $("#contentForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const token=$("#adminToken").value.trim(),status=$("#uploadStatus"),file=$("#itemFile").files[0],posterFile=$("#posterFile")?.files?.[0],submit=$("#contentSubmit");

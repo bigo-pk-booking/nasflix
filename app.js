@@ -34,7 +34,46 @@ function renderEpisodeNav(current){
   box.innerHTML=`<div class="episode-heading"><div><p class="eyebrow">CONTINUE THE STORY</p><h3>${esc(current.seriesTitle)}</h3></div><small>${episodes.length} episodes</small></div>${episodes.map((ep,i)=>`<button class="episode-row ${String(ep.id)===String(current.id)?"current":""}" data-episode-id="${esc(ep.id)}"><span class="episode-number">${Number(ep.seasonNumber)||1}.${Number(ep.episodeNumber)||i+1}</span><span class="episode-copy"><b>${esc(ep.episodeTitle||ep.title)}</b><small>Season ${Number(ep.seasonNumber)||1} · Episode ${Number(ep.episodeNumber)||i+1}</small></span><span class="episode-play">${String(ep.id)===String(current.id)?"NOW PLAYING":"▶"}</span></button>`).join("")}<div class="episode-nav-buttons"><button type="button" data-episode-id="${episodes[index-1]?.id||""}" ${index<=0?"disabled":""}>← Previous</button><button type="button" data-episode-id="${episodes[index+1]?.id||""}" ${index>=episodes.length-1?"disabled":""}>Next Episode →</button></div>`;
 }
 let activeMusicAudio=null,activeMusicContext=null,activeMusicAnalyser=null,activeMusicSource=null,musicVisualFrame=0;
-function openPlayer(id){const x=items.find(i=>String(i.id)===String(id));if(!x)return;if(x.type==="Music"&&x.url&&isDirectMedia(x.url)){openMusicPlayer(id,true);return;}if(activeMusicAudio){activeMusicAudio.pause();activeMusicAudio=null;}if(musicVisualFrame)cancelAnimationFrame(musicVisualFrame);$("#playerType").textContent=x.type.toUpperCase()+" · "+(x.genre||"FEATURED");$("#playerTitle").textContent=x.seriesTitle?(x.episodeTitle||x.title):x.title;$("#playerDescription").textContent=x.description||"Enjoy this featured title.";const link=$("#downloadLink");if(x.url&&x.download){link.href=x.url;link.hidden=false}else{link.hidden=true}const yt=youtubeId(x.url);const screen=$("#playerScreen");screen.classList.remove("music-mode");screen.innerHTML=yt?'<div class="player-loading"><span></span>Loading video…</div><iframe src="https://www.youtube-nocookie.com/embed/'+yt+'" title="'+esc(x.title)+'" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe><button class="player-fullscreen" type="button" aria-label="Fullscreen">⛶</button>':x.url&&isDirectMedia(x.url)?'<video controls playsinline src="'+esc(x.url)+'"></video><button class="player-fullscreen" type="button" aria-label="Fullscreen">⛶</button>':'<div class="play-symbol">▶</div><p>'+(x.url?"This link may not be a direct playable media file. Open the original link below.":"No media URL has been added yet.")+'</p>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">Open media link</a>':"");const video=screen.querySelector("video");if(video){video.autoplay=false;video.removeAttribute("autoplay");video.pause();}const frame=screen.querySelector("iframe");if(frame)frame.addEventListener("load",()=>screen.querySelector(".player-loading")?.remove(),{once:true});renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");$("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";}
+// Android/Chrome lock-screen and notification media controls
+function updateMediaSession(item, mediaElement, handlers={}){
+  if(!("mediaSession" in navigator))return;
+  try{
+    if("MediaMetadata" in window){
+      const artwork=item.poster_url||item.thumbnail||"";
+      navigator.mediaSession.metadata=new MediaMetadata({
+        title:item.episodeTitle||item.title||"NASFLIX",
+        artist:item.seriesTitle||item.genre||"NASFLIX",
+        album:"NASFLIX",
+        artwork:artwork?[{src:new URL(artwork,location.href).href,sizes:"512x512",type:"image/jpeg"}]:[]
+      });
+    }
+    navigator.mediaSession.setActionHandler("play",handlers.play||(()=>mediaElement?.play?.()));
+    navigator.mediaSession.setActionHandler("pause",handlers.pause||(()=>mediaElement?.pause?.()));
+    navigator.mediaSession.setActionHandler("previoustrack",handlers.previous||null);
+    navigator.mediaSession.setActionHandler("nexttrack",handlers.next||null);
+    navigator.mediaSession.setActionHandler("seekto",details=>{
+      if(mediaElement&&Number.isFinite(details.seekTime))mediaElement.currentTime=details.seekTime;
+    });
+    navigator.mediaSession.setActionHandler("seekbackward",details=>{
+      if(mediaElement)mediaElement.currentTime=Math.max(0,mediaElement.currentTime-(details.seekOffset||10));
+    });
+    navigator.mediaSession.setActionHandler("seekforward",details=>{
+      if(mediaElement&&Number.isFinite(mediaElement.duration))mediaElement.currentTime=Math.min(mediaElement.duration,mediaElement.currentTime+(details.seekOffset||10));
+    });
+  }catch(error){console.warn("NASFLIX media session setup:",error);}
+}
+function updateMediaPlaybackState(state){
+  if("mediaSession" in navigator){try{navigator.mediaSession.playbackState=state;}catch{}}
+}
+
+function openPlayer(id){const x=items.find(i=>String(i.id)===String(id));if(!x)return;if(x.type==="Music"&&x.url&&isDirectMedia(x.url)){openMusicPlayer(id,true);return;}if(activeMusicAudio){activeMusicAudio.pause();activeMusicAudio=null;}if(musicVisualFrame)cancelAnimationFrame(musicVisualFrame);$("#playerType").textContent=x.type.toUpperCase()+" · "+(x.genre||"FEATURED");$("#playerTitle").textContent=x.seriesTitle?(x.episodeTitle||x.title):x.title;$("#playerDescription").textContent=x.description||"Enjoy this featured title.";const link=$("#downloadLink");if(x.url&&x.download){link.href=x.url;link.hidden=false}else{link.hidden=true}const yt=youtubeId(x.url);const screen=$("#playerScreen");screen.classList.remove("music-mode");screen.innerHTML=yt?'<div class="player-loading"><span></span>Loading video…</div><iframe src="https://www.youtube-nocookie.com/embed/'+yt+'" title="'+esc(x.title)+'" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe><button class="player-fullscreen" type="button" aria-label="Fullscreen">⛶</button>':x.url&&isDirectMedia(x.url)?'<video controls playsinline src="'+esc(x.url)+'"></video><button class="player-fullscreen" type="button" aria-label="Fullscreen">⛶</button>':'<div class="play-symbol">▶</div><p>'+(x.url?"This link may not be a direct playable media file. Open the original link below.":"No media URL has been added yet.")+'</p>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">Open media link</a>':"");const video=screen.querySelector("video");if(video){video.autoplay=false;video.removeAttribute("autoplay");video.pause();}const frame=screen.querySelector("iframe");if(frame)frame.addEventListener("load",()=>screen.querySelector(".player-loading")?.remove(),{once:true});
+ if(video){
+   updateMediaSession(x,video);
+   video.addEventListener("play",()=>updateMediaPlaybackState("playing"));
+   video.addEventListener("pause",()=>updateMediaPlaybackState("paused"));
+   video.addEventListener("ended",()=>updateMediaPlaybackState("none"));
+ }
+ renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");$("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";}
 function openMusicPlayer(id,shouldPlay=true){
  const queue=items.filter(x=>x.type==="Music"&&x.url&&isDirectMedia(x.url));let index=queue.findIndex(x=>String(x.id)===String(id));if(index<0)return;const x=queue[index];const screen=$("#playerScreen");screen.classList.add("music-mode");
  if(activeMusicAudio){activeMusicAudio.pause();activeMusicAudio=null;}if(musicVisualFrame)cancelAnimationFrame(musicVisualFrame);
@@ -42,15 +81,27 @@ function openMusicPlayer(id,shouldPlay=true){
  screen.innerHTML='<div class="nas-music-player"><canvas class="music-visualizer" id="musicVisualizer" aria-label="Audio visualizer"></canvas><div class="music-live"><span></span> NOW PLAYING</div><div class="music-track-name" id="musicTrackName">'+esc(x.title)+'</div><div class="music-track-genre" id="musicTrackGenre">'+esc(x.genre||"Music")+'</div><audio id="nasMusicAudio" preload="metadata"></audio><div class="music-progress-row"><span id="musicCurrent">0:00</span><input id="musicSeek" type="range" min="0" max="1000" value="0" aria-label="Seek music"><span id="musicDuration">0:00</span></div><div class="music-controls"><button type="button" id="musicPrevious" aria-label="Previous track">⏮</button><button type="button" id="musicPlayPause" class="music-play" aria-label="Play">▶</button><button type="button" id="musicNext" aria-label="Next track">⏭</button></div><div class="music-bottom"><span>NASFLIX AUDIO</span><label>VOL <input id="musicVolume" type="range" min="0" max="1" step=".01" value=".85"></label></div><div class="music-queue-label" id="musicQueueLabel">TRACK '+(index+1)+' OF '+queue.length+'</div></div>';
  const audio=$("#nasMusicAudio"),seek=$("#musicSeek"),play=$("#musicPlayPause"),canvas=$("#musicVisualizer"),ctx=canvas.getContext("2d");activeMusicAudio=audio;audio.volume=.85;audio.src=x.url;
  function time(t){if(!Number.isFinite(t))return"0:00";return Math.floor(t/60)+":"+String(Math.floor(t%60)).padStart(2,"0");}
- function loadTrack(nextIndex,playNow){index=(nextIndex+queue.length)%queue.length;const track=queue[index];$("#playerTitle").textContent=track.title;$("#musicTrackName").textContent=track.title;$("#musicTrackGenre").textContent=track.genre||"Music";$("#musicQueueLabel").textContent="TRACK "+(index+1)+" OF "+queue.length;audio.src=track.url;audio.load();seek.value=0;$("#musicCurrent").textContent="0:00";$("#musicDuration").textContent="0:00";const dl=$("#downloadLink");if(track.download){dl.href=track.url;dl.hidden=false}else dl.hidden=true;if(playNow)audio.play().then(()=>{play.textContent="Ⅱ";play.setAttribute("aria-label","Pause");}).catch(()=>{play.textContent="▶";});else{play.textContent="▶";play.setAttribute("aria-label","Play");}}
+ function loadTrack(nextIndex,playNow){index=(nextIndex+queue.length)%queue.length;const track=queue[index];$("#playerTitle").textContent=track.title;$("#musicTrackName").textContent=track.title;$("#musicTrackGenre").textContent=track.genre||"Music";$("#musicQueueLabel").textContent="TRACK "+(index+1)+" OF "+queue.length;audio.src=track.url;audio.load();
+  updateMediaSession(track,audio,{
+    play:()=>{if(activeMusicContext?.state==="suspended")activeMusicContext.resume();audio.play().catch(()=>{});},
+    pause:()=>audio.pause(),
+    previous:()=>loadTrack(index-1,true),
+    next:()=>loadTrack(index+1,true)
+  });
+  seek.value=0;$("#musicCurrent").textContent="0:00";$("#musicDuration").textContent="0:00";const dl=$("#downloadLink");if(track.download){dl.href=track.url;dl.hidden=false}else dl.hidden=true;if(playNow)audio.play().then(()=>{play.textContent="Ⅱ";play.setAttribute("aria-label","Pause");}).catch(()=>{play.textContent="▶";});else{play.textContent="▶";play.setAttribute("aria-label","Play");}}
  function resizeCanvas(){const dpr=Math.min(window.devicePixelRatio||1,2),w=canvas.clientWidth,h=canvas.clientHeight;canvas.width=Math.max(1,Math.floor(w*dpr));canvas.height=Math.max(1,Math.floor(h*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);}window.addEventListener("resize",resizeCanvas,{passive:true});
  try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){if(!activeMusicContext)activeMusicContext=new AC();activeMusicAnalyser=activeMusicContext.createAnalyser();activeMusicAnalyser.fftSize=128;activeMusicAnalyser.smoothingTimeConstant=.82;activeMusicSource=activeMusicContext.createMediaElementSource(audio);activeMusicSource.connect(activeMusicAnalyser);activeMusicAnalyser.connect(activeMusicContext.destination);}}catch(e){activeMusicAnalyser=null;}
  const bins=activeMusicAnalyser?new Uint8Array(activeMusicAnalyser.frequencyBinCount):null;
  function draw(){musicVisualFrame=requestAnimationFrame(draw);const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;ctx.clearRect(0,0,w,h);const count=48,gap=3,bw=(w-gap*(count-1))/count;if(bins)activeMusicAnalyser.getByteFrequencyData(bins);for(let n=0;n<count;n++){let v=bins?bins[Math.floor(n/count*bins.length)]/255:(.12+Math.abs(Math.sin(Date.now()/270+n*.47))*.28);if(audio.paused)v*=.28;const bh=Math.max(4,v*(h*.82));const grad=ctx.createLinearGradient(0,h-bh,0,h);grad.addColorStop(0,"#e879f9");grad.addColorStop(1,"#7c3aed");ctx.fillStyle=grad;ctx.beginPath();ctx.roundRect(n*(bw+gap),h-bh,bw,bh,4);ctx.fill();}}
  $("#musicPrevious").addEventListener("click",()=>loadTrack(index-1,true));$("#musicNext").addEventListener("click",()=>loadTrack(index+1,true));
  play.addEventListener("click",()=>{if(audio.paused){if(activeMusicContext?.state==="suspended")activeMusicContext.resume();audio.play().then(()=>{play.textContent="Ⅱ";play.setAttribute("aria-label","Pause");}).catch(()=>{});}else audio.pause();});
- audio.addEventListener("play",()=>{if(activeMusicContext?.state==="suspended")activeMusicContext.resume();play.textContent="Ⅱ";play.setAttribute("aria-label","Pause");});audio.addEventListener("pause",()=>{play.textContent="▶";play.setAttribute("aria-label","Play");});
- audio.addEventListener("ended",()=>loadTrack(index+1,true));audio.addEventListener("loadedmetadata",()=>{$("#musicDuration").textContent=time(audio.duration);});audio.addEventListener("timeupdate",()=>{if(Number.isFinite(audio.duration)&&audio.duration>0){seek.value=String(Math.round(audio.currentTime/audio.duration*1000));$("#musicCurrent").textContent=time(audio.currentTime);}});
+ audio.addEventListener("play",()=>{if(activeMusicContext?.state==="suspended")activeMusicContext.resume();play.textContent="Ⅱ";play.setAttribute("aria-label","Pause");updateMediaPlaybackState("playing");});audio.addEventListener("pause",()=>{play.textContent="▶";play.setAttribute("aria-label","Play");updateMediaPlaybackState("paused");});
+ audio.addEventListener("ended",()=>loadTrack(index+1,true));audio.addEventListener("loadedmetadata",()=>{$("#musicDuration").textContent=time(audio.duration);});audio.addEventListener("timeupdate",()=>{
+  if(Number.isFinite(audio.duration)&&audio.duration>0){
+    seek.value=String(Math.round(audio.currentTime/audio.duration*1000));$("#musicCurrent").textContent=time(audio.currentTime);
+    if("mediaSession" in navigator&&navigator.mediaSession.setPositionState){try{navigator.mediaSession.setPositionState({duration:audio.duration,playbackRate:audio.playbackRate,position:audio.currentTime});}catch{}}
+  }
+ });
  seek.addEventListener("input",()=>{if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=(Number(seek.value)/1000)*audio.duration;});$("#musicVolume").addEventListener("input",e=>audio.volume=Number(e.target.value));
  renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");$("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";requestAnimationFrame(()=>{resizeCanvas();draw();});if(shouldPlay){if(activeMusicContext?.state==="suspended")activeMusicContext.resume();audio.play().catch(()=>{play.textContent="▶";});}
 }

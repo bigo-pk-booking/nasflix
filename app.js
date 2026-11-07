@@ -79,6 +79,7 @@ function clearMediaSession(){
 }
 function stopCurrentMedia(){
   const screen=$("#playerScreen");
+  try{window.NasflixAndroid?.setVideoPlaying(false);}catch{}
   const video=screen?.querySelector("video");
   if(video){try{video.pause();video.removeAttribute("src");video.load();}catch{}}
   const frame=screen?.querySelector("iframe");
@@ -102,9 +103,9 @@ function updateMediaPlaybackState(state){
 function openPlayer(id){const x=items.find(i=>String(i.id)===String(id));if(!x)return;stopCurrentMedia();if(x.type==="Music"&&x.url&&isDirectMedia(x.url)){openMusicPlayer(id,true);return;}if(activeMusicAudio){activeMusicAudio.pause();activeMusicAudio=null;}if(musicVisualFrame)cancelAnimationFrame(musicVisualFrame);$("#playerType").textContent=x.type.toUpperCase()+" · "+(x.genre||"FEATURED");$("#playerTitle").textContent=x.seriesTitle?(x.episodeTitle||x.title):x.title;$("#playerDescription").textContent=x.description||"Enjoy this featured title.";const link=$("#downloadLink");if(x.url&&x.download){link.href=x.url;link.hidden=false}else{link.hidden=true}const saveBtn=$("#saveOfflinePlayer");if(saveBtn){saveBtn.dataset.id=String(x.id);saveBtn.dataset.offlineSave=String(x.id);saveBtn.textContent=offlineItems.some(s=>String(s.id)===String(x.id))?"✓ Saved offline":"↓ Save offline";}const yt=youtubeId(x.url);const screen=$("#playerScreen");screen.classList.remove("music-mode");screen.innerHTML=yt?'<div class="player-loading"><span></span>Loading video…</div><iframe src="https://www.youtube-nocookie.com/embed/'+yt+'" title="'+esc(x.title)+'" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe><button class="player-fullscreen" type="button" aria-label="Fullscreen">⛶</button>':x.url&&isDirectMedia(x.url)?'<video controls playsinline src="'+esc(x.url)+'"></video><button class="player-fullscreen" type="button" aria-label="Fullscreen">⛶</button>':'<div class="play-symbol">▶</div><p>'+(x.url?"This link may not be a direct playable media file. Open the original link below.":"No media URL has been added yet.")+'</p>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">Open media link</a>':"");const video=screen.querySelector("video");if(video){video.autoplay=false;video.removeAttribute("autoplay");video.pause();}const frame=screen.querySelector("iframe");if(frame)frame.addEventListener("load",()=>screen.querySelector(".player-loading")?.remove(),{once:true});
  if(video){
    updateMediaSession(x,video);
-   video.addEventListener("play",()=>{updateMediaPlaybackState("playing");updateMediaSession(x,video);});
-   video.addEventListener("pause",()=>updateMediaPlaybackState("paused"));
-   video.addEventListener("ended",()=>updateMediaPlaybackState("none"));
+   video.addEventListener("play",()=>{updateMediaPlaybackState("playing");updateMediaSession(x,video);try{window.NasflixAndroid?.setVideoPlaying(true);}catch{}});
+   video.addEventListener("pause",()=>{updateMediaPlaybackState("paused");try{window.NasflixAndroid?.setVideoPlaying(false);}catch{}});
+   video.addEventListener("ended",()=>{updateMediaPlaybackState("none");try{window.NasflixAndroid?.setVideoPlaying(false);}catch{}});
  }
  renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");$("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";}
 function openMusicPlayer(id,shouldPlay=true){

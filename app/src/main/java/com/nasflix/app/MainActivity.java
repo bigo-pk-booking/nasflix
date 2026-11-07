@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
     }
 
     private class NasflixBridge {
-        @JavascriptInterface public void setVideoPlaying(boolean isPlaying) { directVideoPlaying = isPlaying; }
+        @JavascriptInterface public void setVideoPlaying(boolean isPlaying) { directVideoPlaying = isPlaying; runOnUiThread(() -> updatePictureInPictureParams()); }
         @JavascriptInterface public void playQueue(String queueJson, int index, boolean autoplay) {
             Intent extras = new Intent();
             extras.putExtra(PlaybackService.EXTRA_QUEUE, queueJson);
@@ -182,25 +182,31 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
-    @Override public void onUserLeaveHint() {
-        super.onUserLeaveHint();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && directVideoPlaying && customView == null) {
-            try {
-                ArrayList<RemoteAction> actions = new ArrayList<>();
-                actions.add(pipAction("Play", android.R.drawable.ic_media_play, ACTION_PIP_PLAY, 1));
-                actions.add(pipAction("Pause", android.R.drawable.ic_media_pause, ACTION_PIP_PAUSE, 2));
-                actions.add(pipAction("Close", android.R.drawable.ic_menu_close_clear_cancel, ACTION_PIP_CLOSE, 3));
-                PictureInPictureParams params = new PictureInPictureParams.Builder()
-                    .setAspectRatio(new Rational(16, 9))
-                    .setActions(actions)
-                    .build();
-                enterPictureInPictureMode(params);
-            } catch (IllegalStateException error) {
-                android.util.Log.w("NASFLIX", "Unable to enter picture-in-picture", error);
-            }
+    private PictureInPictureParams buildPipParams() {
+        ArrayList<RemoteAction> actions = new ArrayList<>();
+        actions.add(pipAction("Play", android.R.drawable.ic_media_play, ACTION_PIP_PLAY, 1));
+        actions.add(pipAction("Pause", android.R.drawable.ic_media_pause, ACTION_PIP_PAUSE, 2));
+        actions.add(pipAction("Close", android.R.drawable.ic_menu_close_clear_cancel, ACTION_PIP_CLOSE, 3));
+        PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder()
+            .setAspectRatio(new Rational(16, 9)).setActions(actions);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) builder.setAutoEnterEnabled(directVideoPlaying);
+        return builder.build();
+    }
+
+    private void updatePictureInPictureParams() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !isFinishing()) {
+            try { setPictureInPictureParams(buildPipParams()); }
+            catch (IllegalStateException error) { android.util.Log.w("NASFLIX", "Unable to update PiP parameters", error); }
         }
     }
 
+    @Override public void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && directVideoPlaying && customView == null) {
+            try { enterPictureInPictureMode(buildPipParams()); }
+            catch (IllegalStateException error) { android.util.Log.w("NASFLIX", "Unable to enter picture-in-picture", error); }
+        }
+    }
     @Override public void onBackPressed() {
         if (customView != null) { hideCustomView(); return; }
         if (webView != null && webView.canGoBack()) webView.goBack();

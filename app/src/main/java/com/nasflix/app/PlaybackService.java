@@ -40,6 +40,8 @@ public class PlaybackService extends MediaSessionService {
 
     private ExoPlayer player;
     private MediaSession mediaSession;
+    private boolean startWhenReady = false;
+    private int pendingStartIndex = 0;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable progressUpdater = new Runnable() {
         @Override public void run() {
@@ -83,6 +85,12 @@ public class PlaybackService extends MediaSessionService {
             }
 
             @Override public void onPlaybackStateChanged(int playbackState) {
+                if (playbackState == Player.STATE_READY && startWhenReady) {
+                    startWhenReady = false;
+                    player.seekToDefaultPosition(pendingStartIndex);
+                    player.play();
+                    triggerNotificationUpdate();
+                }
                 updatePlaybackState();
             }
 
@@ -138,7 +146,10 @@ public class PlaybackService extends MediaSessionService {
                     intent.getIntExtra(EXTRA_INDEX, 0),
                     intent.getBooleanExtra(EXTRA_AUTOPLAY, true));
             } else if (ACTION_PLAY.equals(action)) {
-                if (player != null && player.getMediaItemCount() > 0) player.play();
+                if (player != null && player.getMediaItemCount() > 0) {
+                    player.play();
+                    triggerNotificationUpdate();
+                }
             } else if (ACTION_PAUSE.equals(action)) {
                 if (player != null) player.pause();
             } else if (ACTION_STOP.equals(action)) {
@@ -196,15 +207,18 @@ public class PlaybackService extends MediaSessionService {
             int index = Math.max(0, Math.min(requestedIndex, mediaItems.size() - 1));
             lastPlaybackError = "";
             playbackDiagnostics = "Queue received: " + mediaItems.size() + " tracks; URL=" + mediaItems.get(index).localConfiguration.uri;
+            startWhenReady = autoplay;
+            pendingStartIndex = index;
             player.setMediaItems(mediaItems, index, C.TIME_UNSET);
             player.prepare();
-            // Explicitly reset to the beginning after preparation so a fresh queue
-            // starts from 0:00 instead of waiting for a manual seek on some devices.
-            if (autoplay) {
+            if (!autoplay) {
+                player.pause();
+                triggerNotificationUpdate();
+            } else if (player.getPlaybackState() == Player.STATE_READY) {
+                startWhenReady = false;
                 player.seekToDefaultPosition(index);
                 player.play();
-            } else {
-                player.pause();
+                triggerNotificationUpdate();
             }
         } catch (Exception error) {
             lastPlaybackError = error.getClass().getSimpleName() + ": " + String.valueOf(error.getMessage());

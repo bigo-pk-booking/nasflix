@@ -1,4 +1,4 @@
-// AndroidX Media3 background playback
+// AndroidX Media3 background playback; AndroidX is enabled in root gradle.properties
 plugins { id 'com.android.application' }
 android {
     namespace 'com.nasflix.app'

@@ -384,3 +384,26 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .trending-skeleton i{width:82%}.trending-skeleton b{width:54%;height:8px}
 @keyframes trendShimmer{to{background-position:-250% 0}}
 @media(max-width:650px){.trending-skeletons{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+
+
+/* Playlist view and add-to-playlist picker */
+.playlist-open{flex:1;min-width:0;justify-content:flex-start}
+.playlist-view-label{margin-left:auto;font-size:11px;color:#bd91e8;white-space:nowrap}
+.playlist-detail{margin-top:14px;padding:14px;border:1px solid #76509a;border-radius:16px;background:#120e1b}
+.playlist-detail[hidden],.playlist-picker[hidden]{display:none}
+.playlist-detail-heading,.playlist-picker-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.playlist-detail-heading h4,.playlist-picker-heading h3{margin:3px 0;font-size:20px}
+.playlist-detail-heading small,.playlist-track-row small,.playlist-picker-option small{display:block;color:#ad9cbb;font-size:11px;margin-top:3px}
+.playlist-detail-heading button{margin:3px;padding:9px 12px;border:1px solid #8153a5;border-radius:10px;background:#39204f;color:#fff}
+.playlist-detail-heading button:disabled{opacity:.45}
+.playlist-track-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 2px;border-top:1px solid #35283f}
+.playlist-track-row b{font-size:13px}
+.playlist-track-row button,.playlist-picker-heading button{width:34px;height:34px;border:1px solid #604078;border-radius:50%;background:#21172e;color:#ead8fa;font-size:20px}
+.playlist-picker{position:fixed;inset:0;z-index:100020;display:grid;place-items:center;padding:18px;background:#080610df;backdrop-filter:blur(12px)}
+.playlist-picker-card{width:min(100%,420px);max-height:min(75vh,620px);overflow:auto;padding:20px;border:1px solid #8052a3;border-radius:20px;background:linear-gradient(145deg,#21152e,#100c18);box-shadow:0 20px 70px #000b}
+.playlist-picker-options{display:grid;gap:9px}
+.playlist-picker-option{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border:1px solid #49365e;border-radius:13px;background:#17111f;color:#f5eaff;text-align:left}
+.playlist-picker-option .playlist-icon{flex:none}
+.playlist-picker-option>span:nth-child(2){flex:1}
+.playlist-picker-option>span:last-child{font-size:20px;color:#c69af0}
+@media(max-width:600px){.playlist-view-label{font-size:10px}.playlist-detail-heading{align-items:flex-start;flex-wrap:wrap}.playlist-picker-card{padding:16px}}

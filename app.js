@@ -1,13 +1,3 @@
-const demoItems = [
-  {id:1,title:"The Unknown",type:"Movie",genre:"Sci-Fi",description:"A mysterious signal changes everything in this cinematic concept preview.",art:"未知",c1:"#5b21b6",c2:"#111827"},
-  {id:2,title:"Neon Dreams",type:"AI Video",genre:"Fantasy",description:"A surreal journey through a glowing dreamscape.",art:"✧",c1:"#be185d",c2:"#312e81"},
-  {id:3,title:"After the Silence",type:"Series",genre:"Drama",description:"A quiet town. A secret that refuses to stay buried.",art:"静",c1:"#0f766e",c2:"#172554"},
-  {id:4,title:"Midnight Drive",type:"Music",genre:"Electronic",description:"A late-night electronic mood for the road ahead.",art:"♫",c1:"#7c2d12",c2:"#1e1b4b"},
-  {id:5,title:"Red Horizon",type:"Movie",genre:"Action",description:"An original action-film concept set beyond the edge of the city.",art:"赤",c1:"#b91c1c",c2:"#292524"},
-  {id:6,title:"Dream Circuit",type:"AI Video",genre:"Animation",description:"An experimental animated world built from imagination.",art:"◎",c1:"#0369a1",c2:"#581c87"},
-  {id:7,title:"Quiet Frequencies",type:"Music",genre:"Ambient",description:"Soft ambient textures for focus and relaxation.",art:"〰",c1:"#4338ca",c2:"#164e63"},
-  {id:8,title:"The Last Signal",type:"Series",genre:"Mystery",description:"Every episode reveals another piece of the mystery.",art:"⌁",c1:"#4c1d95",c2:"#3f1d2e"}
-];
 let items = [];
 const $ = s => document.querySelector(s);
 const NASFLIX_APP_MODE=new URLSearchParams(location.search).get("app")==="1";
@@ -24,6 +14,7 @@ function render(){
   grid.innerHTML = catalogueCards.map(card).join("");
   musicList.innerHTML = visible.filter(x=>x.type==="Music").map(track).join("");
   $("#emptyState").hidden = visible.length>0;
+  if(visible.length===0) $("#emptyState").textContent=items.length===0?"No content has been added yet. Check back soon.":"No titles found. Try another search.";
   document.querySelectorAll(".cat-chip").forEach(b=>b.classList.toggle("selected",b.dataset.filter===activeFilter));
   document.querySelectorAll(".media-card").forEach(el=>el.addEventListener("click",()=>openPlayer(el.dataset.id)));
   document.querySelectorAll("[data-track]").forEach(el=>el.addEventListener("click",()=>openPlayer(el.dataset.track)));

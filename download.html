@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090811">
+  <meta name="description" content="Download the official NASFLIX Android app.">
+  <title>Download NASFLIX — Android App</title>
+  <link rel="stylesheet" href="styles.css?v=20261107-downloadpage1">
+  <style>
+    .download-page{min-height:calc(100vh - 180px);display:grid;place-items:center;padding:50px 6vw}
+    .download-page .app-download-section{width:100%;max-width:1000px;padding:0}
+    .download-page .app-download-card{max-width:900px;margin:auto}
+    .download-back{display:inline-flex;margin:0 0 24px;color:#d8c9ff;text-decoration:none;font-size:13px}
+    .download-page-title{text-align:center;margin-bottom:24px}
+    .download-page-title .eyebrow{color:#c4a9ff;letter-spacing:3px;font-size:10px}
+    .download-page-title h1{font:800 clamp(30px,5vw,48px)/1.1 Manrope,sans-serif;margin:10px 0}
+    .download-page-title h1 em{font-style:normal;color:var(--purple)}
+    @media(max-width:650px){.download-page{padding:35px 5vw}.download-page .app-download-card{padding:26px 22px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-group">
+      <a class="brand" href="index.html"><span class="brand-mark">N</span> NAS<span>FLIX</span></a>
+    </div>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a class="active" href="download.html">Download App</a>
+      <a href="index.html#movies">Movies</a>
+      <a href="index.html#music">Music</a>
+    </nav>
+    <div class="header-actions"><a class="text-link" href="index.html">← Back to NASFLIX</a></div>
+  </header>
+  <main class="download-page">
+    <div style="width:100%;max-width:1000px">
+      <a class="download-back" href="index.html">← Back to home</a>
+      <div class="download-page-title"><p class="eyebrow">OFFICIAL ANDROID APPLICATION</p><h1>Download <em>NASFLIX</em></h1></div>
+      <section class="app-download-section">
+        <div class="app-download-card">
+          <div class="app-download-icon"><span class="brand-mark">N</span></div>
+          <div class="app-download-copy">
+            <p class="eyebrow">NASFLIX FOR ANDROID</p>
+            <h2>Take NASFLIX <em>with you.</em></h2>
+            <p>Install the NASFLIX Android app and enjoy your entertainment on your phone.</p>
+            <div class="app-download-meta"><span>Version 1.2.1</span><span>Android APK</span><span>Signed release</span></div>
+            <a class="primary app-download-button" href="https://github.com/bigo-pk-booking/nasflix/releases/download/nasflix-v1.2.1-release-20261107/app-release.apk" target="_blank" rel="noopener">↓ Download NASFLIX APK</a>
+            <small>Android may ask you to allow installation from your browser. Only install apps you trust.</small>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer><a class="brand" href="index.html"><span class="brand-mark">N</span> NAS<span>FLIX</span></a><p>© <span id="year"></span> NASFLIX. A home for independent entertainment.</p><div><a href="index.html">Home</a><a href="index.html#movies">Browse</a></div></footer>
+  <script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+</body>
+</html>

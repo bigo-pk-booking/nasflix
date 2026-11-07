@@ -624,7 +624,17 @@ body.app-mode .content-section,body.app-mode .music-section{
   min-width:0;max-width:100%;
 }
 body.app-mode .music-section{
-  width:100%;grid-template-columns:minmax(0,1fr);
+  display:grid;width:100%;min-width:0;max-width:100%;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:
+    "heading"
+    "playlists"
+    "actions"
+    "artists"
+    "categories"
+    "albums"
+    "songs";
+  align-items:stretch;
 }
 body.app-mode .music-section>*{min-width:0;max-width:100%}
 body.app-mode .ad-section{width:calc(100% - 20px);max-width:100%;overflow:hidden}

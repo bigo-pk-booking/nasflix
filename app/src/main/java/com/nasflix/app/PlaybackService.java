@@ -48,6 +48,8 @@ public class PlaybackService extends MediaSessionService {
     private static volatile long currentPositionMs = 0;
     private static volatile long durationMs = 0;
     private static volatile boolean playing = false;
+    private static volatile String lastPlaybackError = "";
+    public static String getLastPlaybackError() { return lastPlaybackError; }
 
     public static long getCurrentPositionMs() { return currentPositionMs; }
     public static long getDurationMs() { return durationMs; }
@@ -75,6 +77,13 @@ public class PlaybackService extends MediaSessionService {
             }
 
             @Override public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
+                lastPlaybackError = "";
+                updatePlaybackState();
+            }
+
+            @Override public void onPlayerError(androidx.media3.common.PlaybackException error) {
+                lastPlaybackError = error.errorCodeName + ": " + String.valueOf(error.getMessage());
+                android.util.Log.e("NASFLIX", "Media playback error: " + lastPlaybackError, error);
                 updatePlaybackState();
             }
         });
@@ -171,10 +180,13 @@ public class PlaybackService extends MediaSessionService {
             }
             if (mediaItems.isEmpty()) return;
             int index = Math.max(0, Math.min(requestedIndex, mediaItems.size() - 1));
+            lastPlaybackError = "";
             player.setMediaItems(mediaItems, index, 0);
             player.prepare();
-            if (autoplay) player.play(); else player.pause();
+            player.setPlayWhenReady(autoplay);
+            if (!autoplay) player.pause();
         } catch (Exception error) {
+            lastPlaybackError = error.getClass().getSimpleName() + ": " + String.valueOf(error.getMessage());
             android.util.Log.e("NASFLIX", "Unable to start native media queue", error);
         }
     }

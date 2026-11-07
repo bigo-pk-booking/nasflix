@@ -26,7 +26,7 @@ function render(){
 function card(x){return `<article class="media-card" data-id="${x.id}"><div class="poster" style="--c1:${x.c1||"#4c1d95"};--c2:${x.c2||"#111827"}"><span class="card-type">${esc(x.type)}</span><span class="poster-art">${esc(x.art||"✦")}</span><div><span class="poster-label">${esc(x.genre||"FEATURED").toUpperCase()}</span></div><span class="play-badge">▶</span></div><h3 class="card-title">${esc(x.title)}</h3><p class="card-meta">${esc(x.type)} · ${esc(x.genre||"Entertainment")}</p></article>`}
 function track(x){return `<div class="track"><div class="track-cover">♫</div><div class="track-info"><b>${esc(x.title)}</b><small>${esc(x.genre||"Music")} · ${esc(x.description||"Featured track")}</small></div><button data-track="${x.id}">▶ Listen</button></div>`}
 function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function openPlayer(id){const x=items.find(i=>String(i.id)===String(id));if(!x)return;$("#playerType").textContent=x.type.toUpperCase()+" · "+(x.genre||"FEATURED");$("#playerTitle").textContent=x.title;$("#playerDescription").textContent=x.description||"Enjoy this featured title.";const link=$("#downloadLink");if(x.url&&x.download){link.href=x.url;link.hidden=false}else{link.hidden=true}$("#playerScreen").innerHTML=x.url&&/\.(mp4|webm|mp3|ogg)(\?|$)/i.test(x.url)?(x.type==="Music"?`<audio controls src="${esc(x.url)}"></audio>`:`<video controls playsinline src="${esc(x.url)}"></video>`):`<div class="play-symbol">▶</div><p>PREVIEW PLAYER</p>`;$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");}
+function openPlayer(id){const x=items.find(i=>String(i.id)===String(id));if(!x)return;$("#playerType").textContent=x.type.toUpperCase()+" · "+(x.genre||"FEATURED");$("#playerTitle").textContent=x.title;$("#playerDescription").textContent=x.description||"Enjoy this featured title.";const link=$("#downloadLink");if(x.url&&x.download){link.href=x.url;link.hidden=false}else{link.hidden=true}$("#playerScreen").innerHTML=x.url&&/\.(mp4|webm|mp3|ogg|m4a|wav)(\?|$)/i.test(x.url)?(x.type==="Music"?`<audio controls src="${esc(x.url)}"></audio>`:`<video controls playsinline src="${esc(x.url)}"></video>`):`<div class="play-symbol">▶</div><p>${x.url?"This link may not be a direct playable media file. Open the original link below.":"No media URL has been added yet."}</p>${x.url?`<a href="${esc(x.url)}" target="_blank" rel="noopener">Open media link</a>`:""}`;$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");}
 function closeModal(id){const el=$("#"+id+"Modal");el.classList.remove("open");el.setAttribute("aria-hidden","true");}
 document.querySelectorAll(".cat-chip").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;render()}));
 $("#searchInput").addEventListener("input",render);
@@ -36,31 +36,26 @@ document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal("player");closeModal("admin")}});
 $("#contentForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  const file=$("#itemFile").files[0], token=$("#adminToken").value.trim(), status=$("#uploadStatus");
-  if(file){
-    if(!token){status.textContent="Enter your admin access key first.";return;}
-    const form=new FormData();
-    form.append("file",file);form.append("title",$("#itemTitle").value.trim());
-    form.append("type",$("#itemType").value);form.append("genre",$("#itemGenre").value.trim());
-    form.append("description",$("#itemDescription").value.trim());form.append("allowDownload",String($("#itemDownload").checked));
-    status.textContent="Uploading media to NASFLIX...";
-    try{
-      const response=await fetch("/api/upload",{method:"POST",headers:{Authorization:"Bearer "+token},body:form});
-      const result=await response.json();
-      if(!response.ok) throw new Error(result.error||"Upload failed.");
-      status.textContent="Upload complete! Your media is now saved in NASFLIX.";
-      $("#contentForm").reset();$("#adminToken").value=token;await loadRemote();
-    }catch(error){status.textContent=error.message;}
-    return;
-  }
-  const item={id:Date.now(),title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),download:$("#itemDownload").checked,art:"✦",c1:"#6d28d9",c2:"#171026"};
-  items.unshift(item);$("#contentForm").reset();$("#adminToken").value=token;status.textContent="Added as a temporary browser preview. Choose a file to save permanently.";render();
+  const token=$("#adminToken").value.trim(),status=$("#uploadStatus");
+  const item={title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),allowDownload:$("#itemDownload").checked};
+  if(!token){status.textContent="Enter your admin access key first.";return;}
+  if(!item.title||!item.url){status.textContent="Enter a title and a media URL.";return;}
+  if(!/^https?:\/\//i.test(item.url)){status.textContent="Enter a valid http or https media URL.";return;}
+  status.textContent="Saving to NASFLIX...";
+  try{
+    const response=await fetch("/api/media",{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+token},body:JSON.stringify(item)});
+    const result=await response.json();
+    if(!response.ok)throw new Error(result.error||"Could not save this item.");
+    status.textContent="Saved permanently to NASFLIX!";
+    $("#contentForm").reset();$("#adminToken").value=token;
+    await loadRemote();
+  }catch(error){status.textContent=error.message;}
 });
 async function loadRemote(){
   try{
     const response=await fetch("/api/media");if(!response.ok)return;
     const data=await response.json();
-    const remote=data.map((x,i)=>({...x,id:x.id,url:x.url,download:!!x.allow_download,remote:true,art:"✦",c1:["#6d28d9","#be185d","#0369a1","#0f766e"][i%4],c2:"#171026"}));
+    const remote=data.map((x,i)=>({...x,id:x.id,url:x.media_url,download:!!x.allow_download,remote:true,art:"✦",c1:["#6d28d9","#be185d","#0369a1","#0f766e"][i%4],c2:"#171026"}));
     items=[...remote,...demoItems];render();
   }catch(error){console.warn("NASFLIX media API is not configured yet.",error);}
 }

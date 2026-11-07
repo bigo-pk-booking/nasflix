@@ -28,13 +28,15 @@ await ensureTable(env.DB);
 await env.DB.prepare("CREATE TABLE IF NOT EXISTS media_engagement (media_id TEXT PRIMARY KEY,views INTEGER NOT NULL DEFAULT 0,listens INTEGER NOT NULL DEFAULT 0,last_viewed_at INTEGER,last_listened_at INTEGER,updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();
 const fields="m.id,m.title,m.type,m.genre,m.artist,m.album_title,m.description,m.media_url,m.allow_download,m.series_title,m.season_number,m.episode_number,m.episode_title,m.poster_object_key,COALESCE(e.views,0) AS views,COALESCE(e.listens,0) AS listens,e.last_viewed_at,e.last_listened_at";
 const join=" FROM media_links m LEFT JOIN media_engagement e ON e.media_id=m.id ";
-const [v,l,rv,rl]=await Promise.all([
+const [v,l,rv,rl,av,am]=await Promise.all([
 env.DB.prepare("SELECT "+fields+join+"WHERE lower(m.type)!='music' ORDER BY COALESCE(e.views,0) DESC,m.created_at DESC LIMIT 8").all(),
 env.DB.prepare("SELECT "+fields+join+"WHERE lower(m.type)='music' ORDER BY COALESCE(e.listens,0) DESC,m.created_at DESC LIMIT 8").all(),
 env.DB.prepare("SELECT "+fields+join+"WHERE lower(m.type)!='music' AND e.last_viewed_at IS NOT NULL ORDER BY e.last_viewed_at DESC LIMIT 8").all(),
-env.DB.prepare("SELECT "+fields+join+"WHERE lower(m.type)='music' AND e.last_listened_at IS NOT NULL ORDER BY e.last_listened_at DESC LIMIT 8").all()
+env.DB.prepare("SELECT "+fields+join+"WHERE lower(m.type)='music' AND e.last_listened_at IS NOT NULL ORDER BY e.last_listened_at DESC LIMIT 8").all(),
+env.DB.prepare("SELECT "+fields+join+"WHERE lower(m.type)!='music' ORDER BY m.created_at DESC LIMIT 8").all(),
+env.DB.prepare("SELECT "+fields+join+"WHERE lower(m.type)='music' ORDER BY m.created_at DESC LIMIT 8").all()
 ]);
-return json({mostViewed:v.results||[],mostListened:l.results||[],recentViewed:rv.results||[],recentListened:rl.results||[]});
+return json({mostViewed:v.results||[],mostListened:l.results||[],recentViewed:rv.results||[],recentListened:rl.results||[],recentAddedVideos:av.results||[],recentAddedMusic:am.results||[]});
 }
 if(path==="/api/metrics/track"&&request.method==="POST"){
 await ensureTable(env.DB);

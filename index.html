@@ -84,7 +84,8 @@
       <label>Or media URL <input id="itemUrl" type="url" placeholder="https://... (optional external preview)"></label>
       <label class="check-label"><input id="itemDownload" type="checkbox"> Allow downloads (only for files you have rights to distribute)</label>
       <button class="primary full" id="contentSubmit" type="submit">Save to NASFLIX catalogue +</button><button class="admin-cancel" id="cancelEdit" type="button" hidden>Cancel edit</button>
-      <p class="upload-hint" id="uploadStatus" role="status">Catalogue information is saved in D1. Media files stay on their original hosting service.</p>
+      <div class="upload-progress" id="uploadProgress" hidden><div class="upload-progress-top"><span id="uploadProgressLabel">Preparing upload…</span><strong id="uploadProgressPercent">0%</strong></div><div class="upload-progress-track"><span id="uploadProgressBar"></span></div><p id="uploadProgressDetail">Please keep this page open while your file uploads.</p></div>
+      <p class="upload-hint" id="uploadStatus" role="status" aria-live="polite">Choose a media file or enter a media URL.</p>
     </form>
     <div class="admin-items"><h3>Catalogue entries</h3><div id="adminItems"></div></div>
   </div>

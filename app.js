@@ -35,7 +35,7 @@ function render(){
   const shownMusic=activeMusicAlbum==="All Albums"?artistTracks:artistTracks.filter(x=>(String(x.albumTitle||"").trim()||"Singles")===activeMusicAlbum);
   const visibleTracks=shownMusic.slice(0,musicVisibleCount);
   const skeletons='<div class="track track-skeleton"><div class="track-cover skeleton-block"></div><div class="track-info"><b class="skeleton-line"></b><small class="skeleton-line short"></small></div><span class="skeleton-button"></span><span class="skeleton-button round"></span></div>';
-  musicList.innerHTML=musicBatchLoading?Array.from({length:10},()=>skeletons).join(""):visibleTracks.map(track).join("");
+  musicList.innerHTML=visibleTracks.map(track).join("")+(musicBatchLoading?Array.from({length:10},()=>skeletons).join(""):"");
   const sentinel=$("#musicLoadSentinel");
   if(sentinel)sentinel.hidden=musicBatchLoading||visibleTracks.length>=shownMusic.length;
   const playAll=$("#playAllMusic");if(playAll){playAll.disabled=shownMusic.length===0;playAll.textContent=activeMusicAlbum!=="All Albums"?"▶ Play album":activeMusicArtist==="All Artists"?"▶ Play all":"▶ Play "+activeMusicArtist;}

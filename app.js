@@ -60,7 +60,7 @@ function setUploadProgress(percent,label,detail,state=""){
   $("#uploadProgressLabel").textContent=label;
   $("#uploadProgressDetail").textContent=detail;
 }
-function uploadWithProgress(url,formData,token,onProgress){
+function uploadWithProgress(url,formData,token,onProgress,method="POST"){
   return new Promise((resolve,reject)=>{
     const xhr=new XMLHttpRequest();xhr.open(method,url);xhr.setRequestHeader("authorization","Bearer "+token);
     xhr.upload.addEventListener("progress",event=>{if(event.lengthComputable)onProgress(event.loaded,event.total);});

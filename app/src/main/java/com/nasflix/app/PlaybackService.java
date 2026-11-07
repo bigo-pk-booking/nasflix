@@ -1,6 +1,7 @@
 package com.nasflix.app;
 
 import android.content.Intent;
+import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -59,7 +60,12 @@ public class PlaybackService extends MediaSessionService {
         super.onCreate();
         player = new ExoPlayer.Builder(this).build();
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
-        mediaSession = new MediaSession.Builder(this, player).build();
+        Intent activityIntent = new Intent(this, MainActivity.class);
+        PendingIntent sessionActivity = PendingIntent.getActivity(this, 0, activityIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        mediaSession = new MediaSession.Builder(this, player)
+            .setSessionActivity(sessionActivity)
+            .build();
         handler.post(progressUpdater);
     }
 

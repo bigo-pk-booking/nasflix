@@ -60,8 +60,23 @@ async function syncPlaylists(){clearTimeout(playlistSaveTimer);await accountRequ
 function schedulePlaylistSync(){clearTimeout(playlistSaveTimer);playlistSaveTimer=setTimeout(()=>syncPlaylists().catch(e=>accountMessage(e.message)),500);}
 function enterGuestMode(){guestMode=true;$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;}
 async function refreshAccount(){try{const data=await accountRequest("me");accountUser=data.user;if(accountUser){guestMode=false;$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=false;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=false;$("#accountSignedIn").hidden=false;$("#accountStatus").textContent="Signed in";$("#accountEmailLabel").textContent=accountUser.email;const saved=await accountRequest("playlists");userPlaylists=Array.isArray(saved.playlists)?saved.playlists:[];activePlaylistId=userPlaylists[0]?.id||"";renderUserPlaylists();}else{userPlaylists=[];$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountSignedIn").hidden=true;$("#accountLoginHeader").hidden=guestMode;$("#accountLogoutHeader").hidden=true;$("#accountStatus").textContent="Not signed in";}}catch(e){accountMessage(e.message);$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=guestMode;$("#accountLogoutHeader").hidden=true;}}
-async function accountAction(kind){const email=$("#accountEmail").value.trim(),password=$("#accountPassword").value,fullName=$("#accountFullName").value.trim(),confirmPassword=$("#accountConfirmPassword").value;if(!email||!password||(kind==="register"&&!fullName)){accountMessage(kind==="register"?"Enter your full name, email and password.":"Enter your email and password.");return;}if(kind==="register"&&password!==confirmPassword){accountMessage("Passwords do not match. Please re-enter your password.");$("#accountConfirmPassword").focus();return;}try{const data=await accountRequest(kind,{email,password,fullName});accountUser=data.user;$("#accountPassword").value="";$("#accountConfirmPassword").value="";$("#accountFullName").value="";await loadTrending();
-refreshAccount();accountMessage(kind==="register"?"Account created. Your playlists will sync here.":"Welcome back! Your playlists are synced.");}catch(e){accountMessage(e.message);}}
+let accountActionBusy=false;
+async function accountAction(kind){
+ if(accountActionBusy)return;
+ const email=$("#accountEmail").value.trim(),password=$("#accountPassword").value,fullName=$("#accountFullName").value.trim(),confirmPassword=$("#accountConfirmPassword").value;
+ if(!email||!password||(kind==="register"&&!fullName)){accountMessage(kind==="register"?"Enter your full name, email and password.":"Enter your email and password.");return;}
+ if(kind==="register"&&password!==confirmPassword){accountMessage("Passwords do not match. Please re-enter your password.");$("#accountConfirmPassword").focus();return;}
+ const button=kind==="register"?$("#accountCreate"):$("#accountLogin"),original=button?.textContent||"";
+ accountActionBusy=true;if(button){button.disabled=true;button.textContent=kind==="register"?"Creating account…":"Signing in…";}
+ accountMessage(kind==="register"?"Creating your NASFLIX account…":"Connecting to NASFLIX…");
+ try{
+  const data=await accountRequest(kind,{email,password,...(kind==="register"?{fullName}:{})});
+  accountUser=data.user;$("#accountPassword").value="";$("#accountConfirmPassword").value="";$("#accountFullName").value="";
+  await refreshAccount();
+  accountMessage(kind==="register"?"Account created successfully!":"Welcome back!");
+ }catch(e){accountMessage(e.message||"Something went wrong. Please try again.");}
+ finally{accountActionBusy=false;if(button){button.disabled=false;button.textContent=original;}}
+}
 async function addTrackToPlaylist(id){if(!accountUser){accountMessage("Log in first to create and save playlists.");$("#accountEmail").focus();return;}const p=userPlaylists.find(x=>x.id===activePlaylistId);if(!p){accountMessage("Create and select a playlist first.");return;}if(!p.trackIds.includes(String(id)))p.trackIds.push(String(id));renderUserPlaylists();schedulePlaylistSync();}
 function playUserPlaylist(){const p=userPlaylists.find(x=>x.id===activePlaylistId);if(!p)return;const queue=p.trackIds.map(id=>items.find(x=>String(x.id)===id)).filter(x=>x&&x.url&&isDirectMedia(x.url));if(!queue.length){accountMessage("No playable songs in this playlist yet.");return;}openMusicPlayer(queue[0].id,true,"","All Albums");}
 $("#continueGuest")?.addEventListener("click",enterGuestMode);

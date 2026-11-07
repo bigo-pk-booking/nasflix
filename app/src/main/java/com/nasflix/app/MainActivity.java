@@ -110,8 +110,9 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 4102);
         }
-        webView.clearCache(true);
-        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        // Preserve the WebView's Service Worker Cache Storage so the app shell and
+        // downloaded media remain available when the device is offline.
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261107-nativeaudio4");
         showPreviousCrashIfAny();
     }

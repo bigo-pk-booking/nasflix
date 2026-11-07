@@ -1,4 +1,4 @@
-const CACHE="nasflix-shell-v2";
+const CACHE="nasflix-shell-v3";
 const SHELL=["/","/index.html","/styles.css","/app.js","/manifest.webmanifest","/nasflix-icon.svg"];
 self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim();});

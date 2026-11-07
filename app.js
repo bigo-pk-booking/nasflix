@@ -202,7 +202,7 @@ function uploadWithProgress(url,formData,token,onProgress,method="POST"){
 async function uploadBulkBatch(kind){
   const music=kind==="music";
   const files=[...(music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).files];
-  const artist=(music?$("#bulkMusicArtist"):$("#bulkVideoArtist").value).trim();
+  const artist=(music?$("#bulkMusicArtist").value:$("#bulkVideoArtist").value).trim();
   const poster=(music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).files[0];
   const status=$(music?"#bulkMusicStatus":"#bulkVideoStatus");
   const button=$(music?"#bulkMusicSubmit":"#bulkVideoSubmit");

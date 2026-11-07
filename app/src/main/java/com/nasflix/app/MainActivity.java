@@ -46,7 +46,9 @@ public class MainActivity extends Activity {
         root.addView(webView, new FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
-        webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1");
+        webView.clearCache(true);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261107-menu3");
     }
 
     private void showCustomView(View view, WebChromeClient.CustomViewCallback callback) {

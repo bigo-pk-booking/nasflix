@@ -82,7 +82,7 @@ public class PlaybackService extends MediaSessionService {
             }
 
             @Override public void onPlayerError(androidx.media3.common.PlaybackException error) {
-                lastPlaybackError = error.errorCodeName + ": " + String.valueOf(error.getMessage());
+                lastPlaybackError = androidx.media3.common.PlaybackException.getErrorCodeName(error.errorCode) + ": " + String.valueOf(error.getMessage());
                 android.util.Log.e("NASFLIX", "Media playback error: " + lastPlaybackError, error);
                 updatePlaybackState();
             }

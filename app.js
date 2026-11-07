@@ -62,7 +62,7 @@ function setUploadProgress(percent,label,detail,state=""){
 }
 function uploadWithProgress(url,formData,token,onProgress){
   return new Promise((resolve,reject)=>{
-    const xhr=new XMLHttpRequest();xhr.open("POST",url);xhr.setRequestHeader("authorization","Bearer "+token);
+    const xhr=new XMLHttpRequest();xhr.open(method,url);xhr.setRequestHeader("authorization","Bearer "+token);
     xhr.upload.addEventListener("progress",event=>{if(event.lengthComputable)onProgress(event.loaded,event.total);});
     xhr.addEventListener("load",()=>{let result={};try{result=JSON.parse(xhr.responseText||"{}");}catch{}if(xhr.status>=200&&xhr.status<300)resolve(result);else reject(new Error(result.error||"Upload failed ("+xhr.status+")."));});
     xhr.addEventListener("error",()=>reject(new Error("Network error. Please try the upload again.")));
@@ -79,21 +79,21 @@ $("#contentForm").addEventListener("submit",async e=>{
   if(!item.title){status.textContent="Enter a title.";return;}
   if(!editingId&&file&&file.size>50*1024*1024){status.textContent="Maximum upload size is 50 MB.";return;}if(posterFile&&posterFile.size>5*1024*1024){status.textContent="Poster maximum size is 5 MB.";return;}
   if(!file&&!item.url){status.textContent="Choose a media file or enter a media URL.";return;}
-  if(!file&&item.url&&!/^https?:\/\//i.test(item.url)){status.textContent="Enter a valid http or https media URL.";return;}
+  if(!file&&item.url&&!/^https?:\/\//i.test(item.url)&&!/^\/api\/file\/[a-z0-9-]+$/i.test(item.url)){status.textContent="Enter a valid media URL.";return;}
   submit.disabled=true;submit.textContent=(file||posterFile)?"Uploading…":"Saving…";
   if(progress){progress.hidden=true;progress.classList.remove("done","error");}
   status.textContent=(file||posterFile)?"Preparing secure upload…":"Saving to NASFLIX…";
   try{
     let result;
-    if((file||posterFile)&&!editingId){
+    if(file||posterFile){
       const form=new FormData();Object.entries(item).forEach(([k,v])=>form.append(k,String(v??"")));if(file)form.append("file",file);if(posterFile)form.append("posterFile",posterFile);
       setUploadProgress(0,"Preparing upload…","Getting your file ready for secure R2 storage.");
-      result=await uploadWithProgress("/api/media",form,token,(loaded,total)=>{
+      result=await uploadWithProgress(editingId?"/api/media/"+encodeURIComponent(editingId):"/api/media",form,token,(loaded,total)=>{
         const percent=total?loaded/total*100:0;
-        setUploadProgress(percent,percent>=100?"Upload sent — saving…":"Uploading your video…",Math.round(loaded/1024/1024*10)/10+" MB of "+Math.round(total/1024/1024*10)/10+" MB uploaded. Keep this page open.");
+        setUploadProgress(percent,percent>=100?"Upload sent — saving…":"Uploading files…",Math.round(loaded/1024/1024*10)/10+" MB of "+Math.round(total/1024/1024*10)/10+" MB uploaded. Keep this page open.");
         status.textContent="Uploading to secure R2 storage… "+Math.round(percent)+"%";
-      });
-      setUploadProgress(100,"Upload complete!","Your file was stored in R2 successfully.", "done");
+      },editingId?"PUT":"POST");
+      setUploadProgress(100,"Upload complete!","Your file(s) were stored in R2 successfully.", "done");
     }else{
       const headers={"authorization":"Bearer "+token,"content-type":"application/json"};
       const response=await fetch(editingId?"/api/media/"+encodeURIComponent(editingId):"/api/media",{method:editingId?"PUT":"POST",headers,body:JSON.stringify(item)});

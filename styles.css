@@ -86,3 +86,23 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .nav-categories{display:grid!important}
 .header-actions{margin-left:auto}
 @media(max-width:650px){.topbar{padding:0 16px;gap:10px}.brand-group{gap:10px}.brand{font-size:16px}.header-actions{margin-left:auto}.search input{width:78px}.main-nav{top:78px!important}}
+
+
+/* NASFLIX premium music player */
+.nas-music-player{width:100%;min-height:100%;padding:22px 18px 16px;display:flex;flex-direction:column;justify-content:center;gap:13px;background:radial-gradient(ellipse at 50% 10%,#43205f88,transparent 62%),linear-gradient(145deg,#100d1c,#07060d);color:#f8f4ff}
+.music-visualizer{display:block;width:100%;height:145px;border-radius:14px;background:linear-gradient(180deg,#090711,#120c20);border:1px solid #ffffff12}
+.music-live{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:2.4px;color:#c9a9ff;font-weight:800}
+.music-live span{width:7px;height:7px;border-radius:50%;background:#d946ef;box-shadow:0 0 12px #d946ef;animation:musicPulse 1.3s infinite}
+@keyframes musicPulse{50%{opacity:.35;transform:scale(.72)}}
+.music-track-name{font:800 clamp(19px,4vw,27px)/1.2 Manrope,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.music-track-genre{font-size:11px;color:#a69ab8;margin-top:-8px}
+.music-progress-row{display:flex;align-items:center;gap:10px;color:#bfb4d0;font-size:10px;font-variant-numeric:tabular-nums}
+.music-progress-row input{flex:1;min-width:0;accent-color:#c084fc;height:4px}
+.music-controls{display:flex;align-items:center;justify-content:center;gap:27px;padding:3px 0}
+.music-controls button{border:0;background:transparent;color:#e9ddff;font-size:25px;width:42px;height:42px;border-radius:50%}
+.music-controls .music-play{width:56px;height:56px;background:linear-gradient(135deg,#8b5cf6,#c026d3);color:#fff;font-size:23px;box-shadow:0 8px 28px #8b5cf655}
+.music-bottom{display:flex;align-items:center;justify-content:space-between;color:#887c9c;font-size:8px;letter-spacing:1.8px}
+.music-bottom label{display:flex;align-items:center;gap:8px}
+.music-bottom input{width:85px;accent-color:#c084fc}
+.music-queue-label{text-align:center;color:#766b89;font-size:8px;letter-spacing:2px}
+@media(max-width:650px){.nas-music-player{padding:14px 10px;gap:10px}.music-visualizer{height:115px}.music-controls{gap:20px}}

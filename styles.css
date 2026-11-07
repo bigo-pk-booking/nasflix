@@ -376,3 +376,11 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 @media(max-width:650px){.music-visual-stage{height:115px}}
 
 .music-library-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.shuffle-music-button{border:1px solid #8b5cf6!important;background:#211632!important;color:#e9d5ff!important;border-radius:28px!important;padding:11px 16px!important;font-weight:700!important;font-size:12px!important}.shuffle-music-button:active{transform:scale(.97)}
+
+.trending-skeletons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;width:100%}
+.trending-skeleton{min-width:0;display:flex;flex-direction:column;gap:10px}
+.trending-skeleton span{display:block;width:100%;aspect-ratio:3/4;border-radius:13px;background:linear-gradient(110deg,#171321 25%,#292037 38%,#171321 62%);background-size:250% 100%;animation:trendShimmer 1.35s ease-in-out infinite}
+.trending-skeleton i,.trending-skeleton b{display:block;height:10px;border-radius:8px;background:linear-gradient(110deg,#171321 25%,#292037 38%,#171321 62%);background-size:250% 100%;animation:trendShimmer 1.35s ease-in-out infinite}
+.trending-skeleton i{width:82%}.trending-skeleton b{width:54%;height:8px}
+@keyframes trendShimmer{to{background-position:-250% 0}}
+@media(max-width:650px){.trending-skeletons{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}

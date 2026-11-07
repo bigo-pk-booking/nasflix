@@ -171,11 +171,14 @@ public class PlaybackService extends MediaSessionService {
                 MediaMetadata.Builder metadata = new MediaMetadata.Builder()
                     .setTitle(track.optString("title", "NASFLIX"))
                     .setArtist(track.optString("artist", "NASFLIX"))
+                    .setAlbumArtist("NASFLIX")
+                    .setDisplayTitle(track.optString("title", "NASFLIX"))
                     .setAlbumTitle("NASFLIX");
                 String artwork = track.optString("artwork", "");
                 if (!artwork.isEmpty()) {
                     try { metadata.setArtworkUri(Uri.parse(artwork)); } catch (Exception ignored) {}
                 }
+                metadata.setIsBrowsable(false).setIsPlayable(true);
                 mediaItems.add(new MediaItem.Builder()
                     .setUri(Uri.parse(url))
                     .setMediaMetadata(metadata.build())

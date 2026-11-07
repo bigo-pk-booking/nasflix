@@ -8,6 +8,7 @@ import android.os.Looper;
 
 import androidx.annotation.Nullable;
 import androidx.media3.common.C;
+import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
@@ -59,6 +60,12 @@ public class PlaybackService extends MediaSessionService {
     @Override public void onCreate() {
         super.onCreate();
         player = new ExoPlayer.Builder(this).build();
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+            .setUsage(C.USAGE_MEDIA)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+            .build();
+        player.setAudioAttributes(audioAttributes, true);
+        player.setHandleAudioBecomingNoisy(true);
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
         Intent activityIntent = new Intent(this, MainActivity.class);
         PendingIntent sessionActivity = PendingIntent.getActivity(this, 0, activityIntent,
@@ -77,6 +84,9 @@ public class PlaybackService extends MediaSessionService {
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String action = intent.getAction();
+            boolean handledByNasflix = ACTION_SET_QUEUE.equals(action) || ACTION_PLAY.equals(action) ||
+                ACTION_PAUSE.equals(action) || ACTION_STOP.equals(action) ||
+                ACTION_SEEK.equals(action) || ACTION_VOLUME.equals(action);
             if (ACTION_SET_QUEUE.equals(action)) {
                 setQueue(intent.getStringExtra(EXTRA_QUEUE),
                     intent.getIntExtra(EXTRA_INDEX, 0),
@@ -103,6 +113,7 @@ public class PlaybackService extends MediaSessionService {
                     player.setVolume(Math.max(0f, Math.min(1f, volume)));
                 }
             }
+            if (handledByNasflix) return START_STICKY;
         }
         return super.onStartCommand(intent, flags, startId);
     }

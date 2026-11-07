@@ -15,7 +15,7 @@ let activeFilter = "All";
 let editingId = null;
 function render(){
   const term = $("#searchInput").value.trim().toLowerCase();
-  const visible = items.filter(x => (activeFilter==="All" || x.type===activeFilter) && [x.title,x.type,x.genre,x.description].join(" ").toLowerCase().includes(term));
+  const visible = items.filter(x => (activeFilter==="All" || x.type===activeFilter || String(x.genre||"").toLowerCase()===activeFilter.toLowerCase()) && [x.title,x.type,x.genre,x.description].join(" ").toLowerCase().includes(term));
   grid.innerHTML = visible.filter(x=>x.type!=="Music").map(card).join("");
   musicList.innerHTML = visible.filter(x=>x.type==="Music").map(track).join("");
   $("#emptyState").hidden = visible.length>0;

@@ -12,6 +12,7 @@ let items = [...demoItems];
 const $ = s => document.querySelector(s);
 const grid = $("#contentGrid"), musicList = $("#musicList");
 let activeFilter = "All";
+let editingId = null;
 function render(){
   const term = $("#searchInput").value.trim().toLowerCase();
   const visible = items.filter(x => (activeFilter==="All" || x.type===activeFilter) && [x.title,x.type,x.genre,x.description].join(" ").toLowerCase().includes(term));
@@ -47,11 +48,11 @@ $("#contentForm").addEventListener("submit",async e=>{
   if(!/^https?:\/\//i.test(item.url)){status.textContent="Enter a valid http or https media URL.";return;}
   status.textContent="Saving to NASFLIX...";
   try{
-    const response=await fetch("/api/media",{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+token},body:JSON.stringify(item)});
+    const response=await fetch(editingId?"/api/media/"+encodeURIComponent(editingId):"/api/media",{method:editingId?"PUT":"POST",headers:{"content-type":"application/json","authorization":"Bearer "+token},body:JSON.stringify(item)});
     const result=await response.json();
     if(!response.ok)throw new Error(result.error||"Could not save this item.");
-    status.textContent="Saved permanently to NASFLIX!";
-    $("#contentForm").reset();$("#adminToken").value=token;
+    status.textContent=editingId?"Changes saved successfully!":"Saved permanently to NASFLIX!";
+    editingId=null;$("#contentForm").reset();$("#adminToken").value=token;$("#contentSubmit").textContent="Save to NASFLIX catalogue +";$("#cancelEdit").hidden=true;
     await loadRemote();
   }catch(error){status.textContent=error.message;}
 });
@@ -64,7 +65,8 @@ async function loadRemote(){
   }catch(error){console.warn("NASFLIX media API is not configured yet.",error);}
 }
 function renderAdmin(){
-  $("#adminItems").innerHTML=items.map(x=>"<div class=\"admin-row\"><span>"+esc(x.title)+" <small>("+esc(x.type)+")"+(x.remote?" · Saved":"")+"</small></span><button data-delete=\""+esc(x.id)+"\" data-remote=\""+(x.remote?"1":"0")+"\">Remove</button></div>").join("");
+  $("#adminItems").innerHTML=items.map(x=>"<div class=\"admin-row\"><span>"+esc(x.title)+" <small>("+esc(x.type)+")"+(x.remote?" · Saved":"")+"</small></span><span class=\"admin-actions\">"+(x.remote?"<button data-edit=\""+esc(x.id)+"\">Edit</button>":"")+"<button data-delete=\""+esc(x.id)+"\" data-remote=\""+(x.remote?"1":"0")+"\">Remove</button></span></div>").join("");
+  document.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>{const x=items.find(item=>String(item.id)===String(b.dataset.edit));if(!x)return;editingId=x.id;$("#itemTitle").value=x.title;$("#itemType").value=x.type;$("#itemGenre").value=x.genre||"";$("#itemDescription").value=x.description||"";$("#itemUrl").value=x.url||"";$("#itemDownload").checked=!!x.download;$("#contentSubmit").textContent="Save changes";$("#cancelEdit").hidden=false;$("#uploadStatus").textContent="Editing: "+x.title;$("#contentForm").scrollIntoView({behavior:"smooth",block:"start"});}));
   document.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",async()=>{
     const id=b.dataset.delete;
     if(b.dataset.remote==="1"){
@@ -79,3 +81,5 @@ function renderAdmin(){
 $("#year").textContent=new Date().getFullYear();
 render();
 loadRemote();
+
+$("#cancelEdit").addEventListener("click",()=>{editingId=null;$("#contentForm").reset();$("#contentSubmit").textContent="Save to NASFLIX catalogue +";$("#cancelEdit").hidden=true;$("#uploadStatus").textContent="Edit cancelled.";});

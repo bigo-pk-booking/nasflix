@@ -101,12 +101,30 @@
     </section>
 
     <section class="music-section page-hidden" data-page-section="music" id="music">
-      <div class="section-heading"><div><p class="eyebrow">PRESS PLAY</p><h2>Soundtrack <em>your day</em></h2></div><span class="section-note">Music from the NASFLIX library</span></div>
-            <div class="account-playlist-panel" id="accountPlaylistPanel" hidden>
-<div class="playlist-heading"><div><p class="eyebrow">YOUR NASFLIX ACCOUNT</p><h3>My <em>Playlists</em></h3></div><span id="accountStatus" class="account-status">Not signed in</span></div>
-<div id="accountSignedIn" hidden><div class="account-user-row"><span id="accountEmailLabel"></span></div><div class="playlist-create"><input id="newPlaylistName" maxlength="60" placeholder="Name your playlist"><button type="button" id="createPlaylist">＋ Create playlist</button></div><div id="myPlaylistList" class="my-playlist-list"></div><div id="playlistDetail" class="playlist-detail" hidden></div></div></div>
-<div class="playlist-picker" id="playlistPicker" hidden><div class="playlist-picker-card"><div class="playlist-picker-heading"><div><p class="eyebrow">SAVE YOUR MUSIC</p><h3>Add to a playlist</h3></div><button type="button" id="playlistPickerClose" aria-label="Close">×</button></div><div id="playlistPickerOptions" class="playlist-picker-options"></div></div></div>
-      <div class="artist-browser"><div class="artist-browser-heading"><div><p class="eyebrow">YOUR MUSIC LIBRARY</p><h3>Browse by <em>artist</em></h3></div><div class="music-library-actions"><button type="button" id="shuffleAllMusic" class="shuffle-music-button">🔀 Shuffle</button><button type="button" id="playAllMusic">▶ Play all</button></div></div><div class="artist-filters" id="artistFilters"></div><div class="album-browser" id="albumBrowser" hidden></div></div><div class="music-list" id="musicList"></div><div id="musicLoadSentinel" class="music-load-sentinel" aria-hidden="true"></div>
+      <div class="section-heading"><div><p class="eyebrow">YOUR SOUNDTRACK</p><h2>Music <em>library</em></h2></div><span class="section-note">Discover and organize your music</span></div>
+      <section class="account-playlist-panel" id="accountPlaylistPanel" hidden>
+        <div class="playlist-heading"><div><p class="eyebrow">YOUR COLLECTION</p><h3>My <em>Playlists</em></h3></div><button type="button" id="createPlaylist" class="create-playlist-cta">＋ Create New Playlist</button></div>
+        <div id="accountSignedIn" hidden>
+          <div id="myPlaylistList" class="my-playlist-list"></div>
+          <div id="playlistDetail" class="playlist-detail" hidden></div>
+        </div>
+      </section>
+      <div class="playlist-create-modal" id="playlistCreateModal" hidden>
+        <div class="playlist-create-backdrop" data-close-playlist-create></div>
+        <div class="playlist-create-dialog" role="dialog" aria-modal="true" aria-labelledby="playlistCreateTitle">
+          <button type="button" class="playlist-create-close" data-close-playlist-create aria-label="Close">×</button>
+          <p class="eyebrow">MAKE IT YOURS</p><h3 id="playlistCreateTitle">Create a playlist</h3>
+          <p>Give your collection a name.</p>
+          <input id="newPlaylistName" maxlength="60" placeholder="e.g. My Favorites" autocomplete="off">
+          <div class="playlist-create-dialog-actions"><button type="button" data-close-playlist-create>Cancel</button><button type="button" id="confirmCreatePlaylist">Create playlist</button></div>
+        </div>
+      </div>
+      <div class="playlist-picker" id="playlistPicker" hidden><div class="playlist-picker-card"><div class="playlist-picker-heading"><div><p class="eyebrow">SAVE YOUR MUSIC</p><h3>Add to a playlist</h3></div><button type="button" id="playlistPickerClose" aria-label="Close">×</button></div><div id="playlistPickerOptions" class="playlist-picker-options"></div></div></div>
+      <div class="music-library-actions music-main-actions"><button type="button" id="playAllMusic">▶ Play All Songs</button><button type="button" id="shuffleAllMusic" class="shuffle-music-button">⤨ Shuffle Play</button></div>
+      <section class="artist-browser"><div class="artist-browser-heading"><div><p class="eyebrow">DISCOVER YOUR SOUND</p><h3>Browse by <em>artist</em></h3></div></div><div class="artist-filters" id="artistFilters"></div></section>
+      <section class="music-category-section"><div class="artist-browser-heading"><div><p class="eyebrow">EXPLORE MUSIC</p><h3>Genres & <em>Categories</em></h3></div></div><div class="music-category-grid" id="musicCategoryGrid"></div></section>
+      <div class="album-browser" id="albumBrowser" hidden></div>
+      <div class="music-list" id="musicList"></div><div id="musicLoadSentinel" class="music-load-sentinel" aria-hidden="true"></div>
     </section>
     <section class="join-banner"><div><p class="eyebrow">THE NEXT SCENE STARTS HERE</p><h2>Find your next<br><em>favorite thing.</em></h2></div><a href="#home" class="primary">Back to top ↑</a></section>
   </main>

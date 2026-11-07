@@ -10,6 +10,9 @@ const demoItems = [
 ];
 let items = [...demoItems];
 const $ = s => document.querySelector(s);
+const NASFLIX_APP_MODE=new URLSearchParams(location.search).get("app")==="1";
+if(NASFLIX_APP_MODE){document.body.classList.add("app-mode");const adminButton=document.querySelector("#adminOpen");if(adminButton)adminButton.remove();const adminModal=document.querySelector("#adminModal");if(adminModal)adminModal.remove();}
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));}
 const grid = $("#contentGrid"), musicList = $("#musicList");
 let activeFilter = "All";
 let editingId = null;

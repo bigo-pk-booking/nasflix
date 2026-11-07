@@ -389,11 +389,12 @@ function loadMoreMusicOnScroll(){
 }
 window.addEventListener("scroll",loadMoreMusicOnScroll,{passive:true});
 window.addEventListener("resize",loadMoreMusicOnScroll);
-document.querySelectorAll("[data-download-folder]").forEach(button=>button.addEventListener("click",()=>{activeDownloadFolder=button.dataset.downloadFolder;renderDownloads();}));
+document.querySelectorAll("[data-download-folder]").forEach(button=>button.addEventListener("click",()=>{if(!accountUser){const modal=$("#offlineLoginModal");if(modal)modal.hidden=false;return;}activeDownloadFolder=button.dataset.downloadFolder;renderDownloads();}));
 function renderDownloads(){
  const box=$("#downloadsGrid"),empty=$("#downloadsEmpty"),count=$("#downloadsCount");if(!box)return;
  const filtered=offlineItems.filter(x=>activeDownloadFolder==="all"||(activeDownloadFolder==="music"?String(x.type).toLowerCase()==="music":String(x.type).toLowerCase()!=="music"));
- count.textContent=offlineItems.length+" saved";
+ count.textContent=accountUser?offlineItems.length+" saved":"Login required";
+ if(!accountUser){box.hidden=true;empty.hidden=false;empty.textContent="Log in or register to access My Downloads and save media for offline playback.";return;}
  box.hidden=activeDownloadFolder==="none";
  empty.hidden=activeDownloadFolder==="none"||filtered.length>0;
  if(activeDownloadFolder==="none"){box.innerHTML="";document.querySelectorAll("[data-download-folder]").forEach(button=>button.classList.remove("active"));return;}

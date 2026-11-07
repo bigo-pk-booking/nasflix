@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
         }
         webView.clearCache(true);
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261107-nativeaudio1");
+        webView.loadUrl("https://nasflix-dxt.pages.dev/?app=1&appBuild=20261107-nativeaudio2");
     }
 
 
@@ -76,7 +76,9 @@ public class MainActivity extends Activity {
         Intent command = new Intent(this, PlaybackService.class);
         command.setAction(action);
         if (extras != null) command.putExtras(extras);
-        if (Build.VERSION.SDK_INT >= 26) startForegroundService(command);
+        boolean needsForeground = PlaybackService.ACTION_PLAY.equals(action) ||
+            (PlaybackService.ACTION_SET_QUEUE.equals(action) && extras != null && extras.getBooleanExtra(PlaybackService.EXTRA_AUTOPLAY, true));
+        if (Build.VERSION.SDK_INT >= 26 && needsForeground) startForegroundService(command);
         else startService(command);
     }
 

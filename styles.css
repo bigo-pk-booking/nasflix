@@ -895,3 +895,12 @@ body{padding-bottom:76px!important}
   #playerModal.minimized{left:10px!important;right:10px!important;bottom:calc(66px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;z-index:510!important}
   #playerModal.minimized .player-card{width:100%!important;box-sizing:border-box!important}
 }
+
+
+/* Remove the oversized empty tail below the music library; keep nav fixed. */
+@media(max-width:850px){
+  body.music-page{padding-bottom:0!important;margin-bottom:0!important}
+  body.music-page main#home{padding-bottom:0!important;margin-bottom:0!important}
+  body.music-page main#home>.music-section{padding-bottom:0!important;margin-bottom:0!important}
+  body.music-page main#home>.music-section>.music-list{margin-bottom:8px!important}
+}

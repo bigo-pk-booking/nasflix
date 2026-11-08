@@ -376,6 +376,13 @@ function setMediaTab(type){
 document.querySelectorAll("[data-media-tab]").forEach(tab=>tab.addEventListener("click",()=>setMediaTab(tab.dataset.mediaTab)));
 setMediaTab("Movie");
 mainNav?.querySelectorAll("a").forEach(link=>link.addEventListener("click",event=>{
+  if(link.id==="deviceHelpOpen"){
+    event.preventDefault();
+    const modal=$("#deviceHelp");
+    if(modal){modal.hidden=false;document.body.classList.add("device-help-open");}
+    closeNav();
+    return;
+  }
   const page=link.dataset.page,filter=link.dataset.menuFilter;
   if(page){event.preventDefault();showNasflixPage(page);}
   else if(filter){event.preventDefault();setMediaTab(filter==="Music"?"Music":filter==="Series"?"Series":filter==="AI Video"?"AI Video":"Movie");if(!["Music","Series","AI Video","Movie"].includes(filter)){activeFilter=filter;render();}}
@@ -668,14 +675,6 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-episode-id
   steps.innerHTML="<h3>Settings to check</h3><ol>"+guide.map(x=>"<li>"+x.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+"</li>").join("")+"</ol>";
   function show(){modal.hidden=false;document.body.classList.add("device-help-open");}
   function hide(){modal.hidden=true;document.body.classList.remove("device-help-open");}
-  // Capture the help-link tap before any page-navigation handler can swallow it.
-  document.addEventListener("click",e=>{
-    const trigger=e.target.closest("#deviceHelpOpen");
-    if(!trigger)return;
-    e.preventDefault();
-    e.stopPropagation();
-    show();
-  },true);
   modal.querySelectorAll("[data-device-help-close]").forEach(el=>el.addEventListener("click",hide));
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.hidden)hide();});
 })();

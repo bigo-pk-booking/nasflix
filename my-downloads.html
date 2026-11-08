@@ -83,7 +83,8 @@ grid.addEventListener("click",async e=>{
   }catch(error){alert(error.message||"Unable to play this saved file.");}
  }
 });
-function toggleOfflinePlayer(){const player=$("#offlinePlayer"),mini=player.classList.toggle("minimized");$("#offlinePlayerMinimize").textContent=mini?"↗":"−";if(!mini)player.scrollIntoView({behavior:"smooth",block:"center"});}\n$("#offlinePlayerMinimize").addEventListener("click",toggleOfflinePlayer);\n$("#offlinePlayerTitle").addEventListener("click",()=>{if($("#offlinePlayer").classList.contains("minimized"))toggleOfflinePlayer();});
+function toggleOfflinePlayer(){const player=$("#offlinePlayer"),mini=player.classList.toggle("minimized");$("#offlinePlayerMinimize").textContent=mini?"↗":"−";if(!mini)player.scrollIntoView({behavior:"smooth",block:"center"});}
+$("#offlinePlayerMinimize").addEventListener("click",toggleOfflinePlayer);\n$("#offlinePlayerTitle").addEventListener("click",()=>{if($("#offlinePlayer").classList.contains("minimized"))toggleOfflinePlayer();});
 $("#offlinePlayerClose").addEventListener("click",()=>{const player=$("#offlinePlayer"),media=player.querySelector("audio,video");if(media){media.pause();media.removeAttribute("src");media.load();}$("#offlinePlayerContent").replaceChildren();player.hidden=true;player.classList.remove("minimized");});
 $("#pageLogin").addEventListener("click",()=>location.href="index.html?auth=login");
 $("#pageLogout").addEventListener("click",async()=>{try{await fetch("/api/account/logout",{method:"POST",credentials:"same-origin"});}catch{}location.reload();});

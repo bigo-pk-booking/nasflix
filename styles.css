@@ -1200,3 +1200,32 @@ body.app-mode nav#mediaTabs.media-tabs{
   .episode-nav-buttons{display:none!important}
   .modal-info{padding-bottom:0!important;margin-bottom:0!important}
 }
+
+
+/* Final music-page bottom clearance: last track clears the fixed nav; add dock room only when minimized. */
+@media(max-width:850px){
+  body.music-page main#home,
+  body.app-mode.music-page main#home{
+    padding-bottom:0!important;
+    margin-bottom:0!important;
+  }
+  body.music-page main#home>.music-section,
+  body.app-mode.music-page main#home>.music-section{
+    padding-bottom:calc(68px + env(safe-area-inset-bottom,0px))!important;
+    margin-bottom:0!important;
+  }
+  body.music-player-minimized.music-page main#home>.music-section,
+  body.app-mode.music-player-minimized.music-page main#home>.music-section{
+    padding-bottom:calc(142px + env(safe-area-inset-bottom,0px))!important;
+  }
+  body.music-page main#home>.music-section>.music-list,
+  body.app-mode.music-page main#home>.music-section>.music-list{
+    margin-bottom:0!important;
+    padding-bottom:0!important;
+    scroll-margin-bottom:calc(68px + env(safe-area-inset-bottom,0px));
+  }
+  body.music-player-minimized.music-page main#home>.music-section>.music-list,
+  body.app-mode.music-player-minimized.music-page main#home>.music-section>.music-list{
+    scroll-margin-bottom:calc(142px + env(safe-area-inset-bottom,0px));
+  }
+}

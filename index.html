@@ -162,6 +162,10 @@
     <div id="videoUploadArea" class="admin-upload-area" hidden>
     <div class="bulk-upload-panel" style="margin:22px 0;padding:18px;border:1px solid #51406a;border-radius:18px;background:linear-gradient(145deg,#21162f,#12101b)">
       <p class="eyebrow">BATCH UPLOAD</p><h3 style="margin:0 0 8px">Upload videos</h3><p class="upload-hint">Video files only. Select multiple videos; each filename becomes its own title.</p>
+      <div class="form-row bulk-video-meta">
+        <label>Type<select id="bulkVideoType"><option value="Movie">Movie</option><option value="AI Video">AI Video</option><option value="Series">Series</option></select></label>
+        <label>Genre<select id="bulkVideoGenre"><option>Animation</option><option>Anime</option><option>Action</option><option>Comedy</option><option>Horror</option><option>Romance</option><option>Fantasy</option><option>Sci-Fi</option><option>Documentary</option><option>Drama</option><option>Thriller</option><option>Music</option><option>Independent</option></select></label>
+      </div>
       <label>Video collection / Creator name (optional)<input id="bulkVideoArtist" maxlength="90" placeholder="Creator or collection name"></label>
       <div class="batch-link-box" style="margin-top:16px;padding-top:16px;border-top:1px solid #ffffff20">
         <h4 style="margin:0 0 8px">Batch episode links</h4>

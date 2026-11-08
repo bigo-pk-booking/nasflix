@@ -1264,3 +1264,18 @@ body.app-mode nav#mediaTabs.media-tabs{
 .catalogue-folder>summary small{margin-left:auto;color:#bca9d2;font-size:12px;font-weight:500}
 .catalogue-folder-content{padding:0 12px 12px}
 .catalogue-folder-content .admin-row{margin-top:8px}
+
+
+/* Admin panel navigation matching the approved layout */
+.admin-access-top{margin:18px 0 20px;padding:18px;border:1px solid #6940a0;border-radius:18px;background:linear-gradient(145deg,#251238,#100d1b);box-shadow:0 12px 34px #0005}
+.admin-access-top h3{margin:4px 0 12px;color:#fff;font:800 19px Manrope,sans-serif}
+.admin-access-top>label{display:block;margin:0}
+.admin-access-top input{width:100%;box-sizing:border-box}
+.admin-upload-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0 8px}
+.admin-choice{min-height:112px;border:1px solid #a14bea;border-radius:17px;background:linear-gradient(145deg,#8735d7,#a52ad2);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font:800 17px Manrope,sans-serif;cursor:pointer}
+.admin-choice span{font-size:28px;line-height:1}
+.admin-choice.active{outline:3px solid #d6a7ff;box-shadow:0 0 24px #a855f755}
+.admin-choice-hint{margin:8px 0 16px;color:#bca9d2;font-size:12px}
+.admin-upload-area[hidden]{display:none!important}
+.admin-upload-area{margin:14px 0}
+@media(max-width:480px){.admin-upload-choices{gap:8px}.admin-choice{min-height:94px;font-size:15px}}

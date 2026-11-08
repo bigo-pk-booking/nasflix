@@ -1172,3 +1172,31 @@ body.app-mode nav#mediaTabs.media-tabs{
 .episode-now{font-size:8px}
 .episode-nav-buttons{display:none!important}
 @media(max-width:520px){.episode-card{flex-basis:116px}.episode-thumb{min-height:54px}}
+
+/* Mobile series player: reclaim vertical space for the video */
+@media(max-width:650px){
+  .modal{padding:4px!important;align-items:center!important}
+  .modal-card.player-card{padding:8px!important;border-radius:12px!important;max-height:calc(100dvh - 82px)!important;overflow-y:auto!important}
+  .player-screen{width:100%!important;aspect-ratio:16/9!important;border-radius:9px!important}
+  .modal-info .eyebrow{font-size:8px!important;letter-spacing:1.4px!important;margin:7px 0 3px!important}
+  .modal-info h2{font-size:19px!important;line-height:1.12!important;letter-spacing:-.5px!important;margin:3px 0!important}
+  .modal-info>p:not(.eyebrow){font-size:10px!important;line-height:1.35!important;margin:4px 0!important}
+  .modal-info .download-link{font-size:10px!important;margin:3px 0!important}
+  .offline-save-player{font-size:9px!important;padding:6px 10px!important;margin:4px 6px 4px 0!important}
+  .series-episodes{margin-top:8px!important;padding-top:7px!important}
+  .episode-heading{margin-bottom:4px!important}
+  .episode-heading .eyebrow{font-size:9px!important;letter-spacing:1.4px!important}
+  .episode-heading>span,.episode-season-single{font-size:9px!important}
+  .episode-season-bar{margin:0 0 5px!important;min-height:24px!important}
+  .episode-strip{gap:6px!important;padding:0 1px 4px!important}
+  .episode-card{flex-basis:100px!important;gap:4px!important;padding:5px!important;border-radius:9px!important}
+  .episode-card.current{padding:4px!important}
+  .episode-thumb{min-height:42px!important;padding:5px!important;border-radius:7px!important}
+  .episode-thumb .episode-number{width:27px!important;height:27px!important;font-size:9px!important}
+  .episode-card-play{width:23px!important;height:23px!important;font-size:10px!important}
+  .episode-card .episode-copy b{font-size:9px!important;line-height:1.15!important}
+  .episode-card .episode-copy small{font-size:8px!important;margin-top:2px!important}
+  .episode-now{font-size:7px!important;letter-spacing:.5px!important}
+  .episode-nav-buttons{display:none!important}
+  .modal-info{padding-bottom:0!important;margin-bottom:0!important}
+}

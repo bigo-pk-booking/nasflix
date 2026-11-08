@@ -571,7 +571,7 @@ async function loadRemote(){
   try{
     const response=await fetch("/api/media");if(!response.ok)throw new Error("Catalogue unavailable offline.");
     const data=await response.json();
-    const remote=data.map((x,i)=>({...x,id:x.id,url:x.media_url,download:!!x.allow_download,seriesTitle:x.series_title||"",seasonNumber:x.season_number||1,albumTitle:x.album_title||"",episodeNumber:x.episode_number||null,episodeTitle:x.episode_title||"",remote:true,art:"✦",c1:["#6d28d9","#be185d","#0369a1","#0f766e"][i%4],c2:"#171026"}));
+    const remote=data.map((x,i)=>({...x,id:x.id,url:x.media_url,download:!!x.allow_download,seriesTitle:x.series_title||"",seasonNumber:x.season_number||1,albumTitle:x.album_title||"",episodeNumber:x.episode_number||null,episodeTitle:x.episode_title||"",poster_url:x.poster_url||"",thumbnail:x.poster_url||"",remote:true,art:"✦",c1:["#6d28d9","#be185d","#0369a1","#0f766e"][i%4],c2:"#171026"}));
     items=remote;localStorage.setItem("nasflix-catalogue-cache",JSON.stringify(remote));musicBatchLoading=false;render();
   }catch(error){console.warn("NASFLIX media API is not configured yet.",error);try{items=JSON.parse(localStorage.getItem("nasflix-catalogue-cache")||"[]");}catch{items=[];}musicBatchLoading=false;render();}
 }

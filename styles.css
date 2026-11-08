@@ -740,3 +740,33 @@ body.app-mode .ad-banner-slot iframe{width:100%!important}
     padding:0 8px 10px!important;
   }
 }
+
+
+/* Further compact category tiles and section spacing on Android phones. */
+@media(max-width:600px){
+  body.app-mode .music-section>.music-category-section{
+    padding:8px 2px 10px!important;
+    margin:0!important;
+  }
+  body.app-mode .music-section .music-category-section h3{
+    font-size:20px!important;
+    margin:6px 0 10px!important;
+  }
+  body.app-mode .music-section .music-category-grid{
+    gap:8px!important;
+  }
+  body.app-mode .music-section .music-category-card{
+    min-height:64px!important;
+    height:auto!important;
+    padding:10px 12px!important;
+    border-radius:14px!important;
+    font-size:13px!important;
+  }
+  body.app-mode .music-section .music-category-card b,
+  body.app-mode .music-section .music-category-card strong{
+    font-size:14px!important;
+  }
+  body.app-mode .music-section>.music-list{
+    margin-top:0!important;
+  }
+}

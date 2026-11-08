@@ -1119,6 +1119,17 @@ body.app-mode nav#mediaTabs.media-tabs{
 }
 #playerModal.minimized .mini-player-progress span{display:block!important;width:0;height:100%;background:#fff!important}
 @media(max-width:850px){
- body.music-page main#home,body.app-mode.music-page main#home{padding-bottom:calc(142px + env(safe-area-inset-bottom))!important}
+ body.music-page main#home,body.app-mode.music-page main#home{padding-bottom:0!important}
  body.music-page main#home>.music-section,body.app-mode.music-page main#home>.music-section{padding-bottom:0!important}
+ body.music-player-minimized.music-page main#home,
+ body.app-mode.music-player-minimized.music-page main#home{
+   padding-bottom:calc(142px + env(safe-area-inset-bottom))!important;
+ }
+ body.music-player-minimized.music-page main#home>.music-section,
+ body.app-mode.music-player-minimized.music-page main#home>.music-section{
+   padding-bottom:0!important;
+ }
 }
+
+/* Only reserve mini-player space while it is actually minimized. */
+@media(max-width:850px){body.music-player-minimized.music-page .music-list{scroll-margin-bottom:142px!important}}

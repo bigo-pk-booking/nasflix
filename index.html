@@ -170,6 +170,7 @@
       <div class="batch-link-box" style="margin-top:16px;padding-top:16px;border-top:1px solid #ffffff20">
         <h4 style="margin:0 0 8px">Batch episode links</h4>
         <p class="upload-hint">Paste one video URL per line. Optional format: Episode title | video URL. NASFLIX will add them as consecutive episodes in the same series.</p>
+        <div class="form-row"><label>Type<select id="bulkLinkType"><option value="Series" selected>Series</option><option value="Movie">Movie</option><option value="AI Video">AI Video</option></select></label><label>Genre<select id="bulkLinkGenre"><option>Animation</option><option>Anime</option><option>Action</option><option>Comedy</option><option>Horror</option><option>Romance</option><option>Fantasy</option><option>Sci-Fi</option><option>Documentary</option><option>Drama</option><option>Thriller</option><option>Music</option><option>Independent</option></select></label></div>
         <label>Series / Folder name<input id="bulkLinkSeries" maxlength="90" placeholder="e.g. OJT Hours of Love"></label>
         <div class="form-row"><label>Season number<input id="bulkLinkSeason" type="number" min="1" max="99" value="1"></label><label>Starting episode number<input id="bulkLinkStartEpisode" type="number" min="1" max="999" value="1"></label></div>
         <label>Video links (one per line)<textarea id="bulkVideoLinks" rows="6" maxlength="50000" placeholder="https://example.com/episode-1.mp4&#10;Episode 2 | https://example.com/episode-2.mp4"></textarea></label>

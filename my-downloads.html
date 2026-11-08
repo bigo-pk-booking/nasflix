@@ -8,6 +8,17 @@
 .download-page .offline-player-actions button{width:38px;height:38px;border:1px solid #604477;border-radius:50%;background:#251831;color:#e9d4ff;font-size:24px;line-height:1}
 .download-page .offline-player-content video,.download-page .offline-player-content audio{display:block;width:100%;max-height:60vh;border-radius:12px;background:#050409}
 .download-page .offline-player-card.minimized .offline-player-content{display:none}
+/* Floating mini-player stays above the page while browsing downloads */
+.download-page .offline-player-card.minimized{position:fixed;z-index:1200;left:12px;right:12px;bottom:calc(78px + env(safe-area-inset-bottom,0px));width:auto;max-width:680px;margin:0 auto;padding:10px 12px;border:1px solid #a66be0;border-radius:18px;background:rgba(27,18,39,.97);box-shadow:0 8px 30px #000b;backdrop-filter:blur(16px)}
+.download-page .offline-player-card.minimized .offline-player-toolbar{padding:0;min-height:42px}
+.download-page .offline-player-card.minimized .offline-player-toolbar>b{font-size:13px;flex:1}
+.download-page .offline-player-card.minimized .offline-player-actions button{width:38px;height:38px}
+.download-page .offline-player-card.minimized #offlinePlayerMinimize{font-size:0}
+.download-page .offline-player-card.minimized #offlinePlayerMinimize::before{content:"↗";font-size:20px}
+.download-page .offline-player-card.minimized #offlinePlayerClose{font-size:22px}
+.download-page .offline-player-card.minimized #offlinePlayerTitle{cursor:pointer}
+@media(max-width:520px){.download-page .offline-player-card.minimized{left:10px;right:10px;bottom:calc(72px + env(safe-area-inset-bottom,0px));}}
+
 .download-page .back-home{color:#c7a2f2;text-decoration:none}@media(max-width:650px){.download-page{padding:28px 16px 70px}.download-page .download-folders{gap:9px}.download-page .download-folder{min-height:145px;padding:14px;border-radius:19px}.download-page .download-folder span{width:48px;height:48px;border-radius:15px;font-size:23px}.download-page .download-folder b{font-size:18px}.download-page .download-folder small{font-size:11px}}
 </style></head><body>
 <header class="topbar"><div class="topbar-inner"><button class="menu-toggle" id="menuToggle" aria-label="Open navigation menu" aria-expanded="false"><span></span><span></span><span></span></button><a class="brand" href="index.html"><span class="brand-mark">N</span> NAS<span>FLIX</span></a><div class="header-actions"><a class="back-home" href="index.html">Home</a><button id="pageLogin" class="header-login">Log in</button><button id="pageLogout" class="header-logout" hidden>Log out</button></div></div><nav class="main-nav" id="mainNav"><a href="index.html">Home</a><a href="download.html">Download App</a><a class="active" href="my-downloads.html">My Downloads</a><a href="index.html#movies">Movies</a><a href="index.html#videos">AI Videos</a><a href="index.html#series">Series</a><a href="index.html#music">Music</a></nav></header>
@@ -72,7 +83,7 @@ grid.addEventListener("click",async e=>{
   }catch(error){alert(error.message||"Unable to play this saved file.");}
  }
 });
-$("#offlinePlayerMinimize").addEventListener("click",()=>{$("#offlinePlayer").classList.toggle("minimized");$("#offlinePlayerMinimize").textContent=$("#offlinePlayer").classList.contains("minimized")?"+":"−";});
+function toggleOfflinePlayer(){const player=$("#offlinePlayer"),mini=player.classList.toggle("minimized");$("#offlinePlayerMinimize").textContent=mini?"↗":"−";if(!mini)player.scrollIntoView({behavior:"smooth",block:"center"});}\n$("#offlinePlayerMinimize").addEventListener("click",toggleOfflinePlayer);\n$("#offlinePlayerTitle").addEventListener("click",()=>{if($("#offlinePlayer").classList.contains("minimized"))toggleOfflinePlayer();});
 $("#offlinePlayerClose").addEventListener("click",()=>{const player=$("#offlinePlayer"),media=player.querySelector("audio,video");if(media){media.pause();media.removeAttribute("src");media.load();}$("#offlinePlayerContent").replaceChildren();player.hidden=true;player.classList.remove("minimized");});
 $("#pageLogin").addEventListener("click",()=>location.href="index.html?auth=login");
 $("#pageLogout").addEventListener("click",async()=>{try{await fetch("/api/account/logout",{method:"POST",credentials:"same-origin"});}catch{}location.reload();});

@@ -492,22 +492,32 @@ $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
  const status=$("#bulkVideoLinksStatus"),button=$("#bulkVideoLinksSubmit"),token=$("#adminToken").value.trim();
  const seriesTitle=$("#bulkLinkSeries").value.trim(),seasonNumber=Math.max(1,Math.min(99,Number($("#bulkLinkSeason").value)||1)),startEpisode=Math.max(1,Math.min(999,Number($("#bulkLinkStartEpisode").value)||1));
  const lines=$("#bulkVideoLinks").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ const sharedPoster=$("#bulkLinksSharedPoster").files[0]||null,individual=[...$("#bulkLinksIndividualPosters").files];
  if(!token){status.textContent="Enter your Admin access key first.";return;}
  if(!seriesTitle){status.textContent="Enter the series / folder name.";return;}
  if(!lines.length){status.textContent="Paste at least one video link.";return;}
  if(lines.length>200){status.textContent="Maximum 200 episode links per batch.";return;}
+ if(sharedPoster&&sharedPoster.size>5*1024*1024){status.textContent="Shared thumbnail maximum size is 5 MB.";return;}
+ const badPoster=individual.find(file=>file.size>5*1024*1024||!/^image\/(jpeg|png|webp)$/i.test(file.type));
+ if(badPoster){status.textContent="Each individual thumbnail must be JPG, PNG or WebP and no larger than 5 MB.";return;}
+ if(individual.length&&individual.length!==lines.length){status.textContent="Select exactly one individual thumbnail per episode, in the same order as the links, or clear the individual thumbnails field.";return;}
  const entries=lines.map((line,index)=>{let title="",url=line;const split=line.indexOf("|");if(split>0){title=line.slice(0,split).trim();url=line.slice(split+1).trim();}if(!/^https?:\/\//i.test(url))return {error:"Line "+(index+1)+" is not a valid http(s) URL."};if(!title){try{const part=decodeURIComponent(new URL(url).pathname.split("/").filter(Boolean).pop()||"Episode "+(startEpisode+index));title=cleanFileTitle(part);}catch{title="Episode "+(startEpisode+index);}}return {title,url,episodeNumber:startEpisode+index};});
  const invalid=entries.find(x=>x.error);if(invalid){status.textContent=invalid.error;return;}
  if(startEpisode+entries.length-1>999){status.textContent="Episode numbers cannot exceed 999.";return;}
  button.disabled=true;let done=0;
  try{
-  for(const entry of entries){
+  for(let index=0;index<entries.length;index++){
+   const entry=entries[index],poster=individual[index]||sharedPoster;
    status.textContent="Adding episode "+entry.episodeNumber+" of "+(startEpisode+entries.length-1)+": "+entry.title;
-   const response=await fetch("/api/media",{method:"POST",headers:{"authorization":"Bearer "+token,"content-type":"application/json"},body:JSON.stringify({title:entry.title,type:"Series",genre:"Independent",description:"",url:entry.url,allowDownload:false,seriesTitle,seasonNumber,episodeNumber:entry.episodeNumber,episodeTitle:entry.title})});
+   const form=new FormData();
+   const data={title:entry.title,type:"Series",genre:"Independent",artist:"",albumTitle:"",description:"",url:entry.url,allowDownload:"false",seriesTitle,seasonNumber:String(seasonNumber),episodeNumber:String(entry.episodeNumber),episodeTitle:entry.title};
+   Object.entries(data).forEach(([key,value])=>form.append(key,value));
+   if(poster)form.append("posterFile",poster,poster.name);
+   const response=await fetch("/api/media",{method:"POST",headers:{"authorization":"Bearer "+token},body:form});
    const result=await response.json().catch(()=>({}));if(!response.ok)throw new Error(result.error||"Failed to add episode "+entry.episodeNumber+".");done++;
   }
-  status.textContent="Success! "+done+" episode links added to "+seriesTitle+".";
-  $("#bulkVideoLinks").value="";await loadRemote();
+  status.textContent="Success! "+done+" episodes and thumbnails added to "+seriesTitle+".";
+  $("#bulkVideoLinks").value="";$("#bulkLinksSharedPoster").value="";$("#bulkLinksIndividualPosters").value="";await loadRemote();
  }catch(error){status.textContent=done+" of "+entries.length+" added. Stopped: "+error.message+" Remove already-added lines before retrying to avoid duplicates.";}
  finally{button.disabled=false;}
 });

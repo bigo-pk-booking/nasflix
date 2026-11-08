@@ -468,7 +468,7 @@ async function uploadBulkBatch(kind){
       const data={title,type:music?"Music":"Movie",genre:music?"Music":"Independent",artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
       Object.entries(data).forEach(([key,value])=>form.append(key,String(value)));
       form.append("file",file);
-      if(poster&&completed===0)form.append("posterFile",poster);
+      if(poster)form.append("posterFile",poster);
       status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+title+(tags.title?" · title detected from music tags":" · using filename");
       await uploadWithProgress("/api/media",form,token,(loaded,total)=>{
         const pct=total?Math.round(loaded/total*100):0;

@@ -1289,16 +1289,8 @@ body.app-mode nav#mediaTabs.media-tabs{
 .dashboard-splash-logo{display:flex;align-items:center;gap:13px;font:900 clamp(30px,8vw,42px) Manrope,sans-serif;letter-spacing:.12em}
 .dashboard-splash-logo em{font-style:normal;color:#bd8aff}
 .dashboard-splash-logo .brand-mark{display:grid;place-items:center;width:54px;height:54px;border-radius:17px;background:linear-gradient(135deg,#8540e9,#d12bd4);box-shadow:0 0 35px #a34cff77;color:#fff;font-size:30px;letter-spacing:0}
-.dashboard-splash-orbit{position:relative;width:86px;height:86px;margin:44px 0 25px;border:2px solid #76509a;border-top-color:#d7b45e;border-radius:50%;animation:dashboardOrbit 1.2s linear infinite}
-.dashboard-splash-orbit:before,.dashboard-splash-orbit:after{content:"";position:absolute;border:1px solid #9c6bc4;border-radius:50%;inset:9px}
-.dashboard-splash-orbit:after{inset:20px;border-color:#c49b55}
-.dashboard-splash-orbit span{position:absolute;width:8px;height:8px;border-radius:50%;background:#e4c16c;box-shadow:0 0 14px #e4c16c;top:5px;left:17px}
-.dashboard-splash-orbit span:nth-child(2){top:auto;left:auto;right:4px;bottom:23px;background:#c17aff;box-shadow:0 0 14px #c17aff}
-.dashboard-splash-orbit span:nth-child(3){top:auto;bottom:4px;left:27px;width:5px;height:5px}
-.dashboard-splash-status{margin:0;color:#d9b7ff;font:800 13px Manrope,sans-serif;letter-spacing:.22em}
-.dashboard-splash-name{min-height:24px;margin:13px 0 0;color:#f1d58d;font:700 17px Manrope,sans-serif;letter-spacing:.08em;overflow-wrap:anywhere}
-.dashboard-splash-progress{width:min(220px,70%);height:3px;margin-top:28px;border-radius:99px;background:#3c2b4b;overflow:hidden}
-.dashboard-splash-progress span{display:block;width:38%;height:100%;border-radius:99px;background:linear-gradient(90deg,#9860ed,#e3c16d);animation:dashboardProgress 1.35s ease-in-out infinite}
-@keyframes dashboardOrbit{to{transform:rotate(360deg)}}
+.dashboard-splash-ring{width:112px;height:112px;margin:38px 0 25px;padding:7px;border-radius:50%;background:conic-gradient(from -90deg,#d7b45e var(--load-progress),#493052 var(--load-progress));box-shadow:0 0 32px #a34cff44;transition:background .08s linear}
+.dashboard-splash-ring-inner{width:100%;height:100%;display:grid;place-items:center;border:1px solid #76509a;border-radius:50%;background:radial-gradient(circle,#1c1029 0%,#0a0710 75%)}
+.dashboard-splash-ring-inner span{font:800 25px Manrope,sans-serif;color:#f1d58d;font-variant-numeric:tabular-nums}
 @keyframes dashboardProgress{0%{transform:translateX(-110%)}100%{transform:translateX(370%)}}
-@media(prefers-reduced-motion:reduce){.dashboard-splash-orbit,.dashboard-splash-progress span{animation:none}}
+@media(prefers-reduced-motion:reduce){.dashboard-splash-ring{transition:none}}

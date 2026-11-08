@@ -886,35 +886,3 @@ body.app-mode .ad-banner-slot iframe{width:100%!important}
     box-sizing:border-box!important;
   }
 }
-
-
-/* Android music browsing: show a 15-track window, then scroll inside All Songs.
-   Keep the artist carousel horizontally swipeable on touch screens. */
-@media(max-width:850px){
-  body.app-mode main#home>.music-section>.music-list{
-    max-height:1280px!important;
-    overflow-y:auto!important;
-    overflow-x:hidden!important;
-    overscroll-behavior:contain;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:thin;
-  }
-  body.app-mode main#home>.music-section>.artist-browser{
-    min-width:0!important;
-    overflow:hidden!important;
-  }
-  body.app-mode main#home>.music-section>.artist-browser .artist-filters{
-    display:flex!important;
-    width:100%!important;
-    max-width:100%!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-    flex-wrap:nowrap!important;
-    touch-action:pan-x!important;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior-x:contain;
-  }
-  body.app-mode main#home>.music-section>.artist-browser .artist-filter{
-    flex:0 0 86px!important;
-  }
-}

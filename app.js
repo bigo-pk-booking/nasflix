@@ -599,6 +599,5 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-episode-id
    const page=btn.dataset.bottomPage;
    document.querySelectorAll("[data-bottom-page]").forEach(b=>b.classList.toggle("active",b===btn));
    if(page==="search"){const input=$("#searchInput");input?.focus();window.scrollTo({top:0,behavior:"smooth"});}
-   else if(page==="create"){if($("#adminModal")){$("#adminModal").classList.add("open");$("#adminModal").setAttribute("aria-hidden","false");}}
    else showNasflixPage(page);
  }));

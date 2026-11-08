@@ -62,6 +62,17 @@ function render(){
 let accountUser=null,userPlaylists=[],activePlaylistId="",playlistSaveTimer=null,guestMode=true;
 async function accountRequest(path,body){let response;try{response=await fetch("/api/account/"+path,{method:body===undefined?"GET":"POST",headers:body===undefined?{}:{"content-type":"application/json"},body:body===undefined?undefined:JSON.stringify(body),credentials:"same-origin",cache:"no-store"});}catch(e){throw new Error("Cannot connect to NASFLIX server. Check your internet connection.");}const raw=await response.text();let data={};try{data=raw?JSON.parse(raw):{};}catch{}if(!response.ok)throw new Error(data.error||("Server error ("+response.status+"). "+(raw&&!raw.startsWith("<")?raw.slice(0,160):"Please check Cloudflare Pages Functions and D1 database settings.")));return data;}
 function accountMessage(message){const el=$("#accountMessage");if(el)el.textContent=message;}
+async function showDashboardSplash(status,name){
+ const splash=$("#dashboardSplash"),statusEl=$("#dashboardSplashStatus"),nameEl=$("#dashboardSplashName");
+ if(!splash)return;
+ statusEl.textContent=status;
+ nameEl.textContent=name?("WELCOME, "+String(name).toUpperCase()):"";
+ splash.hidden=false;splash.classList.remove("splash-leaving");
+ await new Promise(resolve=>setTimeout(resolve,1550));
+ splash.classList.add("splash-leaving");
+ await new Promise(resolve=>setTimeout(resolve,450));
+ splash.hidden=true;splash.classList.remove("splash-leaving");
+}
 function renderUserPlaylists(){
  const list=$("#myPlaylistList"),detail=$("#playlistDetail");if(!list)return;
  list.innerHTML=userPlaylists.map(p=>{const first=p.trackIds.map(id=>items.find(x=>String(x.id)===String(id))).find(Boolean);return '<div class="my-playlist-card '+(p.id===viewingPlaylistId?"selected":"")+'"><button type="button" class="playlist-open" data-open-playlist="'+esc(p.id)+'"><span class="playlist-icon">'+(first?'<img src="'+esc(musicArtwork(first))+'" alt="">':'♫')+'</span><span><b>'+esc(p.name)+'</b><small>'+p.trackIds.length+' songs</small></span><span class="playlist-view-label">View →</span></button><button type="button" class="playlist-delete" data-delete-playlist="'+esc(p.id)+'">×</button></div>';}).join("")||'<p class="playlist-empty">No playlists yet. Create your first one.</p>';
@@ -71,7 +82,10 @@ function renderUserPlaylists(){
 }
 async function syncPlaylists(){clearTimeout(playlistSaveTimer);await accountRequest("playlists",{playlists:userPlaylists});}
 function schedulePlaylistSync(){clearTimeout(playlistSaveTimer);playlistSaveTimer=setTimeout(()=>syncPlaylists().catch(e=>accountMessage(e.message)),500);}
-function enterGuestMode(){guestMode=true;$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;}
+async function enterGuestMode(){
+ guestMode=true;accountUser=null;$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;
+ await showDashboardSplash("ACCESSING GUEST DASHBOARD","");
+}
 async function refreshAccount(){try{const data=await accountRequest("me");accountUser=data.user;if(accountUser){guestMode=false;$("#adminOpen")?.toggleAttribute("hidden",accountUser.role!=="admin");$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=false;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=false;$("#accountSignedIn").hidden=false;$("#accountStatus").textContent=accountUser.role==="admin"?"Admin account":"Signed in";$("#accountEmailLabel").textContent=accountUser.email;const saved=await accountRequest("playlists");userPlaylists=Array.isArray(saved.playlists)?saved.playlists:[];activePlaylistId=userPlaylists[0]?.id||"";renderUserPlaylists();if(accountUser.role==="admin"){const admin=$("#adminModal");if(admin){admin.classList.add("open");admin.setAttribute("aria-hidden","false");}}}else{$("#adminOpen")?.setAttribute("hidden","");userPlaylists=[];$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountSignedIn").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;$("#accountStatus").textContent="Not signed in";}}catch(e){$("#adminOpen")?.setAttribute("hidden","");accountMessage(e.message);$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;}}
 let accountActionBusy=false;
 async function accountAction(kind){
@@ -85,6 +99,7 @@ async function accountAction(kind){
  try{
   const data=await accountRequest(kind,{email,password,...(kind==="register"?{fullName}:{})});
   accountUser=data.user;$("#accountPassword").value="";$("#accountConfirmPassword").value="";$("#accountFullName").value="";
+  await showDashboardSplash("ACCESSING USER DASHBOARD",accountUser?.fullName||accountUser?.name||accountUser?.displayName||fullName||accountUser?.email||"");
   await refreshAccount();
   accountMessage(kind==="register"?"Account created successfully!":"Welcome back!");
  }catch(e){accountMessage(e.message||"Something went wrong. Please try again.");}

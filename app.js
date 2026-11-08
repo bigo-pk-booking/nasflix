@@ -491,12 +491,12 @@ $("#bulkVideoSubmit")?.addEventListener("click",()=>uploadBulkBatch("video"));
 $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
  const status=$("#bulkVideoLinksStatus"),button=$("#bulkVideoLinksSubmit"),token=$("#adminToken").value.trim();
  const seriesTitle=$("#bulkLinkSeries").value.trim(),seasonNumber=Math.max(1,Math.min(99,Number($("#bulkLinkSeason").value)||1)),startEpisode=Math.max(1,Math.min(999,Number($("#bulkLinkStartEpisode").value)||1));
- const lines=$("#bulkVideoLinks").value.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+ const lines=$("#bulkVideoLinks").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  if(!token){status.textContent="Enter your Admin access key first.";return;}
  if(!seriesTitle){status.textContent="Enter the series / folder name.";return;}
  if(!lines.length){status.textContent="Paste at least one video link.";return;}
  if(lines.length>200){status.textContent="Maximum 200 episode links per batch.";return;}
- const entries=lines.map((line,index)=>{let title="",url=line;const split=line.indexOf("|");if(split>0){title=line.slice(0,split).trim();url=line.slice(split+1).trim();}if(!/^https?:\\/\\//i.test(url))return {error:"Line "+(index+1)+" is not a valid http(s) URL."};if(!title){try{const part=decodeURIComponent(new URL(url).pathname.split("/").filter(Boolean).pop()||"Episode "+(startEpisode+index));title=cleanFileTitle(part);}catch{title="Episode "+(startEpisode+index);}}return {title,url,episodeNumber:startEpisode+index};});
+ const entries=lines.map((line,index)=>{let title="",url=line;const split=line.indexOf("|");if(split>0){title=line.slice(0,split).trim();url=line.slice(split+1).trim();}if(!/^https?:\/\//i.test(url))return {error:"Line "+(index+1)+" is not a valid http(s) URL."};if(!title){try{const part=decodeURIComponent(new URL(url).pathname.split("/").filter(Boolean).pop()||"Episode "+(startEpisode+index));title=cleanFileTitle(part);}catch{title="Episode "+(startEpisode+index);}}return {title,url,episodeNumber:startEpisode+index};});
  const invalid=entries.find(x=>x.error);if(invalid){status.textContent=invalid.error;return;}
  if(startEpisode+entries.length-1>999){status.textContent="Episode numbers cannot exceed 999.";return;}
  button.disabled=true;let done=0;

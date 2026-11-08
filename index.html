@@ -142,6 +142,13 @@
   <div class="modal" id="playerModal" aria-hidden="true"><div class="modal-backdrop" data-close="player"></div><div class="modal-card player-card"><button class="player-minimize" id="playerMinimize" type="button" aria-label="Minimize player">−</button><button class="modal-close" data-close="player" aria-label="Close player">×</button><div class="player-screen" id="playerScreen"><div class="play-symbol">▶</div><p>SELECT A TITLE TO PLAY</p></div><div class="mini-player-bar" id="miniPlayerBar"><img id="miniPlayerArt" class="mini-player-art" alt=""><div class="mini-player-copy"><b id="miniPlayerTitle"><span class="mini-player-marquee-text">Now playing</span></b><small id="miniPlayerArtist">NASFLIX MUSIC</small></div><button id="playerRestore" type="button" aria-label="Open full player">＋</button><button id="miniPlayerToggle" type="button" aria-label="Play or pause">▶</button><div class="mini-player-progress"><span id="miniPlayerProgress"></span></div></div><div class="modal-info"><p class="eyebrow" id="playerType">FEATURE</p><h2 id="playerTitle">Title</h2><p id="playerDescription"></p><button class="offline-save-player" id="saveOfflinePlayer" type="button" data-id="" data-offline-save="">↓ Save offline</button><a class="download-link" id="downloadLink" href="#" download hidden>↓ Download file</a></div><div class="series-episodes" id="seriesEpisodes" hidden></div></div></div>
 
   <div class="modal" id="adminModal" aria-hidden="true"><div class="modal-backdrop" data-close="admin"></div><div class="modal-card admin-card"><button class="modal-close" data-close="admin" aria-label="Close">×</button><p class="eyebrow">PRIVATE WORKSPACE</p><h2>Admin <em>studio</em></h2><p class="admin-intro">Add authorized video and music links to your NASFLIX catalogue. Links and catalogue details are saved in the free D1 database.</p>
+    <section class="admin-access-top"><p class="eyebrow">SECURE ADMIN</p><h3>Admin Access Key</h3>    <label>Admin access key<input id="adminToken" type="password" autocomplete="current-password" placeholder="Enter your private admin key"></label></section>
+    <div class="admin-upload-choices">
+      <button type="button" class="admin-choice" id="openMusicUpload"><span>♫</span><b>Music Upload</b></button>
+      <button type="button" class="admin-choice" id="openVideoUpload"><span>▣</span><b>Video Upload</b></button>
+    </div>
+    <p class="admin-choice-hint" id="adminUploadHint">Choose Music Upload or Video Upload to open the existing upload tools.</p>
+    <div id="musicUploadArea" class="admin-upload-area" hidden>
     <div class="bulk-upload-panel" style="margin:22px 0;padding:18px;border:1px solid #51406a;border-radius:18px;background:linear-gradient(145deg,#21162f,#12101b)">
       <p class="eyebrow">BATCH UPLOAD</p><h3 style="margin:0 0 8px">Upload music</h3><p class="upload-hint">Music files only. Select multiple songs from one artist; each filename becomes its own track title.</p>
       <label>Artist / Singer name<input id="bulkMusicArtist" maxlength="90" placeholder="Artist name"></label>
@@ -151,6 +158,8 @@
       <button class="primary full" id="bulkMusicSubmit" type="button">Upload music batch</button>
       <p class="upload-hint" id="bulkMusicStatus" role="status" aria-live="polite">Choose multiple music files to begin.</p>
     </div>
+    </div>
+    <div id="videoUploadArea" class="admin-upload-area" hidden>
     <div class="bulk-upload-panel" style="margin:22px 0;padding:18px;border:1px solid #51406a;border-radius:18px;background:linear-gradient(145deg,#21162f,#12101b)">
       <p class="eyebrow">BATCH UPLOAD</p><h3 style="margin:0 0 8px">Upload videos</h3><p class="upload-hint">Video files only. Select multiple videos; each filename becomes its own title.</p>
       <label>Video collection / Creator name (optional)<input id="bulkVideoArtist" maxlength="90" placeholder="Creator or collection name"></label>
@@ -172,7 +181,9 @@
       <p class="upload-hint" id="bulkVideoStatus" role="status" aria-live="polite">Choose multiple video files to begin.</p>
     </div>
 
-    <label>Admin access key<input id="adminToken" type="password" autocomplete="current-password" placeholder="Enter your private admin key"></label>
+
+    </div>
+    <div id="singleUploadArea" class="admin-upload-area" hidden>
     <form id="contentForm">
       <label>Content title<input id="itemTitle" required maxlength="90" placeholder="Enter a title"></label>
       <div class="form-row"><label>Type<select id="itemType"><option>Movie</option><option>AI Video</option><option>Series</option><option>Music</option></select></label><label>Genre<select id="itemGenre"><option>Animation</option><option>Anime</option><option>Action</option><option>Comedy</option><option>Horror</option><option>Romance</option><option>Fantasy</option><option>Sci-Fi</option><option>Documentary</option><option>Drama</option><option>Thriller</option><option>Music</option><option>Independent</option></select></label></div>
@@ -201,6 +212,7 @@
       <div class="upload-progress" id="uploadProgress" hidden><div class="upload-progress-top"><span id="uploadProgressLabel">Preparing upload…</span><strong id="uploadProgressPercent">0%</strong></div><div class="upload-progress-track"><span id="uploadProgressBar"></span></div><p id="uploadProgressDetail">Please keep this page open while your file uploads.</p></div>
       <p class="upload-hint" id="uploadStatus" role="status" aria-live="polite">Choose a media file or enter a media URL.</p>
     </form>
+    </div>
     <div class="admin-items"><h3>Catalogue entries</h3><div id="adminItems"></div></div>
   </div>
   

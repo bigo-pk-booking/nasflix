@@ -904,3 +904,17 @@ body{padding-bottom:76px!important}
   body.music-page main#home>.music-section{padding-bottom:0!important;margin-bottom:0!important}
   body.music-page main#home>.music-section>.music-list{margin-bottom:8px!important}
 }
+
+
+/* Keep the final music track clear of the fixed bottom navigation. */
+@media(max-width:850px){
+  body.music-page main#home{
+    padding-bottom:calc(92px + env(safe-area-inset-bottom))!important;
+  }
+  body.music-page main#home>.music-section{
+    padding-bottom:calc(92px + env(safe-area-inset-bottom))!important;
+  }
+  body.music-page main#home>.music-section>.music-list{
+    scroll-margin-bottom:calc(92px + env(safe-area-inset-bottom));
+  }
+}

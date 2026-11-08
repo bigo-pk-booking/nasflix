@@ -918,3 +918,23 @@ body{padding-bottom:76px!important}
     scroll-margin-bottom:calc(92px + env(safe-area-inset-bottom));
   }
 }
+
+
+/* Keep the main header and media category bar pinned like the bottom nav. */
+:root{--nas-topbar-height:78px}
+header.topbar{
+  position:sticky!important;top:0!important;z-index:600!important;
+  min-height:var(--nas-topbar-height)!important;
+  background:rgba(9,8,17,.97)!important;
+}
+nav#mediaTabs.media-tabs{
+  position:sticky!important;top:var(--nas-topbar-height)!important;
+  z-index:590!important;
+  background:rgba(9,8,17,.97)!important;
+  border-bottom:1px solid var(--line)!important;
+}
+@media(max-width:650px){
+  :root{--nas-topbar-height:78px}
+  header.topbar{top:0!important}
+  nav#mediaTabs.media-tabs{top:var(--nas-topbar-height)!important}
+}

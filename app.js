@@ -300,6 +300,27 @@ if($("#adminOpen")&&$("#adminModal"))$("#adminOpen").addEventListener("click",()
 const menuToggle=$("#menuToggle"),mainNav=$("#mainNav");
 function closeNav(){if(!menuToggle||!mainNav)return;menuToggle.setAttribute("aria-expanded","false");menuToggle.setAttribute("aria-label","Open navigation menu");mainNav.classList.remove("open");}
 menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("aria-expanded")!=="true";menuToggle.setAttribute("aria-expanded",String(open));menuToggle.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");mainNav.classList.toggle("open",open);});
+// Context-aware bottom navigation: video library tabs vs music library tabs
+ const bottomNav=$("#nasBottomNav");
+ function renderBottomNav(mode="video"){
+   if(!bottomNav)return;
+   const entries=mode==="music"
+     ? [["home","⌂","Home"],["search","⌕","Search"],["playlists","▤","Your Library"],["music","♫","Music"]]
+     : [["home","⌂","Home"],["movie","▣","Movies"],["series","▤","Series"],["video","▷","Videos"]];
+   bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${(mode==="music"?key==="music":key==="home")?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
+   bottomNav.querySelectorAll("[data-bottom-page]").forEach(btn=>btn.addEventListener("click",()=>{
+     const page=btn.dataset.bottomPage;
+     bottomNav.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===btn));
+     if(page==="search"){const input=$("#searchInput");input?.focus();window.scrollTo({top:0,behavior:"smooth"});}
+     else if(page==="movie")setMediaTab("Movie");
+     else if(page==="series")setMediaTab("Series");
+     else if(page==="video")setMediaTab("AI Video");
+     else if(page==="music")setMediaTab("Music");
+     else showNasflixPage(page);
+   }));
+ }
+ renderBottomNav("video");
+
 function showNasflixPage(page){
   document.body.classList.toggle("music-page",page==="playlists");
   document.body.classList.toggle("video-library-page",page!=="playlists" && page!=="music");
@@ -597,23 +618,4 @@ $("#cancelEdit").addEventListener("click",()=>{editingId=null;$("#contentForm").
 
 document.addEventListener("click",e=>{const b=e.target.closest("[data-episode-id]");if(b&&!b.disabled&&b.dataset.episodeId)openPlayer(b.dataset.episodeId);});
 
-// Context-aware bottom navigation: video library tabs vs music library tabs
- const bottomNav=$("#nasBottomNav");
- function renderBottomNav(mode="video"){
-   if(!bottomNav)return;
-   const entries=mode==="music"
-     ? [["home","⌂","Home"],["search","⌕","Search"],["playlists","▤","Your Library"],["music","♫","Music"]]
-     : [["home","⌂","Home"],["movie","▣","Movies"],["series","▤","Series"],["video","▷","Videos"]];
-   bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${(mode==="music"?key==="music":key==="home")?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
-   bottomNav.querySelectorAll("[data-bottom-page]").forEach(btn=>btn.addEventListener("click",()=>{
-     const page=btn.dataset.bottomPage;
-     bottomNav.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===btn));
-     if(page==="search"){const input=$("#searchInput");input?.focus();window.scrollTo({top:0,behavior:"smooth"});}
-     else if(page==="movie")setMediaTab("Movie");
-     else if(page==="series")setMediaTab("Series");
-     else if(page==="video")setMediaTab("AI Video");
-     else if(page==="music")setMediaTab("Music");
-     else showNasflixPage(page);
-   }));
- }
- renderBottomNav("video");
+

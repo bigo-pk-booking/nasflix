@@ -448,10 +448,6 @@ async function uploadBulkBatch(kind){
   const music=kind==="music";
   const files=[...(music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).files];
   const artist=(music?$("#bulkMusicArtist").value:$("#bulkVideoArtist").value).trim();
-  const videoType=music?"Music":($("#bulkVideoType")?.value||"Movie");
-  const videoSeries=(music?"":($("#bulkVideoSeries")?.value||"").trim());
-  const videoSeason=Number($("#bulkVideoSeason")?.value)||1,videoStartEpisode=Number($("#bulkVideoEpisode")?.value)||1;
-  const individual=[...(music?$("#bulkMusicIndividualPosters")?.files||[]:$("#bulkVideoIndividualPosters")?.files||[])];
   const poster=(music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).files[0];
   const status=$(music?"#bulkMusicStatus":"#bulkVideoStatus");
   const button=$(music?"#bulkMusicSubmit":"#bulkVideoSubmit");
@@ -459,9 +455,6 @@ async function uploadBulkBatch(kind){
   if(!token){status.textContent="Enter your Admin access key first.";return;}
   if(!files.length){status.textContent="Choose at least one "+(music?"music":"video")+" file.";return;}
   if(music&&!artist){status.textContent="Enter the artist / singer name.";return;}
-  if(!music&&videoType==="Series"&&!videoSeries){status.textContent="Enter the Series / Folder name.";return;}
-  if(individual.length&&individual.length!==files.length){status.textContent="Choose exactly one individual thumbnail per file, in the same order, or clear that field.";return;}
-  if(individual.some(f=>f.size>5*1024*1024||!/^image\/(jpeg|png|webp)$/i.test(f.type))){status.textContent="Individual thumbnails must be JPG, PNG or WebP under 5 MB.";return;}
   if(poster&&poster.size>5*1024*1024){status.textContent="Shared poster maximum size is 5 MB.";return;}
   const invalid=files.find(file=>file.size>50*1024*1024);
   if(invalid){status.textContent=invalid.name+" is over the 50 MB per-file limit.";return;}
@@ -474,11 +467,10 @@ async function uploadBulkBatch(kind){
       const detectedArtist=music?(artist||tags.artist||""):artist;
       const detectedAlbum=music?(tags.album||$("#bulkMusicAlbum").value.trim()):"";
       const form=new FormData();
-      const episodeNo=!music&&videoType==="Series"?videoStartEpisode+completed:"";
-      const data={title,type:videoType,genre:music?"Music":"Independent",artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:videoSeries,seasonNumber:videoSeason,episodeNumber:episodeNo,episodeTitle:episodeNo?"Episode "+episodeNo:""};
+      const data={title,type:music?"Music":"Movie",genre:music?"Music":"Independent",artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
       Object.entries(data).forEach(([key,value])=>form.append(key,String(value)));
       form.append("file",file);
-      const chosenPoster=individual[completed]||poster;if(chosenPoster)form.append("posterFile",chosenPoster);
+      if(poster)form.append("posterFile",poster);
       status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+title+(tags.title?" · title detected from music tags":" · using filename");
       await uploadWithProgress("/api/media",form,token,(loaded,total)=>{
         const pct=total?Math.round(loaded/total*100):0;
@@ -489,7 +481,6 @@ async function uploadBulkBatch(kind){
     status.textContent="Done! "+completed+" "+(music?"music tracks":"videos")+" added to NASFLIX.";
     (music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).value="";
     (music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).value="";
-    (music?$("#bulkMusicIndividualPosters"):$("#bulkVideoIndividualPosters")).value="";
     await loadRemote();
   }catch(error){
     status.textContent=completed+" of "+files.length+" uploaded. Stopped at the first error: "+error.message+" You can select the remaining files and retry.";
@@ -499,11 +490,11 @@ $("#bulkMusicSubmit")?.addEventListener("click",()=>uploadBulkBatch("music"));
 $("#bulkVideoSubmit")?.addEventListener("click",()=>uploadBulkBatch("video"));
 $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
  const status=$("#bulkVideoLinksStatus"),button=$("#bulkVideoLinksSubmit"),token=$("#adminToken").value.trim();
- const seriesTitle=$("#bulkLinkSeries").value.trim(),linkType=$("#bulkVideoType")?.value||"Series",seasonNumber=Math.max(1,Math.min(99,Number($("#bulkLinkSeason").value)||1)),startEpisode=Math.max(1,Math.min(999,Number($("#bulkLinkStartEpisode").value)||1));
+ const seriesTitle=$("#bulkLinkSeries").value.trim(),seasonNumber=Math.max(1,Math.min(99,Number($("#bulkLinkSeason").value)||1)),startEpisode=Math.max(1,Math.min(999,Number($("#bulkLinkStartEpisode").value)||1));
  const lines=$("#bulkVideoLinks").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  const sharedPoster=$("#bulkLinksSharedPoster").files[0]||null,individual=[...$("#bulkLinksIndividualPosters").files];
  if(!token){status.textContent="Enter your Admin access key first.";return;}
- if(linkType==="Series"&&!seriesTitle){status.textContent="Enter the series / folder name.";return;}
+ if(!seriesTitle){status.textContent="Enter the series / folder name.";return;}
  if(!lines.length){status.textContent="Paste at least one video link.";return;}
  if(lines.length>200){status.textContent="Maximum 200 episode links per batch.";return;}
  if(sharedPoster&&sharedPoster.size>5*1024*1024){status.textContent="Shared thumbnail maximum size is 5 MB.";return;}
@@ -519,7 +510,7 @@ $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
    const entry=entries[index],poster=individual[index]||sharedPoster;
    status.textContent="Adding episode "+entry.episodeNumber+" of "+(startEpisode+entries.length-1)+": "+entry.title;
    const form=new FormData();
-   const data={title:entry.title,type:linkType,genre:"Independent",artist:$("#bulkVideoArtist")?.value.trim()||"",albumTitle:"",description:"",url:entry.url,allowDownload:"false",seriesTitle:linkType==="Series"?seriesTitle:"",seasonNumber:String(seasonNumber),episodeNumber:linkType==="Series"?String(entry.episodeNumber):"",episodeTitle:linkType==="Series"?entry.title:""};
+   const data={title:entry.title,type:"Series",genre:"Independent",artist:"",albumTitle:"",description:"",url:entry.url,allowDownload:"false",seriesTitle,seasonNumber:String(seasonNumber),episodeNumber:String(entry.episodeNumber),episodeTitle:entry.title};
    Object.entries(data).forEach(([key,value])=>form.append(key,value));
    if(poster)form.append("posterFile",poster,poster.name);
    const response=await fetch("/api/media",{method:"POST",headers:{"authorization":"Bearer "+token},body:form});

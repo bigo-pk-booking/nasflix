@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090811"><title>My Downloads — NASFLIX</title><link rel="stylesheet" href="styles.css?v=20261108-downloadnavflow4"><style>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090811"><title>My Downloads — NASFLIX</title><link rel="stylesheet" href="styles.css?v=20261108-downloadnavflow5"><style>
 .download-page{max-width:1180px;margin:0 auto;padding:42px 24px 90px}.download-page .eyebrow{color:#c5a4ff;letter-spacing:.22em;font-weight:800}.download-page h1{font-size:clamp(42px,7vw,76px);margin:10px 0 42px}.download-page h1 em{color:#ad80ff;font-style:normal}.download-page .download-folders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.download-page .download-folder{min-height:190px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:28px;border:1px solid #4c3560;border-radius:28px;background:linear-gradient(145deg,#1d1428,#120e1b);color:#f7efff}.download-page .download-folder.active{border-color:#c18aff;box-shadow:0 0 0 2px #9d61d5}.download-page .download-folder span{width:72px;height:72px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(135deg,#9147ec,#c02bd0);font-size:32px}.download-page .download-folder b{font-size:25px}.download-page .download-folder small{font-size:15px;color:#a99ab8}.download-page .downloads-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:28px}.download-page .download-card{display:flex;justify-content:space-between;gap:12px;padding:18px;border:1px solid #493456;border-radius:18px;background:#171120;color:#f5eaff}.download-page .download-card-main{display:grid;gap:8px;cursor:pointer;min-width:0}.download-page .download-card-main b{overflow-wrap:anywhere}.download-page .download-card small{color:#a99ab8}.download-page .download-card button{align-self:start;border:0;background:transparent;color:#e5caff;font-size:25px}.download-page .download-type{font-size:11px;color:#c59cff;text-transform:uppercase}.download-page .download-play{font-size:13px;color:#c69aff}.download-page .empty-state{margin:80px auto 0;max-width:760px;text-align:center;font-size:clamp(18px,3vw,28px);line-height:1.55;color:#aaa0b5}.download-page .page-auth{margin-top:34px;text-align:center}.download-page .page-auth button,.download-page .page-auth a{display:inline-block;margin:5px;padding:12px 20px;border-radius:999px;border:1px solid #9861c9;background:#3d2250;color:white;text-decoration:none}.download-page .player{margin-top:24px}.download-page .player video,.download-page .player audio{width:100%;max-height:65vh}
 .download-page .offline-player-card{position:relative;margin-top:24px;padding:12px;border:1px solid #8056ad;border-radius:18px;background:#171120;box-shadow:0 12px 32px #0008}
 .download-page .offline-player-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 2px 12px}
@@ -93,7 +93,25 @@
  .download-page{padding:14px 16px 100px!important}
  .download-page .downloads-heading{margin:8px 0 10px!important}
  .download-page .downloads-heading h1{font-size:30px!important}
-}</style></head><body>
+}
+/* FINAL mobile flow fix: no sticky offset or reserved blank area */
+html,body{margin:0!important;padding:0!important}
+header.topbar{position:relative!important;top:auto!important;height:65px!important;min-height:65px!important;padding:8px 16px!important;margin:0!important;flex-wrap:nowrap!important}
+#downloadsTabs.media-tabs{position:relative!important;top:auto!important;inset:auto!important;height:auto!important;min-height:0!important;margin:0!important;padding:8px 12px!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:7px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important;background:rgba(9,8,17,.98)!important;border-bottom:1px solid var(--line)!important}
+#downloadsTabs .media-tab{display:block!important;flex:0 0 auto!important;width:auto!important;min-width:92px!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0 14px!important}
+.download-page{display:block!important;position:relative!important;margin:0 auto!important;padding:12px 16px 100px!important;max-width:1180px!important;min-height:0!important}
+.download-page .downloads-heading{margin:0 0 10px!important;padding:0!important;display:flex!important;align-items:baseline!important;gap:8px 12px!important}
+.download-page .downloads-heading .eyebrow{width:100%!important;margin:0!important;padding:0!important}
+.download-page .downloads-heading h1{margin:0!important;padding:0!important;font-size:30px!important;line-height:1.1!important}
+.download-page .downloads-heading>span{font-size:11px!important}
+.download-page .downloads-grid{margin:8px 0 0!important;padding:0!important}
+@media(max-width:650px){
+ header.topbar{height:65px!important;min-height:65px!important;padding:8px 16px!important}
+ #downloadsTabs.media-tabs{padding:8px 10px!important}
+ #downloadsTabs .media-tab{min-width:88px!important;height:42px!important;min-height:42px!important}
+ .download-page{padding:12px 16px 100px!important}
+}
+</style></head><body>
 <header class="topbar">
  <div class="brand-group">
   <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mainNav"><span></span><span></span><span></span></button>

@@ -672,3 +672,71 @@ body.app-mode .ad-banner-slot iframe{width:100%!important}
     border-right-width:1px;
   }
 }
+
+
+/* Compact NASFLIX music layout on phones: reduce vertical space and controls. */
+@media(max-width:600px){
+  body.app-mode .music-section{
+    gap:12px!important;
+    padding-top:12px!important;
+    padding-bottom:76px!important;
+  }
+  body.app-mode .music-section>.section-heading{
+    margin:0!important;
+    padding:0 8px!important;
+  }
+  body.app-mode .music-section>.section-heading .eyebrow{
+    font-size:9px;
+    letter-spacing:1.8px;
+  }
+  body.app-mode .music-section>.section-heading h2{
+    font-size:25px!important;
+    line-height:1.1!important;
+    margin:8px 0 12px!important;
+  }
+  body.app-mode .music-section>.music-library-actions{
+    gap:8px!important;
+  }
+  body.app-mode .music-section .music-library-actions button{
+    min-height:48px!important;
+    padding:10px 8px!important;
+    font-size:13px!important;
+  }
+  body.app-mode .music-section>.artist-browser{
+    padding:12px 10px!important;
+    border-radius:16px!important;
+  }
+  body.app-mode .music-section .artist-browser-heading h3{
+    font-size:21px!important;
+    margin:6px 0 12px!important;
+  }
+  body.app-mode .music-section .artist-search{
+    min-height:40px!important;
+    margin-bottom:6px!important;
+    padding:0 10px!important;
+  }
+  body.app-mode .music-section .artist-search input{
+    font-size:13px!important;
+  }
+  body.app-mode .music-section .artist-filters{
+    gap:7px!important;
+    padding:6px 2px 8px!important;
+  }
+  body.app-mode .music-section .artist-filter{
+    flex-basis:68px!important;
+    max-width:68px!important;
+    padding:6px 3px!important;
+    font-size:11px!important;
+  }
+  body.app-mode .music-section .artist-avatar{
+    width:52px!important;
+    height:52px!important;
+    flex-basis:52px!important;
+  }
+  body.app-mode .music-section .artist-filter b{
+    font-size:11px!important;
+  }
+  body.app-mode .music-section>.music-list{
+    padding:0 8px 10px!important;
+  }
+}

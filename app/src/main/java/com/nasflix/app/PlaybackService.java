@@ -77,8 +77,9 @@ public class PlaybackService extends MediaSessionService {
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .build();
         player.setAudioAttributes(audioAttributes, true);
-        // Keep the CPU and Wi-Fi active for network streaming while the app is backgrounded.
-        player.setWakeMode(C.WAKE_MODE_NETWORK);
+        // Hold a partial CPU wake lock while audio is playing in the background.
+        // Network wake mode only holds Wi-Fi; it does not replace the CPU wake lock.
+        player.setWakeMode(C.WAKE_MODE_LOCAL);
         player.setHandleAudioBecomingNoisy(true);
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
         player.addListener(new Player.Listener() {

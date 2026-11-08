@@ -378,8 +378,8 @@ setMediaTab("Movie");
 mainNav?.querySelectorAll("a").forEach(link=>link.addEventListener("click",event=>{
   if(link.id==="deviceHelpOpen"){
     event.preventDefault();
-    const modal=$("#deviceHelp");
-    if(modal){modal.hidden=false;document.body.classList.add("device-help-open");}
+    if(window.NasflixAndroid?.openBackgroundBatterySettings){window.NasflixAndroid.openBackgroundBatterySettings();}
+    else {const modal=$("#deviceHelp");if(modal){modal.hidden=false;document.body.classList.add("device-help-open");}}
     closeNav();
     return;
   }
@@ -619,6 +619,11 @@ function setStartupStep(step){
 async function finishStartupLoading(){
   const overlay=$("#nasStartup");
   if(!overlay)return;
+  // Ask Android once per app session to exempt NASFLIX from battery optimization.
+  if(NASFLIX_APP_MODE&&window.NasflixAndroid?.openBackgroundBatterySettings&&!sessionStorage.getItem("nasflixBatteryPrompted")){
+    sessionStorage.setItem("nasflixBatteryPrompted","1");
+    setTimeout(()=>window.NasflixAndroid.openBackgroundBatterySettings(),900);
+  }
   // Let visible poster artwork finish loading, but don't keep startup open forever
   const images=[...document.querySelectorAll("#contentGrid img, #downloadsGrid img")];
   const imageLoads=images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{

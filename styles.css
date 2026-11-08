@@ -938,3 +938,27 @@ nav#mediaTabs.media-tabs{
   header.topbar{top:0!important}
   nav#mediaTabs.media-tabs{top:var(--nas-topbar-height)!important}
 }
+
+
+/* Final top navigation behavior: fixed to the viewport on every section.
+   Fixed positioning avoids sticky being disabled by scrolling/overflow parents. */
+:root{--nas-header-fixed-height:78px;--nas-tabs-fixed-height:68px}
+header.topbar{
+  position:fixed!important;top:0!important;left:0!important;right:0!important;
+  width:100%!important;height:var(--nas-header-fixed-height)!important;min-height:var(--nas-header-fixed-height)!important;
+  z-index:1200!important;box-sizing:border-box!important;
+  background:rgba(9,8,17,.98)!important;
+}
+nav#mediaTabs.media-tabs{
+  position:fixed!important;top:var(--nas-header-fixed-height)!important;
+  left:0!important;right:0!important;width:100%!important;
+  min-height:var(--nas-tabs-fixed-height)!important;
+  z-index:1190!important;box-sizing:border-box!important;
+  background:rgba(9,8,17,.98)!important;
+}
+body{padding-top:calc(var(--nas-header-fixed-height) + var(--nas-tabs-fixed-height))!important}
+@media(max-width:650px){
+  :root{--nas-header-fixed-height:78px;--nas-tabs-fixed-height:64px}
+  header.topbar{flex-wrap:nowrap!important;padding:8px 16px!important}
+  nav#mediaTabs.media-tabs{padding:9px 10px!important;gap:6px!important}
+}

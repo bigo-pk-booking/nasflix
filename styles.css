@@ -900,3 +900,8 @@ body{padding-bottom:76px!important}
 #playerModal.minimized #miniPlayerTitle{font-size:13px;font-weight:700;line-height:1.25}
 #playerModal.minimized #playerRestore{flex:0 0 auto;border:0;background:transparent;color:#fff;font-size:20px;padding:7px}
 @media(max-width:650px){footer{padding-bottom:90px!important}}
+
+
+/* Music view: remove the promotional closing banner and global footer. */
+body.music-page .join-banner,
+body.music-page>footer{display:none!important}

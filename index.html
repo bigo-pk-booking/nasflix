@@ -160,6 +160,9 @@
         <label>Series / Folder name<input id="bulkLinkSeries" maxlength="90" placeholder="e.g. OJT Hours of Love"></label>
         <div class="form-row"><label>Season number<input id="bulkLinkSeason" type="number" min="1" max="99" value="1"></label><label>Starting episode number<input id="bulkLinkStartEpisode" type="number" min="1" max="999" value="1"></label></div>
         <label>Video links (one per line)<textarea id="bulkVideoLinks" rows="6" maxlength="50000" placeholder="https://example.com/episode-1.mp4&#10;Episode 2 | https://example.com/episode-2.mp4"></textarea></label>
+        <label>Shared thumbnail for all episodes (optional)<input id="bulkLinksSharedPoster" type="file" accept="image/jpeg,image/png,image/webp"></label>
+        <label>Individual thumbnails (optional, same order as links)<input id="bulkLinksIndividualPosters" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
+        <p class="upload-hint">If individual thumbnails are selected, each image matches the episode in the same order. Otherwise, the shared thumbnail is used for every episode.</p>
         <button class="primary full" id="bulkVideoLinksSubmit" type="button">Add episode links batch</button>
         <p class="upload-hint" id="bulkVideoLinksStatus" role="status" aria-live="polite">Paste multiple direct video links to begin.</p>
       </div>

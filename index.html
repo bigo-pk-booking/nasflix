@@ -24,7 +24,7 @@
       <a class="brand" href="#home"><span class="brand-mark">N</span> NAS<span>FLIX</span></a>
     </div>
     <nav class="main-nav" id="mainNav" aria-label="Main navigation">
-      <a class="active" href="#home" data-page="home">Home</a><a href="#movies" data-page="movies">Movies &amp; Videos</a><a href="#music" data-page="music">Music</a><a href="#playlists" data-page="playlists">My Playlists</a><a href="download.html">Download App</a><a href="my-downloads.html">My Downloads</a>
+      <a class="active" href="#home" data-page="home">Home</a><a href="#movies" data-page="movies">Movies &amp; Videos</a><a href="#music" data-page="music">Music</a><a href="#playlists" data-page="playlists">My Playlists</a><a href="#deviceHelp" id="deviceHelpOpen">Background Music Help</a><a href="download.html">Download App</a><a href="my-downloads.html">My Downloads</a>
       <div class="nav-categories"><span>Browse categories</span><a href="#movies" data-menu-filter="All">For you</a><a href="#movies" data-menu-filter="Movie">Movies</a><a href="#videos" data-menu-filter="AI Video">AI Videos</a><a href="#series" data-menu-filter="Series">Series</a><a href="#music" data-menu-filter="Music">Music</a><a href="#movies" data-menu-filter="Animation">Animation</a><a href="#movies" data-menu-filter="Anime">Anime</a><a href="#movies" data-menu-filter="Action">Action</a><a href="#movies" data-menu-filter="Comedy">Comedy</a><a href="#movies" data-menu-filter="Horror">Horror</a><a href="#movies" data-menu-filter="Romance">Romance</a><a href="#movies" data-menu-filter="Fantasy">Fantasy</a><a href="#movies" data-menu-filter="Sci-Fi">Sci-Fi</a></div>
     </nav>
     <div class="header-actions">
@@ -191,6 +191,8 @@
     <div class="admin-items"><h3>Catalogue entries</h3><div id="adminItems"></div></div>
   </div>
   
+
+  <div class="device-help-modal" id="deviceHelp" hidden><div class="device-help-backdrop" data-device-help-close></div><section class="device-help-card" role="dialog" aria-modal="true" aria-labelledby="deviceHelpTitle"><button type="button" class="device-help-close" data-device-help-close aria-label="Close">×</button><p class="eyebrow">NASFLIX SUPPORT</p><h2 id="deviceHelpTitle">Keep music playing <em>in the background</em></h2><p class="device-help-intro">Your phone may limit background activity to save battery. NASFLIX can identify your phone brand and show the most relevant settings to check. Menu names may vary by model and Android version.</p><div class="device-help-detected" id="deviceHelpDetected">Detecting your device…</div><div class="device-help-steps" id="deviceHelpSteps"></div><p class="device-help-note">Only change these settings if music stops when you leave NASFLIX. Choose settings for NASFLIX only; this may increase battery use. NASFLIX cannot change these protected phone settings automatically.</p><button type="button" class="device-help-done" data-device-help-close>Got it</button></section></div>
   <div class="nas-startup" id="nasStartup" role="status" aria-live="polite" style="position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 42%,#28143f 0%,#120d20 42%,#07060d 100%);color:#f8f4ff;opacity:1;visibility:visible;pointer-events:auto;">
     <div class="startup-orbit startup-orbit-one"></div><div class="startup-orbit startup-orbit-two"></div>
     <div class="startup-content">

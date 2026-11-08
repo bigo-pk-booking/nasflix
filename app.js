@@ -503,7 +503,7 @@ $("#openVideoUpload")?.addEventListener("click",()=>openAdminUpload("video"));
 $("#bulkVideoSubmit")?.addEventListener("click",()=>uploadBulkBatch("video"));
 $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
  const status=$("#bulkVideoLinksStatus"),button=$("#bulkVideoLinksSubmit"),token=$("#adminToken").value.trim();
- const seriesTitle=$("#bulkLinkSeries").value.trim(),seasonNumber=Math.max(1,Math.min(99,Number($("#bulkLinkSeason").value)||1)),startEpisode=Math.max(1,Math.min(999,Number($("#bulkLinkStartEpisode").value)||1));
+ const seriesTitle=$("#bulkLinkSeries").value.trim(),linkType=$("#bulkLinkType").value,linkGenre=$("#bulkLinkGenre").value,seasonNumber=Math.max(1,Math.min(99,Number($("#bulkLinkSeason").value)||1)),startEpisode=Math.max(1,Math.min(999,Number($("#bulkLinkStartEpisode").value)||1));
  const lines=$("#bulkVideoLinks").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  const sharedPoster=$("#bulkLinksSharedPoster").files[0]||null,individual=[...$("#bulkLinksIndividualPosters").files];
  if(!token){status.textContent="Enter your Admin access key first.";return;}
@@ -523,7 +523,7 @@ $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
    const entry=entries[index],poster=individual[index]||sharedPoster;
    status.textContent="Adding episode "+entry.episodeNumber+" of "+(startEpisode+entries.length-1)+": "+entry.title;
    const form=new FormData();
-   const data={title:entry.title,type:"Series",genre:"Independent",artist:"",albumTitle:"",description:"",url:entry.url,allowDownload:"false",seriesTitle,seasonNumber:String(seasonNumber),episodeNumber:String(entry.episodeNumber),episodeTitle:entry.title};
+   const data={title:entry.title,type:linkType,genre:linkGenre,artist:"",albumTitle:"",description:"",url:entry.url,allowDownload:"false",seriesTitle:linkType==="Series"?seriesTitle:"",seasonNumber:String(seasonNumber),episodeNumber:linkType==="Series"?String(entry.episodeNumber):"",episodeTitle:linkType==="Series"?entry.title:""};
    Object.entries(data).forEach(([key,value])=>form.append(key,value));
    if(poster)form.append("posterFile",poster,poster.name);
    const response=await fetch("/api/media",{method:"POST",headers:{"authorization":"Bearer "+token},body:form});

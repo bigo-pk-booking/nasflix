@@ -245,7 +245,7 @@ async function openPlayer(id){const x=items.find(i=>String(i.id)===String(id));i
    video.addEventListener("pause",()=>{updateMediaPlaybackState("paused");try{window.NasflixAndroid?.setVideoPlaying(false);}catch{}});
    video.addEventListener("ended",()=>{updateMediaPlaybackState("none");try{window.NasflixAndroid?.setVideoPlaying(false);}catch{}});
  }
- syncMiniPlayer(x);renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");$("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";if(video){const startPlayback=()=>{if(video.ended){try{video.currentTime=0;}catch{}}video.play().catch(error=>console.warn("NASFLIX video playback was blocked:",error));};if(video.readyState>=2)startPlayback();else video.addEventListener("canplay",startPlayback,{once:true});}}
+ syncMiniPlayer(x);renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");setMiniPlayerTitle($("#playerTitle").textContent||"Now playing");if(video){const startPlayback=()=>{if(video.ended){try{video.currentTime=0;}catch{}}video.play().catch(error=>console.warn("NASFLIX video playback was blocked:",error));};if(video.readyState>=2)startPlayback();else video.addEventListener("canplay",startPlayback,{once:true});}}
 async function openMusicPlayer(id,shouldPlay=true,artistFilter="",albumFilter="All Albums",shuffleQueue=false,queueOverride=null){
  document.body.classList.remove("music-player-minimized");
  const offlineQueueMode=offlineItems.some(s=>String(s.id)===String(id));
@@ -274,22 +274,27 @@ async function openMusicPlayer(id,shouldPlay=true,artistFilter="",albumFilter="A
  });
  seek.addEventListener("input",()=>{if(window.NasflixAndroid?.seekTo){const duration=Number(window.NasflixAndroid.getDuration());window.NasflixAndroid.seekTo(Math.round((Number(seek.value)/1000)*duration));}else if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=(Number(seek.value)/1000)*audio.duration;});$("#musicVolume").addEventListener("input",e=>{const v=Number(e.target.value);if(window.NasflixAndroid?.setVolume)window.NasflixAndroid.setVolume(v);else audio.volume=v;});
  if(window.NasflixAndroid?.getCurrentPosition){nativeMusicPoll=setInterval(()=>{const duration=Number(window.NasflixAndroid.getDuration()),position=Number(window.NasflixAndroid.getCurrentPosition());if(duration>0){seek.value=String(Math.round(position/duration*1000));$("#musicCurrent").textContent=time(position/1000);$("#musicDuration").textContent=time(duration/1000);}const active=window.NasflixAndroid.isPlaying();play.textContent=active?"Ⅱ":"▶";play.setAttribute("aria-label",active?"Pause":"Play");const status=$("#musicTrackGenre");if(status&&!status.textContent.trim())status.textContent="Music";},500);}
- renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");$("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";requestAnimationFrame(()=>{resizeCanvas();draw();});if(shouldPlay&&(!window.NasflixAndroid?.playQueue||offlineQueueMode)){if(activeMusicContext?.state==="suspended")activeMusicContext.resume();audio.play().catch(()=>{play.textContent="▶";});}
+ renderEpisodeNav(x);$("#playerModal").classList.remove("minimized");$("#playerModal").classList.add("open");$("#playerModal").setAttribute("aria-hidden","false");setMiniPlayerTitle($("#playerTitle").textContent||"Now playing");requestAnimationFrame(()=>{resizeCanvas();draw();});if(shouldPlay&&(!window.NasflixAndroid?.playQueue||offlineQueueMode)){if(activeMusicContext?.state==="suspended")activeMusicContext.resume();audio.play().catch(()=>{play.textContent="▶";});}
 }
 
-function syncMiniPlayer(track){
+function setMiniPlayerTitle(value){
+  const title=$("#miniPlayerTitle");if(!title)return;
+  const span=title.querySelector(".mini-player-marquee-text");if(span)span.textContent=String(value||"Now playing");else title.textContent=String(value||"Now playing");
+  requestAnimationFrame(()=>{const text=title.querySelector(".mini-player-marquee-text");if(text)title.classList.toggle("is-overflowing",text.scrollWidth>title.clientWidth+8);});
+ }
+ function syncMiniPlayer(track){
  const title=track?.title||$("#playerTitle")?.textContent||"Now playing";
  const artist=track?.artist||track?.genre||"NASFLIX MUSIC";
  const art=track?musicArtwork(track):"";
  const a=$("#miniPlayerArt");if(a&&art)a.src=art;
- const t=$("#miniPlayerTitle");if(t)t.textContent=title;
+ const t=$("#miniPlayerTitle");if(t){const span=t.querySelector(".mini-player-marquee-text");if(span)span.textContent=title;else t.textContent=title;requestAnimationFrame(()=>{const s=t.querySelector(".mini-player-marquee-text");if(s)t.classList.toggle("is-overflowing",s.scrollWidth>t.clientWidth+8);});}
  const ar=$("#miniPlayerArtist");if(ar)ar.textContent=artist;
 }
 function minimizePlayer(){
   const modal=$("#playerModal");
   if(!modal.classList.contains("open"))return;
   document.body.classList.add("music-player-minimized");
-  $("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";
+  setMiniPlayerTitle($("#playerTitle").textContent||"Now playing");
   modal.classList.add("minimized");
   modal.setAttribute("aria-label","Mini player. Playback continues while you browse.");
 }
@@ -297,7 +302,7 @@ function restorePlayer(){
   const modal=$("#playerModal");
   document.body.classList.remove("music-player-minimized");
   modal.classList.remove("minimized");
-  $("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";
+  setMiniPlayerTitle($("#playerTitle").textContent||"Now playing");
 }
 $("#playerMinimize")?.addEventListener("click",minimizePlayer);
 $("#playerRestore")?.addEventListener("click",e=>{e.stopPropagation();restorePlayer();});

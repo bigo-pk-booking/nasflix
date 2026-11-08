@@ -467,7 +467,7 @@ async function uploadBulkBatch(kind){
       const detectedArtist=music?(artist||tags.artist||""):artist;
       const detectedAlbum=music?(tags.album||$("#bulkMusicAlbum").value.trim()):"";
       const form=new FormData();
-      const data={title,type:music?"Music":"Movie",genre:music?"Music":"Independent",artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
+      const data={title,type:music?"Music":($("#bulkVideoType")?.value||"Movie"),genre:music?"Music":($("#bulkVideoGenre")?.value||"Independent"),artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
       Object.entries(data).forEach(([key,value])=>form.append(key,String(value)));
       form.append("file",file);
       if(poster)form.append("posterFile",poster);

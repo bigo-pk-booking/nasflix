@@ -37,6 +37,22 @@
 .episode-nav-buttons{display:flex;justify-content:space-between;gap:12px;padding-top:14px}
 .episode-nav-buttons button{border:1px solid #ffffff25;background:#211a30;color:#d8b4fe;border-radius:22px;padding:10px 14px;font-size:11px}
 .episode-nav-buttons button:disabled{opacity:.35;cursor:not-allowed}
+.episode-season-bar{display:flex;align-items:center;gap:10px;margin:8px 0 12px;color:var(--muted);font-size:11px}
+.episode-season-bar label{font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.episode-season-bar select{min-width:112px;padding:8px 30px 8px 12px;border:1px solid #76529b;border-radius:18px;background:#21172d;color:#f4eaff;font:600 11px Manrope}
+.episode-season-bar span{margin-left:auto}
+.episode-strip{display:flex;gap:10px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;padding:2px 2px 12px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#8056ad #21172d}
+.episode-card{flex:0 0 148px;min-width:0;display:flex;flex-direction:column;gap:8px;text-align:left;padding:8px;border:1px solid #493456;border-radius:14px;background:#171120;color:var(--text);scroll-snap-align:start}
+.episode-card.current{border:2px solid #a76be2;background:#2a1c40;padding:7px}
+.episode-thumb{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:76px;padding:10px;border-radius:9px;background:linear-gradient(135deg,#38234e,#171120)}
+.episode-thumb .episode-number{width:42px;height:42px;font-size:12px}
+.episode-card-play{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#ffffff18;color:#e7ceff;font-size:14px}
+.episode-card .episode-copy{width:100%}
+.episode-card .episode-copy b{font-size:11px}
+.episode-card .episode-copy small{font-size:10px}
+.episode-now{font-size:9px;letter-spacing:.08em;color:#d7b5ff;font-weight:800}
+@media(max-width:520px){.episode-card{flex-basis:136px}.episode-thumb{min-height:70px}}
+
 
 
 .upload-progress{margin:14px 0 8px;padding:14px;border:1px solid #8b5cf6;border-radius:14px;background:linear-gradient(135deg,#211633,#171326);box-shadow:0 8px 28px #8b5cf622}

@@ -1253,3 +1253,14 @@ body.app-mode nav#mediaTabs.media-tabs{
 .player-screen:fullscreen video{width:100%;height:100%;object-fit:contain}
 @media(max-width:650px){.nas-player-controls{gap:6px;padding:32px 8px 9px}.nas-player-controls button{width:32px;height:32px;font-size:15px}.nas-player-timeline{gap:5px}.nas-player-timeline span{font-size:10px}}
 
+
+
+/* Collapsible catalogue folders in Admin */
+.catalogue-folder{margin:12px 0;border:1px solid #554071;border-radius:14px;background:linear-gradient(145deg,#1b1428,#100e19);overflow:hidden}
+.catalogue-folder>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;cursor:pointer;list-style:none;color:#f5edff;font-weight:700}
+.catalogue-folder>summary::-webkit-details-marker{display:none}
+.catalogue-folder>summary::after{content:"＋";color:#c69aff;font-size:18px}
+.catalogue-folder[open]>summary::after{content:"−"}
+.catalogue-folder>summary small{margin-left:auto;color:#bca9d2;font-size:12px;font-weight:500}
+.catalogue-folder-content{padding:0 12px 12px}
+.catalogue-folder-content .admin-row{margin-top:8px}

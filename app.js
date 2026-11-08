@@ -295,7 +295,11 @@ function restorePlayer(){
   $("#miniPlayerTitle").textContent=$("#playerTitle").textContent||"Now playing";
 }
 $("#playerMinimize")?.addEventListener("click",minimizePlayer);
-$("#playerRestore")?.addEventListener("click",restorePlayer);
+$("#playerRestore")?.addEventListener("click",e=>{e.stopPropagation();restorePlayer();});
+$("#miniPlayerBar")?.addEventListener("click",e=>{
+ if(e.target.closest("#miniPlayerToggle"))return;
+ restorePlayer();
+});
 $("#miniPlayerToggle")?.addEventListener("click",()=>{
  const audio=$("#nasMusicAudio"),video=$("#playerScreen video");
  if(window.NasflixAndroid?.isPlaying&&window.NasflixAndroid?.play){if(window.NasflixAndroid.isPlaying())window.NasflixAndroid.pause();else window.NasflixAndroid.play();return;}

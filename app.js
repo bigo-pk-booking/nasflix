@@ -63,12 +63,22 @@ let accountUser=null,userPlaylists=[],activePlaylistId="",playlistSaveTimer=null
 async function accountRequest(path,body){let response;try{response=await fetch("/api/account/"+path,{method:body===undefined?"GET":"POST",headers:body===undefined?{}:{"content-type":"application/json"},body:body===undefined?undefined:JSON.stringify(body),credentials:"same-origin",cache:"no-store"});}catch(e){throw new Error("Cannot connect to NASFLIX server. Check your internet connection.");}const raw=await response.text();let data={};try{data=raw?JSON.parse(raw):{};}catch{}if(!response.ok)throw new Error(data.error||("Server error ("+response.status+"). "+(raw&&!raw.startsWith("<")?raw.slice(0,160):"Please check Cloudflare Pages Functions and D1 database settings.")));return data;}
 function accountMessage(message){const el=$("#accountMessage");if(el)el.textContent=message;}
 async function showDashboardSplash(status,name){
- const splash=$("#dashboardSplash"),statusEl=$("#dashboardSplashStatus"),nameEl=$("#dashboardSplashName");
+ const splash=$("#dashboardSplash"),statusEl=$("#dashboardSplashStatus"),nameEl=$("#dashboardSplashName"),ring=$("#dashboardSplashRing"),percentEl=$("#dashboardSplashPercent");
  if(!splash)return;
- statusEl.textContent=status;
+ const stages=["LOADING MUSIC LIBRARY","LOADING VIDEOS","LOADING PICTURE","ACCESSING DASHBOARD"];
  nameEl.textContent=name?("WELCOME, "+String(name).toUpperCase()):"";
  splash.hidden=false;splash.classList.remove("splash-leaving");
- await new Promise(resolve=>setTimeout(resolve,1550));
+ for(const stage of stages){
+  statusEl.textContent=stage;
+  for(let value=1;value<=99;value+=2){
+   ring.style.setProperty("--load-progress",value+"%");
+   percentEl.textContent=value+"%";
+   await new Promise(resolve=>setTimeout(resolve,18));
+  }
+  ring.style.setProperty("--load-progress","100%");
+  percentEl.textContent="100%";
+  await new Promise(resolve=>setTimeout(resolve,220));
+ }
  splash.classList.add("splash-leaving");
  await new Promise(resolve=>setTimeout(resolve,450));
  splash.hidden=true;splash.classList.remove("splash-leaving");

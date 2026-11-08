@@ -301,6 +301,7 @@ const menuToggle=$("#menuToggle"),mainNav=$("#mainNav");
 function closeNav(){if(!menuToggle||!mainNav)return;menuToggle.setAttribute("aria-expanded","false");menuToggle.setAttribute("aria-label","Open navigation menu");mainNav.classList.remove("open");}
 menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("aria-expanded")!=="true";menuToggle.setAttribute("aria-expanded",String(open));menuToggle.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");mainNav.classList.toggle("open",open);});
 function showNasflixPage(page){
+  document.body.classList.toggle("music-page",page==="playlists");
   if(page==="playlists"){
     document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",section.dataset.pageSection!=="music"));
     $("#accountPlaylistPanel").hidden=false;
@@ -315,6 +316,7 @@ function showNasflixPage(page){
 }
 function setMediaTab(type){
   const isMusic=type==="Music";
+  document.body.classList.toggle("music-page",isMusic);
   document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",isMusic?section.dataset.pageSection!=="music":section.dataset.pageSection!=="movies"));
   $("#quickCats")?.classList.toggle("page-hidden",isMusic);
   activeFilter=isMusic?"All":type==="Movie"?"Movie":type==="Series"?"Series":type==="AI Video"?"AI Video":"All";

@@ -1229,3 +1229,11 @@ body.app-mode nav#mediaTabs.media-tabs{
     scroll-margin-bottom:calc(142px + env(safe-area-inset-bottom,0px));
   }
 }
+
+
+/* Mini-player song title marquee: scroll only when the title is longer than its slot. */
+#playerModal.minimized #miniPlayerTitle{display:block!important;min-width:0!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:clip!important}
+#playerModal.minimized #miniPlayerTitle .mini-player-marquee-text{display:inline-block!important;white-space:nowrap!important;max-width:none!important}
+#playerModal.minimized #miniPlayerTitle.is-overflowing .mini-player-marquee-text{padding-left:100%;animation:nasflix-title-marquee 12s linear infinite}
+@keyframes nasflix-title-marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+@media(prefers-reduced-motion:reduce){#playerModal.minimized #miniPlayerTitle.is-overflowing .mini-player-marquee-text{animation:none!important;padding-left:0!important}}

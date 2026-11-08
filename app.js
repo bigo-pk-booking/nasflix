@@ -643,3 +643,32 @@ $("#cancelEdit").addEventListener("click",()=>{editingId=null;$("#contentForm").
 document.addEventListener("click",e=>{const b=e.target.closest("[data-episode-id]");if(b&&!b.disabled&&b.dataset.episodeId)openPlayer(b.dataset.episodeId);});
 
 
+
+
+// Device-aware background playback help. This guides users but never changes protected OS settings.
+(function initDeviceBackgroundHelp(){
+  const modal=document.getElementById("deviceHelp");
+  const open=document.getElementById("deviceHelpOpen");
+  const detected=document.getElementById("deviceHelpDetected");
+  const steps=document.getElementById("deviceHelpSteps");
+  if(!modal||!open||!detected||!steps)return;
+  const ua=navigator.userAgent||"";
+  const platform=(navigator.userAgentData&&navigator.userAgentData.platform)||ua;
+  const brand=(ua.match(/(Xiaomi|Redmi|POCO|Samsung|SM-[A-Z0-9]+|OPPO|Realme|vivo|HUAWEI|HONOR|Infinix|TECNO|Google Pixel|Pixel|OnePlus)/i)||[])[0]||"Android phone";
+  let title=brand,guide=[];
+  if(/Xiaomi|Redmi|POCO/i.test(brand))guide=["Open Settings → Apps → Manage apps → NASFLIX → Battery saver → No restrictions.","If available, open Autostart and enable it for NASFLIX.","On some models, open Security → Permissions → Autostart and allow NASFLIX."];
+  else if(/Samsung|SM-/i.test(brand))guide=["Open Settings → Apps → NASFLIX → Battery.","Allow background activity if that option is shown.","Open Settings → Battery → Background usage limits → Never sleeping apps, then add NASFLIX."];
+  else if(/OPPO|Realme/i.test(brand))guide=["Open Settings → Apps → App management → NASFLIX → Battery usage.","Allow background activity / background running if available.","Check Auto launch or App battery management and allow NASFLIX to run in the background."];
+  else if(/vivo/i.test(brand))guide=["Open Settings → Apps → NASFLIX → Battery.","Allow background power consumption or background activity if available.","Check iManager → App manager / Autostart and allow NASFLIX if your model provides it."];
+  else if(/HUAWEI|HONOR/i.test(brand))guide=["Open Settings → Apps → Apps → NASFLIX → Battery.","Open App launch / Launch management and manage NASFLIX manually.","Allow Auto-launch, Secondary launch and Run in background if those switches appear."];
+  else if(/Infinix|TECNO/i.test(brand))guide=["Open Settings → Apps → App management → NASFLIX → Battery.","Allow background activity and disable battery optimization for NASFLIX if offered.","Check Phone Master / Power Marathon for app background restrictions and allow NASFLIX."];
+  else if(/Pixel|Google/i.test(brand))guide=["Open Settings → Apps → NASFLIX → App battery usage.","Select Unrestricted (or Allow background usage, depending on Android version)."];
+  else guide=["Open Settings → Apps → NASFLIX → Battery or App battery usage.","Choose Unrestricted / No restrictions or Allow background activity if available.","Look for Autostart / Background activity settings in your phone's battery or security app."];
+  detected.textContent="Detected device: "+title+(platform?" · "+(String(platform).includes("Android")?"Android":"Mobile device"):"");
+  steps.innerHTML="<h3>Settings to check</h3><ol>"+guide.map(x=>"<li>"+x.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+"</li>").join("")+"</ol>";
+  function show(){modal.hidden=false;document.body.classList.add("device-help-open");}
+  function hide(){modal.hidden=true;document.body.classList.remove("device-help-open");}
+  open.addEventListener("click",e=>{e.preventDefault();show();});
+  modal.querySelectorAll("[data-device-help-close]").forEach(el=>el.addEventListener("click",hide));
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.hidden)hide();});
+})();

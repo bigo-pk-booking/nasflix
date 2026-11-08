@@ -1,6 +1,7 @@
 package com.nasflix.app;
 
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -18,6 +19,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.graphics.Color;
@@ -41,6 +43,8 @@ import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.CookieManager;
+import android.webkit.URLUtil;
 import java.util.ArrayList;
 
 public class MainActivity extends Activity {
@@ -99,6 +103,34 @@ public class MainActivity extends Activity {
                     + "if(nav){nav.classList.remove('open');}"
                     + "})();";
                 view.evaluateJavascript(js, null);
+            }
+        });
+        // Handle file downloads initiated inside the app's WebView (including APK links).
+        webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
+            try {
+                Uri downloadUri = Uri.parse(url);
+                String scheme = downloadUri.getScheme();
+                if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) {
+                    Toast.makeText(MainActivity.this, "Unsupported download link", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                String fileName = URLUtil.guessFileName(url, contentDisposition, mimeType);
+                DownloadManager.Request request = new DownloadManager.Request(downloadUri);
+                request.setTitle(fileName);
+                request.setDescription("Downloading from NASFLIX");
+                request.setMimeType(mimeType != null ? mimeType : "application/octet-stream");
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
+                String cookies = CookieManager.getInstance().getCookie(url);
+                if (cookies != null) request.addRequestHeader("Cookie", cookies);
+                if (userAgent != null) request.addRequestHeader("User-Agent", userAgent);
+                DownloadManager manager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                if (manager == null) throw new IllegalStateException("Download service unavailable");
+                manager.enqueue(request);
+                Toast.makeText(MainActivity.this, "Download started: " + fileName, Toast.LENGTH_LONG).show();
+            } catch (Exception error) {
+                android.util.Log.e("NASFLIX", "Unable to start WebView download", error);
+                Toast.makeText(MainActivity.this, "Could not start download. Please try again.", Toast.LENGTH_LONG).show();
             }
         });
         webView.setWebChromeClient(new WebChromeClient() {

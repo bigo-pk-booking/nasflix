@@ -962,3 +962,25 @@ body{padding-top:calc(var(--nas-header-fixed-height) + var(--nas-tabs-fixed-heig
   header.topbar{flex-wrap:nowrap!important;padding:8px 16px!important}
   nav#mediaTabs.media-tabs{padding:9px 10px!important;gap:6px!important}
 }
+
+
+/* Music list: remove the purple framed panel and let the full list flow naturally. */
+body.music-page .music-list,
+body.app-mode.music-page .music-list,
+body.music-page main#home>.music-section>.music-list{
+  border:0!important;outline:0!important;box-shadow:none!important;
+  border-radius:0!important;background:transparent!important;
+  max-height:none!important;height:auto!important;overflow:visible!important;
+  padding:0 12px 14px!important;
+}
+body.music-page .music-list:before{background:transparent!important}
+
+/* Reinforce viewport-fixed header and category tabs in Android WebView. */
+body.app-mode header.topbar{
+  position:fixed!important;top:0!important;left:0!important;right:0!important;
+  transform:none!important;visibility:visible!important;
+}
+body.app-mode nav#mediaTabs.media-tabs{
+  position:fixed!important;top:var(--nas-header-fixed-height,78px)!important;
+  left:0!important;right:0!important;transform:none!important;visibility:visible!important;
+}

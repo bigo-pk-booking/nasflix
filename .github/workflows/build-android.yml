@@ -42,11 +42,13 @@ jobs:
           echo "NASFLIX_KEYSTORE_PASSWORD=$NASFLIX_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
       - name: Build signed release APK
         run: gradle assembleRelease
+      - name: Rename APK for user-friendly download
+        run: cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/NASFLIX.apk
       - name: Upload signed release APK
         uses: actions/upload-artifact@v4
         with:
           name: NASFLIX-Signed-Release-APK
-          path: app/build/outputs/apk/release/app-release.apk
+          path: app/build/outputs/apk/release/NASFLIX.apk
           retention-days: 30
       - name: Publish public GitHub Release
         uses: softprops/action-gh-release@v2
@@ -56,7 +58,7 @@ jobs:
           body: |
             Signed NASFLIX Android release APK.
             Download the APK below and install it on your Android device.
-          files: app/build/outputs/apk/release/app-release.apk
+          files: app/build/outputs/apk/release/NASFLIX.apk
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

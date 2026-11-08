@@ -1004,3 +1004,22 @@ body.app-mode nav#mediaTabs.media-tabs{
     padding-bottom:8px!important;
   }
 }
+
+
+/* Exact end-of-list clearance: one bottom-nav height, applied once only. */
+@media(max-width:850px){
+  body.music-page main#home,
+  body.app-mode.music-page main#home{
+    padding-bottom:0!important;
+  }
+  body.music-page main#home>.music-section,
+  body.app-mode.music-page main#home>.music-section{
+    padding-bottom:calc(68px + env(safe-area-inset-bottom))!important;
+    margin-bottom:0!important;
+  }
+  body.music-page main#home>.music-section>.music-list,
+  body.app-mode.music-page main#home>.music-section>.music-list{
+    padding-bottom:0!important;
+    margin-bottom:0!important;
+  }
+}

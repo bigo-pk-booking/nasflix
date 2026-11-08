@@ -550,7 +550,7 @@ async function loadTrending(){
  }finally{clearTimeout(timeout);}
 }
 async function saveOffline(id){
- if(!accountUser){const modal=$("#offlineLoginModal");if(modal)modal.hidden=false;return;}
+ // Offline media is stored locally on this device; an account is not required.
  const item=items.find(x=>String(x.id)===String(id));
  if(!item){alert("This title is not available in the catalogue yet.");return;}
  if(!item.url||!isDirectMedia(item.url)||youtubeId(item.url)){alert("Offline saving is available for direct NASFLIX video and music files. Embedded YouTube links cannot be saved.");return;}

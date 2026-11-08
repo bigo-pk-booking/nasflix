@@ -870,38 +870,3 @@ body.app-mode .ad-banner-slot iframe{width:100%!important}
     box-sizing:border-box!important;
   }
 }
-
-
-/* Center the Android song panel on the WebView viewport, independent of parent width. */
-@media(max-width:850px){
-  body.app-mode main#home>.music-section>.music-list{
-    position:relative!important;
-    left:50%!important;
-    transform:translateX(-50%)!important;
-    width:calc(100vw - 16px)!important;
-    min-width:0!important;
-    max-width:calc(100vw - 16px)!important;
-    margin-left:0!important;
-    margin-right:0!important;
-    box-sizing:border-box!important;
-  }
-}
-
-
-/* Spotify-inspired persistent bottom navigation and full-width mini player */
-.nas-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:240;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:8px 5px calc(8px + env(safe-area-inset-bottom));background:rgba(7,7,10,.97);border-top:1px solid #ffffff18;backdrop-filter:blur(18px)}
-.nas-bottom-nav button{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:transparent;color:#aaa;font-size:24px;padding:2px}
-.nas-bottom-nav button small{font-size:10px;white-space:nowrap}.nas-bottom-nav button.active{color:#fff}.nas-bottom-nav button.active span{color:#c084fc}
-body{padding-bottom:76px!important}
-#playerModal.minimized{left:10px!important;right:10px!important;bottom:calc(66px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;height:auto!important;padding:0!important;z-index:245!important}
-#playerModal.minimized .player-card{display:flex;align-items:center;gap:10px;width:100%!important;padding:9px!important;border:1px solid #ffffff20;border-radius:13px!important;background:#30223d!important}
-#playerModal.minimized .player-screen{display:none!important}
-#playerModal.minimized .mini-player-bar{display:flex!important;flex:1;min-width:0;align-items:center;gap:10px;padding:0!important}
-#playerModal.minimized #miniPlayerTitle{font-size:13px;font-weight:700;line-height:1.25}
-#playerModal.minimized #playerRestore{flex:0 0 auto;border:0;background:transparent;color:#fff;font-size:20px;padding:7px}
-@media(max-width:650px){footer{padding-bottom:90px!important}}
-
-
-/* Music view: remove the promotional closing banner and global footer. */
-body.music-page .join-banner,
-body.music-page>footer{display:none!important}

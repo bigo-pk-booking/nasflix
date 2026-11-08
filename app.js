@@ -335,6 +335,8 @@ menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("ar
      : [["home","⌂","Home"],["movie","▣","Movies"],["series","▤","Series"],["video","▷","Videos"]];
    bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${(mode==="music"?key==="music":key==="home")?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
    bottomNav.querySelectorAll("[data-bottom-page]").forEach(btn=>btn.addEventListener("click",()=>{
+     closeNav();
+     if(accountUser){const gate=$("#welcomeGate");if(gate)gate.hidden=true;const login=$("#accountLoginHeader"),logout=$("#accountLogoutHeader");if(login)login.hidden=true;if(logout)logout.hidden=false;}
      const page=btn.dataset.bottomPage;
      bottomNav.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===btn));
      if(page==="search"){const input=$("#searchInput");input?.focus();window.scrollTo({top:0,behavior:"smooth"});}
@@ -378,6 +380,8 @@ function setMediaTab(type){
 document.querySelectorAll("[data-media-tab]").forEach(tab=>tab.addEventListener("click",()=>setMediaTab(tab.dataset.mediaTab)));
 setMediaTab("Movie");
 mainNav?.querySelectorAll("a").forEach(link=>link.addEventListener("click",event=>{
+   closeNav();
+   if(accountUser){const gate=$("#welcomeGate");if(gate)gate.hidden=true;const login=$("#accountLoginHeader"),logout=$("#accountLogoutHeader");if(login)login.hidden=true;if(logout)logout.hidden=false;}
   if(link.id==="deviceHelpOpen"){
     event.preventDefault();
     if(window.NasflixAndroid?.openBackgroundBatterySettings){window.NasflixAndroid.openBackgroundBatterySettings();}

@@ -340,7 +340,32 @@ public class MainActivity extends Activity {
         startService(command);
     }
 
+    private void openBackgroundBatterySettings() {
+        runOnUiThread(() -> {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                try { startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()))); } catch (Exception ignored) {}
+                return;
+            }
+            android.os.PowerManager powerManager = (android.os.PowerManager) getSystemService(POWER_SERVICE);
+            if (powerManager != null && powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+                Toast.makeText(this, "NASFLIX is already unrestricted for battery use.", Toast.LENGTH_LONG).show();
+                return;
+            }
+            try {
+                Intent request = new Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getPackageName()));
+                startActivity(request);
+            } catch (Exception firstError) {
+                try { startActivity(new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)); }
+                catch (Exception secondError) {
+                    try { startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()))); }
+                    catch (Exception ignored) { Toast.makeText(this, "Open Android Settings → Apps → NASFLIX → Battery.", Toast.LENGTH_LONG).show(); }
+                }
+            }
+        });
+    }
+
     private class NasflixBridge {
+        @JavascriptInterface public void openBackgroundBatterySettings() { MainActivity.this.openBackgroundBatterySettings(); }
         @JavascriptInterface public void setVideoPlaying(boolean isPlaying) { directVideoPlaying = isPlaying; runOnUiThread(() -> updatePictureInPictureParams()); }
         @JavascriptInterface public void playQueue(String queueJson, int index, boolean autoplay) {
             Intent extras = new Intent();

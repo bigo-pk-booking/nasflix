@@ -392,6 +392,8 @@ function showNasflixPage(page){
   }
   if(page==="home"){
     document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",section.dataset.pageSection!=="home"));
+    document.querySelectorAll(".media-tab").forEach(tab=>tab.classList.remove("active"));
+    renderBottomNav("video");
     window.scrollTo({top:0,behavior:"smooth"});return;
   }
   setMediaTab(page==="music"?"Music":"Movie");

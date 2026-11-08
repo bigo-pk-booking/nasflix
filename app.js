@@ -663,6 +663,7 @@ refreshAccount();
 $("#cancelEdit").addEventListener("click",()=>{editingId=null;$("#contentForm").reset();$("#contentSubmit").textContent="Save to NASFLIX catalogue +";$("#cancelEdit").hidden=true;$("#uploadStatus").textContent="Edit cancelled.";});
 
 document.addEventListener("click",e=>{const b=e.target.closest("[data-episode-id]");if(b&&!b.disabled&&b.dataset.episodeId)openPlayer(b.dataset.episodeId);});
+document.addEventListener("change",e=>{if(e.target?.id!=="episodeSeasonSelect")return;const box=$("#seriesEpisodes");const selected=Number(e.target.value)||1;const card=box?.querySelector(`[data-episode-id]`);const currentTitle=$("#playerTitle")?.textContent||"";const current=items.find(x=>x.type==="Series"&&(String(x.seriesTitle||x.title||"").trim().toLowerCase()===String(currentTitle).trim().toLowerCase()));const seriesName=current?.seriesTitle||current?.title;if(!seriesName)return;const first=items.filter(x=>x.type==="Series"&&String(x.seriesTitle||x.title||"").trim().toLowerCase()===String(seriesName).trim().toLowerCase()&&(Number(x.seasonNumber)||1)===selected).sort((a,b)=>(Number(a.episodeNumber)||0)-(Number(b.episodeNumber)||0))[0];if(first)openPlayer(first.id);});
 
 
 

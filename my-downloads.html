@@ -5,14 +5,69 @@
 <header class="topbar"><div class="topbar-inner"><button class="menu-toggle" id="menuToggle" aria-label="Open navigation menu" aria-expanded="false"><span></span><span></span><span></span></button><a class="brand" href="index.html"><span class="brand-mark">N</span> NAS<span>FLIX</span></a><div class="header-actions"><a class="back-home" href="index.html">Home</a><button id="pageLogin" class="header-login">Log in</button><button id="pageLogout" class="header-logout" hidden>Log out</button></div></div><nav class="main-nav" id="mainNav"><a href="index.html">Home</a><a href="download.html">Download App</a><a class="active" href="my-downloads.html">My Downloads</a><a href="index.html#movies">Movies</a><a href="index.html#videos">AI Videos</a><a href="index.html#series">Series</a><a href="index.html#music">Music</a></nav></header>
 <main class="download-page"><p class="eyebrow">AVAILABLE WITHOUT INTERNET</p><h1>My <em>Downloads</em></h1><div class="download-folders"><button class="download-folder active" data-folder="all"><span>▦</span><b>All</b><small>Everything saved</small></button><button class="download-folder" data-folder="music"><span>♫</span><b>Music</b><small>Saved songs</small></button><button class="download-folder" data-folder="videos"><span>▣</span><b>Videos</b><small>Saved videos &amp; series</small></button></div><div class="downloads-grid" id="downloadsGrid" hidden></div><div class="empty-state" id="downloadsEmpty">Loading saved files…</div><div class="page-auth" id="pageAuth" hidden><a href="index.html">Go to Login / Sign up</a></div><div class="player" id="offlinePlayer"></div></main>
 <script>
-const $=s=>document.querySelector(s),cacheName="nasflix-offline-media-v1";let user=null,folder="all",saved=[];
-const menuToggle=$("#menuToggle"),mainNav=$("#mainNav");menuToggle.addEventListener("click",()=>{const open=menuToggle.getAttribute("aria-expanded")!=="true";menuToggle.setAttribute("aria-expanded",String(open));mainNav.classList.toggle("open",open);});mainNav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{mainNav.classList.remove("open");menuToggle.setAttribute("aria-expanded","false");}));
-function loadSaved(){try{const data=JSON.parse(localStorage.getItem("nasflix-offline-items")||"[]");saved=Array.isArray(data)?data:[];}catch{saved=[];}render();}
-async function checkUser(){loadSaved();$("#downloadsEmpty").textContent=saved.length?"":"No offline media saved in this folder yet.";const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),3500);try{const r=await fetch("/api/account/me",{credentials:"same-origin",cache:"no-store",signal:controller.signal});if(r.ok){const d=await r.json();user=d.user||null;}}catch{}finally{clearTimeout(timeout);$("#pageLogin").hidden=!!user;$("#pageLogout").hidden=!user;$("#pageAuth").hidden=!!user;loadSaved();}}
-function render(){const list=saved.filter(x=>folder==="all"||(folder==="music"?String(x.type).toLowerCase()==="music":String(x.type).toLowerCase()!=="music"));$("#downloadsGrid").hidden=list.length===0;$("#downloadsGrid").innerHTML=list.map(x=>'<div class="download-card"><div class="download-card-main" data-play="'+encodeURIComponent(x.id)+'"><span class="download-type">'+esc(x.type)+'</span><b>'+esc(x.episodeTitle||x.title)+'</b><small>'+esc(x.seriesTitle||x.genre||"NASFLIX")+'</small><span class="download-play">▶ Play offline</span></div><button data-delete="'+encodeURIComponent(x.id)+'" aria-label="Delete download">×</button></div>').join("");$("#downloadsEmpty").hidden=list.length>0;$("#downloadsEmpty").textContent=list.length?"":"No offline media saved in this folder yet.";document.querySelectorAll("[data-folder]").forEach(b=>b.classList.toggle("active",b.dataset.folder===folder));}
+"use strict";
+const $=s=>document.querySelector(s),cacheName="nasflix-offline-media-v1";
+let user=null,folder="all",saved=[];
+const empty=$("#downloadsEmpty"),grid=$("#downloadsGrid");
+function setMessage(message){if(empty){empty.textContent=message;empty.hidden=false;}if(grid)grid.hidden=true;}
+function loadSaved(){
+ try{
+  const raw=localStorage.getItem("nasflix-offline-items");
+  const data=raw?JSON.parse(raw):[];
+  saved=Array.isArray(data)?data:[];
+ }catch(error){saved=[];setMessage("Unable to read saved downloads on this device.");console.error("NASFLIX downloads storage:",error);return;}
+ render();
+}
+async function checkUser(){
+ loadSaved();
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),3500);
+ try{
+  const r=await fetch("/api/account/me",{credentials:"same-origin",cache:"no-store",signal:controller.signal});
+  if(r.ok){const d=await r.json();user=d.user||null;}
+ }catch(error){console.warn("NASFLIX account check unavailable:",error);}
+ finally{
+  clearTimeout(timeout);
+  $("#pageLogin").hidden=!!user;
+  $("#pageLogout").hidden=!user;
+  $("#pageAuth").hidden=!!user;
+  loadSaved();
+ }
+}
+function render(){
+ if(!grid||!empty)return;
+ const list=saved.filter(x=>folder==="all"||(folder==="music"?String(x.type||"").toLowerCase()==="music":String(x.type||"").toLowerCase()!=="music"));
+ grid.innerHTML=list.map(x=>'<div class="download-card"><div class="download-card-main" data-play="'+encodeURIComponent(x.id)+'"><span class="download-type">'+esc(x.type)+'</span><b>'+esc(x.episodeTitle||x.title)+'</b><small>'+esc(x.seriesTitle||x.genre||"NASFLIX")+'</small><span class="download-play">▶ Play offline</span></div><button data-delete="'+encodeURIComponent(x.id)+'" aria-label="Delete download">×</button></div>').join("");
+ grid.hidden=list.length===0;
+ empty.hidden=list.length>0;
+ empty.textContent=list.length?"":"No offline media saved in this folder yet.";
+ document.querySelectorAll("[data-folder]").forEach(b=>b.classList.toggle("active",b.dataset.folder===folder));
+}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 document.querySelectorAll("[data-folder]").forEach(b=>b.addEventListener("click",()=>{folder=b.dataset.folder;render();}));
-$("#downloadsGrid").addEventListener("click",async e=>{const del=e.target.closest("[data-delete]");if(del){const id=decodeURIComponent(del.dataset.delete),item=saved.find(x=>String(x.id)===id);if(item?.url){const c=await caches.open(cacheName);await c.delete(new URL(item.url,location.href).href);}saved=saved.filter(x=>String(x.id)!==id);localStorage.setItem("nasflix-offline-items",JSON.stringify(saved));render();return;}const play=e.target.closest("[data-play]");if(play){const item=saved.find(x=>String(x.id)===decodeURIComponent(play.dataset.play));if(!item)return;const c=await caches.open(cacheName),res=await c.match(new URL(item.url,location.href).href);if(!res){alert("This file is not in offline storage anymore.");return;}const blob=await res.blob(),url=URL.createObjectURL(blob),el=document.createElement(String(item.type).toLowerCase()==="music"?"audio":"video");el.controls=true;el.autoplay=true;el.src=url;$("#offlinePlayer").replaceChildren(el);el.addEventListener("ended",()=>URL.revokeObjectURL(url),{once:true});}}});
-$("#pageLogin").addEventListener("click",()=>location.href="index.html?auth=login");$("#pageLogout").addEventListener("click",async()=>{try{await fetch("/api/account/logout",{method:"POST",credentials:"same-origin"});}catch{}location.reload();});
-checkUser();
+grid.addEventListener("click",async e=>{
+ const del=e.target.closest("[data-delete]");
+ if(del){
+  const id=decodeURIComponent(del.dataset.delete),item=saved.find(x=>String(x.id)===id);
+  if(item?.url){try{const c=await caches.open(cacheName);await c.delete(new URL(item.url,location.href).href);}catch(error){console.warn("Could not remove cached file:",error);}}
+  saved=saved.filter(x=>String(x.id)!==id);try{localStorage.setItem("nasflix-offline-items",JSON.stringify(saved));}catch{}
+  render();return;
+ }
+ const play=e.target.closest("[data-play]");
+ if(play){
+  const item=saved.find(x=>String(x.id)===decodeURIComponent(play.dataset.play));if(!item)return;
+  try{
+   const c=await caches.open(cacheName),res=await c.match(new URL(item.url,location.href).href);
+   if(!res)throw new Error("This file is not in offline storage anymore.");
+   const blob=await res.blob(),url=URL.createObjectURL(blob),el=document.createElement(String(item.type).toLowerCase()==="music"?"audio":"video");
+   el.controls=true;el.autoplay=true;el.src=url;$("#offlinePlayer").replaceChildren(el);
+   el.addEventListener("ended",()=>URL.revokeObjectURL(url),{once:true});
+  }catch(error){alert(error.message||"Unable to play this saved file.");}
+ }
+});
+$("#pageLogin").addEventListener("click",()=>location.href="index.html?auth=login");
+$("#pageLogout").addEventListener("click",async()=>{try{await fetch("/api/account/logout",{method:"POST",credentials:"same-origin"});}catch{}location.reload();});
+window.addEventListener("pageshow",loadSaved);
+window.addEventListener("storage",e=>{if(e.key==="nasflix-offline-items")loadSaved();});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadSaved();});
+try{checkUser();}catch(error){console.error("NASFLIX My Downloads failed to initialize:",error);setMessage("Could not load saved files. Please refresh this page.");}
 </script></body></html>

@@ -77,8 +77,8 @@ public class PlaybackService extends MediaSessionService {
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .build();
         player.setAudioAttributes(audioAttributes, true);
-        // Keep the CPU awake during active playback so audio can continue with the screen off.
-        player.setWakeMode(C.WAKE_MODE_LOCAL);
+        // Keep the CPU and Wi-Fi active for network streaming while the app is backgrounded.
+        player.setWakeMode(C.WAKE_MODE_NETWORK);
         player.setHandleAudioBecomingNoisy(true);
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
         player.addListener(new Player.Listener() {
@@ -238,8 +238,14 @@ public class PlaybackService extends MediaSessionService {
     }
 
     @Override public void onTaskRemoved(@Nullable Intent rootIntent) {
-        if (player == null || !player.isPlaying()) stopSelf();
-        // Keep the foreground media service alive while audio is playing.
+        // Do not stop the service during a temporary buffer/reconnect period.
+        // isPlaying() is false while buffering; playWhenReady preserves user intent.
+        boolean playbackRequested = player != null
+            && player.getMediaItemCount() > 0
+            && player.getPlayWhenReady()
+            && player.getPlaybackState() != Player.STATE_ENDED;
+        if (!playbackRequested) stopSelf();
+        // MediaSessionService owns the foreground notification during playback.
     }
 
     @Override public void onDestroy() {

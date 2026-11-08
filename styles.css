@@ -870,3 +870,12 @@ body.app-mode .ad-banner-slot iframe{width:100%!important}
     box-sizing:border-box!important;
   }
 }
+
+
+/* Fine alignment: center the Android song panel within the visible WebView. */
+@media(max-width:850px){
+  body.app-mode main#home>.music-section>.music-list{
+    position:relative!important;
+    left:7px!important;
+  }
+}

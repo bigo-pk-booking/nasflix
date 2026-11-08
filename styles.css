@@ -854,3 +854,19 @@ body.app-mode .ad-banner-slot iframe{width:100%!important}
     box-sizing:border-box!important;
   }
 }
+
+
+/* NASFLIX Android WebView: size the song panel against the actual viewport,
+   not a potentially constrained parent grid track. */
+@media(max-width:850px){
+  body.app-mode main#home>.music-section>.music-list{
+    display:block!important;
+    width:calc(100vw - 16px)!important;
+    min-width:0!important;
+    max-width:calc(100vw - 16px)!important;
+    justify-self:center!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+    box-sizing:border-box!important;
+  }
+}

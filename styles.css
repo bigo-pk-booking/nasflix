@@ -984,3 +984,23 @@ body.app-mode nav#mediaTabs.media-tabs{
   position:fixed!important;top:var(--nas-header-fixed-height,78px)!important;
   left:0!important;right:0!important;transform:none!important;visibility:visible!important;
 }
+
+
+/* Remove duplicated bottom clearance that creates a large blank tail on Music. */
+@media(max-width:850px){
+  body.music-page main#home,
+  body.app-mode.music-page main#home{
+    padding-bottom:0!important;margin-bottom:0!important;
+  }
+  body.music-page main#home>.music-section,
+  body.app-mode.music-page main#home>.music-section{
+    padding-bottom:0!important;margin-bottom:0!important;
+    min-height:0!important;
+  }
+  body.music-page main#home>.music-section>.music-list,
+  body.app-mode.music-page main#home>.music-section>.music-list{
+    margin-bottom:0!important;
+    scroll-margin-bottom:0!important;
+    padding-bottom:8px!important;
+  }
+}

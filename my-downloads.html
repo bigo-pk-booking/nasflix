@@ -20,6 +20,19 @@
 @media(max-width:520px){.download-page .offline-player-card.minimized{left:10px;right:10px;bottom:calc(72px + env(safe-area-inset-bottom,0px));}}
 
 .download-page .back-home{color:#c7a2f2;text-decoration:none}@media(max-width:650px){.download-page{padding:28px 16px 70px}.download-page .download-folders{gap:9px}.download-page .download-folder{min-height:145px;padding:14px;border-radius:19px}.download-page .download-folder span{width:48px;height:48px;border-radius:15px;font-size:23px}.download-page .download-folder b{font-size:18px}.download-page .download-folder small{font-size:11px}}
+
+/* My Downloads uses the same compact track-row layout as Music */
+.download-page .downloads-grid{display:flex;flex-direction:column;gap:0;margin-top:22px}
+.download-page .offline-track{display:grid;grid-template-columns:64px minmax(0,1fr) 48px 42px;align-items:center;gap:10px;min-height:82px;padding:10px 4px;border-bottom:1px solid #ffffff20;background:transparent;color:#f5eaff}
+.download-page .offline-track-art{width:64px;height:64px;display:grid;place-items:center;overflow:hidden;border-radius:10px;background:linear-gradient(135deg,#0e7490,#9333ea)}
+.download-page .offline-track-art img{width:100%;height:100%;object-fit:cover}
+.download-page .offline-art-fallback{font-size:21px;font-weight:800;color:white}
+.download-page .offline-track-info{min-width:0;display:flex;flex-direction:column;gap:5px}
+.download-page .offline-track-info b{font-size:14px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.download-page .offline-track-info small{font-size:11px;color:#a99ab8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.download-page .offline-track-play,.download-page .offline-track-delete{width:42px;height:42px;border:1px solid #393143;border-radius:50%;background:#171521;color:#f4eaff;font-size:17px}
+.download-page .offline-track-delete{font-size:23px;color:#d8b5f6}
+@media(max-width:520px){.download-page .downloads-grid{margin-top:14px}.download-page .offline-track{grid-template-columns:56px minmax(0,1fr) 40px 34px;gap:8px;min-height:72px;padding:8px 0}.download-page .offline-track-art{width:56px;height:56px}.download-page .offline-track-info b{font-size:12px}.download-page .offline-track-info small{font-size:10px}.download-page .offline-track-play,.download-page .offline-track-delete{width:36px;height:36px;font-size:15px}.download-page .offline-track-delete{font-size:21px}}
 </style></head><body>
 <header class="topbar"><div class="topbar-inner"><button class="menu-toggle" id="menuToggle" aria-label="Open navigation menu" aria-expanded="false"><span></span><span></span><span></span></button><a class="brand" href="index.html"><span class="brand-mark">N</span> NAS<span>FLIX</span></a><div class="header-actions"><a class="back-home" href="index.html">Home</a><button id="pageLogin" class="header-login">Log in</button><button id="pageLogout" class="header-logout" hidden>Log out</button></div></div><nav class="main-nav" id="mainNav"><a href="index.html">Home</a><a href="download.html">Download App</a><a class="active" href="my-downloads.html">My Downloads</a><a href="index.html#movies">Movies</a><a href="index.html#videos">AI Videos</a><a href="index.html#series">Series</a><a href="index.html#music">Music</a></nav></header>
 <main class="download-page"><p class="eyebrow">AVAILABLE WITHOUT INTERNET</p><h1>My <em>Downloads</em></h1><div class="download-folders"><button class="download-folder active" data-folder="all"><span>▦</span><b>All</b><small>Everything saved</small></button><button class="download-folder" data-folder="music"><span>♫</span><b>Music</b><small>Saved songs</small></button><button class="download-folder" data-folder="videos"><span>▣</span><b>Videos</b><small>Saved videos &amp; series</small></button></div><div class="downloads-grid" id="downloadsGrid" hidden></div><div class="empty-state" id="downloadsEmpty">Loading saved files…</div><div class="page-auth" id="pageAuth" hidden><a href="index.html">Go to Login / Sign up</a></div><section class="player offline-player-card" id="offlinePlayer" hidden><div class="offline-player-toolbar"><b id="offlinePlayerTitle">Now playing</b><div class="offline-player-actions"><button type="button" id="offlinePlayerMinimize" aria-label="Minimize player">−</button><button type="button" id="offlinePlayerClose" aria-label="Close player">×</button></div></div><div class="offline-player-content" id="offlinePlayerContent"></div></section></main>
@@ -52,10 +65,16 @@ async function checkUser(){
   loadSaved();
  }
 }
+function artwork(x){
+ const src=x.poster_url||x.thumbnail||"";
+ if(src)return '<img src="'+esc(src)+'" alt="" loading="lazy" onerror="this.remove()">';
+ const title=String(x.episodeTitle||x.title||"NASFLIX"),initials=title.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+ return '<span class="offline-art-fallback">'+esc(initials||"♫")+'</span>';
+}
 function render(){
  if(!grid||!empty)return;
  const list=saved.filter(x=>folder==="all"||(folder==="music"?String(x.type||"").toLowerCase()==="music":String(x.type||"").toLowerCase()!=="music"));
- grid.innerHTML=list.map(x=>'<div class="download-card"><div class="download-card-main" data-play="'+encodeURIComponent(x.id)+'"><span class="download-type">'+esc(x.type)+'</span><b>'+esc(x.episodeTitle||x.title)+'</b><small>'+esc(x.seriesTitle||x.genre||"NASFLIX")+'</small><span class="download-play">▶ Play offline</span></div><button data-delete="'+encodeURIComponent(x.id)+'" aria-label="Delete download">×</button></div>').join("");
+ grid.innerHTML=list.map(x=>'<article class="offline-track"><div class="offline-track-art">'+artwork(x)+'</div><div class="offline-track-info"><b>'+esc(x.episodeTitle||x.title)+'</b><small>'+esc(x.artist||x.seriesTitle||x.genre||x.type||"NASFLIX")+' · '+esc(x.type)+'</small></div><button class="offline-track-play" type="button" data-play="'+encodeURIComponent(x.id)+'" aria-label="Play offline">▶</button><button class="offline-track-delete" type="button" data-delete="'+encodeURIComponent(x.id)+'" aria-label="Remove download">×</button></article>').join("");
  grid.hidden=list.length===0;
  empty.hidden=list.length>0;
  empty.textContent=list.length?"":"No offline media saved in this folder yet.";

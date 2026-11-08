@@ -487,6 +487,19 @@ async function uploadBulkBatch(kind){
   }finally{button.disabled=false;}
 }
 $("#bulkMusicSubmit")?.addEventListener("click",()=>uploadBulkBatch("music"));
+function openAdminUpload(kind){
+ const music=kind==="music";
+ $("#musicUploadArea").hidden=!music;
+ $("#videoUploadArea").hidden=music;
+ $("#singleUploadArea").hidden=false;
+ $("#itemType").value=music?"Music":"Movie";
+ $("#itemType").dispatchEvent(new Event("change",{bubbles:true}));
+ $("#adminUploadHint").textContent=music?"Music upload tools are open below.":"Video upload tools are open below.";
+ document.querySelectorAll(".admin-choice").forEach(button=>button.classList.toggle("active",button.id===(music?"openMusicUpload":"openVideoUpload")));
+}
+$("#openMusicUpload")?.addEventListener("click",()=>openAdminUpload("music"));
+$("#openVideoUpload")?.addEventListener("click",()=>openAdminUpload("video"));
+
 $("#bulkVideoSubmit")?.addEventListener("click",()=>uploadBulkBatch("video"));
 $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
  const status=$("#bulkVideoLinksStatus"),button=$("#bulkVideoLinksSubmit"),token=$("#adminToken").value.trim();

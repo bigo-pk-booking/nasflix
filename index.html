@@ -154,6 +154,15 @@
     <div class="bulk-upload-panel" style="margin:22px 0;padding:18px;border:1px solid #51406a;border-radius:18px;background:linear-gradient(145deg,#21162f,#12101b)">
       <p class="eyebrow">BATCH UPLOAD</p><h3 style="margin:0 0 8px">Upload videos</h3><p class="upload-hint">Video files only. Select multiple videos; each filename becomes its own title.</p>
       <label>Video collection / Creator name (optional)<input id="bulkVideoArtist" maxlength="90" placeholder="Creator or collection name"></label>
+      <div class="batch-link-box" style="margin-top:16px;padding-top:16px;border-top:1px solid #ffffff20">
+        <h4 style="margin:0 0 8px">Batch episode links</h4>
+        <p class="upload-hint">Paste one video URL per line. Optional format: Episode title | video URL. NASFLIX will add them as consecutive episodes in the same series.</p>
+        <label>Series / Folder name<input id="bulkLinkSeries" maxlength="90" placeholder="e.g. OJT Hours of Love"></label>
+        <div class="form-row"><label>Season number<input id="bulkLinkSeason" type="number" min="1" max="99" value="1"></label><label>Starting episode number<input id="bulkLinkStartEpisode" type="number" min="1" max="999" value="1"></label></div>
+        <label>Video links (one per line)<textarea id="bulkVideoLinks" rows="6" maxlength="50000" placeholder="https://example.com/episode-1.mp4&#10;Episode 2 | https://example.com/episode-2.mp4"></textarea></label>
+        <button class="primary full" id="bulkVideoLinksSubmit" type="button">Add episode links batch</button>
+        <p class="upload-hint" id="bulkVideoLinksStatus" role="status" aria-live="polite">Paste multiple direct video links to begin.</p>
+      </div>
       <label>Video files (MP4, WebM)<input id="bulkVideoFiles" type="file" accept="video/mp4,video/webm,.mp4,.webm" multiple></label>
       <label>Shared video poster (optional)<input id="bulkVideoPoster" type="file" accept="image/jpeg,image/png,image/webp"></label>
       <button class="primary full" id="bulkVideoSubmit" type="button">Upload video batch</button>

@@ -527,6 +527,7 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .music-section .track-cover{width:52px;height:52px;flex:0 0 52px}
 .music-section .track-info{min-width:0}
 .music-section .track-info b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.music-section .track-info{min-width:0;overflow:hidden}.music-section .track-info b.track-title-marquee{display:block;position:relative;overflow:hidden;text-overflow:clip;white-space:nowrap;max-width:100%}.music-section .track-info b.track-title-marquee.is-marquee{width:max-content;max-width:none;padding-left:100%;animation:nasflix-list-title-marquee 11s linear infinite}.music-section .track.is-now-playing{background:linear-gradient(90deg,#21163366,transparent);border-left:2px solid #b879f7;padding-left:10px}.music-section .track.is-now-playing [data-track]{border-color:#9d62d5;color:#d8b4fe;font-weight:700}@keyframes nasflix-list-title-marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}@media(prefers-reduced-motion:reduce){.music-section .track-info b.track-title-marquee.is-marquee{animation:none;padding-left:0}}
 .music-section .track button{flex:0 0 auto}
 @media(max-width:850px){
   .music-section{grid-template-columns:minmax(0,1fr);grid-template-areas:"heading" "playlists" "actions" "artists" "categories" "albums" "songs";gap:18px;padding:30px 16px 105px}

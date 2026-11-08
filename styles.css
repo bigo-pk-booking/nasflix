@@ -1294,3 +1294,8 @@ body.app-mode nav#mediaTabs.media-tabs{
 .dashboard-splash-ring-inner span{font:800 25px Manrope,sans-serif;color:#f1d58d;font-variant-numeric:tabular-nums}
 @keyframes dashboardProgress{0%{transform:translateX(-110%)}100%{transform:translateX(370%)}}
 @media(prefers-reduced-motion:reduce){.dashboard-splash-ring{transition:none}}
+
+
+/* Keep the music library hidden whenever a video category is active. */
+.music-section.page-hidden,
+body.video-library-page main#home>.music-section{display:none!important}

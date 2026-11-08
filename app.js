@@ -167,22 +167,14 @@ function dropboxRawUrl(value){try{const u=new URL(value);if(u.hostname==="www.dr
 function googleDriveId(value){try{const u=new URL(value);if(u.hostname==="drive.google.com"||u.hostname==="www.drive.google.com"){const parts=u.pathname.split("/").filter(Boolean);if(parts[0]==="file"&&parts[1]==="d")return parts[2]||"";return u.searchParams.get("id")||"";}}catch{}return "";} 
 function isDirectMedia(value){if(String(value||"").startsWith("/api/file/"))return true;try{const path=new URL(value).pathname.toLowerCase();return [".mp4",".webm",".mp3",".ogg",".m4a",".wav"].some(ext=>path.endsWith(ext));}catch{return false;}}
 function renderEpisodeNav(current){
-  const box=$("#seriesEpisodes");
-  if(current.type!=="Series"){box.hidden=true;box.innerHTML="";return;}
-  const seriesName=String(current.seriesTitle||current.title||"").trim().toLowerCase();
-  const episodes=items.filter(e=>e.type==="Series"&&String(e.seriesTitle||e.title||"").trim().toLowerCase()===seriesName).sort((a,b)=>(Number(a.seasonNumber)||1)-(Number(b.seasonNumber)||1)||(Number(a.episodeNumber)||0)-(Number(b.episodeNumber)||0));
-  const currentIndex=episodes.findIndex(e=>String(e.id)===String(current.id));
-  const currentSeason=Number(current.seasonNumber)||1;
-  const seasons=[...new Set(episodes.map(e=>Number(e.seasonNumber)||1))].sort((a,b)=>a-b);
-  const visibleEpisodes=episodes.filter(e=>(Number(e.seasonNumber)||1)===currentSeason);
-  const seasonIndex=visibleEpisodes.findIndex(e=>String(e.id)===String(current.id));
-  box.hidden=false;
-  box.innerHTML=`<div class="episode-heading"><div><p class="eyebrow">CONTINUE THE STORY</p><h3>${esc(current.seriesTitle||current.title)}</h3></div><small>${episodes.length} episodes</small></div>
-  <div class="episode-season-bar"><label for="episodeSeasonSelect">Season</label><select id="episodeSeasonSelect">${seasons.map(season=>`<option value="${season}" ${season===currentSeason?"selected":""}>Season ${season}</option>`).join("")}</select><span>${visibleEpisodes.length} episodes</span></div>
-  <div class="episode-strip" id="episodeStrip" aria-label="Episodes">${visibleEpisodes.map((ep,i)=>`<button class="episode-card ${String(ep.id)===String(current.id)?"current":""}" data-episode-id="${esc(ep.id)}"><span class="episode-thumb"><span class="episode-number">${Number(ep.seasonNumber)||1}.${Number(ep.episodeNumber)||i+1}</span><span class="episode-card-play">${String(ep.id)===String(current.id)?"Ⅱ":"▶"}</span></span><span class="episode-copy"><b>${esc(ep.episodeTitle||ep.title)}</b><small>Episode ${Number(ep.episodeNumber)||i+1}</small></span>${String(ep.id)===String(current.id)?'<span class="episode-now">NOW PLAYING</span>':""}</button>`).join("")}</div>
-  <div class="episode-nav-buttons"><button type="button" data-episode-id="${episodes[currentIndex-1]?.id||""}" ${currentIndex<=0?"disabled":""}>← Previous</button><button type="button" data-episode-id="${episodes[currentIndex+1]?.id||""}" ${currentIndex>=episodes.length-1?"disabled":""}>Next Episode →</button></div>`;
-  const strip=$("#episodeStrip"),active=strip?.querySelector(".episode-card.current");
-  if(active&&strip)requestAnimationFrame(()=>active.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"}));
+ const box=$("#seriesEpisodes");if(current.type!=="Series"){box.hidden=true;box.innerHTML="";return;}
+ const key=String(current.seriesTitle||current.title||"").trim().toLowerCase();
+ const eps=items.filter(e=>e.type==="Series"&&String(e.seriesTitle||e.title||"").trim().toLowerCase()===key).sort((a,b)=>(Number(a.seasonNumber)||1)-(Number(b.seasonNumber)||1)||(Number(a.episodeNumber)||0)-(Number(b.episodeNumber)||0));
+ const idx=eps.findIndex(e=>String(e.id)===String(current.id)),season=Number(current.seasonNumber)||1;
+ const seasons=[...new Set(eps.map(e=>Number(e.seasonNumber)||1))].sort((a,b)=>a-b),visible=eps.filter(e=>(Number(e.seasonNumber)||1)===season);
+ box.hidden=false;
+ box.innerHTML=`<div class="episode-heading"><p class="eyebrow">EPISODES</p><span>${visible.length} in this season</span></div><div class="episode-season-bar">${seasons.length>1?`<label for="episodeSeasonSelect">Season</label><select id="episodeSeasonSelect">${seasons.map(n=>`<option value="${n}" ${n===season?"selected":""}>Season ${n}</option>`).join("")}</select>`:`<span class="episode-season-single">Season ${season}</span>`}</div><div class="episode-strip" id="episodeStrip" aria-label="Episodes">${visible.map((ep,i)=>`<button class="episode-card ${String(ep.id)===String(current.id)?"current":""}" data-episode-id="${esc(ep.id)}"><span class="episode-thumb"><span class="episode-number">${Number(ep.episodeNumber)||i+1}</span><span class="episode-card-play">${String(ep.id)===String(current.id)?"Ⅱ":"▶"}</span></span><span class="episode-copy"><b>${esc(ep.episodeTitle||ep.title)}</b><small>Episode ${Number(ep.episodeNumber)||i+1}</small></span>${String(ep.id)===String(current.id)?'<span class="episode-now">PLAYING</span>':""}</button>`).join("")}</div>`;
+ const strip=$("#episodeStrip"),active=strip?.querySelector(".episode-card.current");if(active&&strip)requestAnimationFrame(()=>active.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"}));
 }
 let activeMusicAudio=null,activeMusicContext=null,activeMusicAnalyser=null,activeMusicSource=null,musicVisualFrame=0,nativeMusicPoll=null;
 // Android/Chrome lock-screen and notification media controls

@@ -109,7 +109,8 @@ async function accountAction(kind){
  try{
   const data=await accountRequest(kind,{email,password,...(kind==="register"?{fullName}:{})});
   accountUser=data.user;$("#accountPassword").value="";$("#accountConfirmPassword").value="";$("#accountFullName").value="";
-  await showDashboardSplash("ACCESSING USER DASHBOARD",accountUser?.fullName||accountUser?.name||accountUser?.displayName||fullName||accountUser?.email||"");
+  const welcomeName=accountUser?.fullName||accountUser?.name||accountUser?.displayName||fullName||String(accountUser?.email||"").split("@")[0].replace(/[._-]+/g," ").trim();
+  await showDashboardSplash("ACCESSING USER DASHBOARD",welcomeName);
   await refreshAccount();
   accountMessage(kind==="register"?"Account created successfully!":"Welcome back!");
  }catch(e){accountMessage(e.message||"Something went wrong. Please try again.");}

@@ -503,11 +503,11 @@ $("#openVideoUpload")?.addEventListener("click",()=>openAdminUpload("video"));
 $("#bulkVideoSubmit")?.addEventListener("click",()=>uploadBulkBatch("video"));
 $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
  const status=$("#bulkVideoLinksStatus"),button=$("#bulkVideoLinksSubmit"),token=$("#adminToken").value.trim();
- const seriesTitle=$("#bulkLinkSeries").value.trim(),linkType=$("#bulkLinkType").value,linkGenre=$("#bulkLinkGenre").value,seasonNumber=Math.max(1,Math.min(99,Number($("#bulkLinkSeason").value)||1)),startEpisode=Math.max(1,Math.min(999,Number($("#bulkLinkStartEpisode").value)||1));
+ const seriesTitle=$("#bulkLinkSeries").value.trim(),linkType=$("#bulkVideoType").value,linkGenre=$("#bulkVideoGenre").value,seasonNumber=Math.max(1,Math.min(99,Number($("#bulkLinkSeason").value)||1)),startEpisode=Math.max(1,Math.min(999,Number($("#bulkLinkStartEpisode").value)||1));
  const lines=$("#bulkVideoLinks").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  const sharedPoster=$("#bulkLinksSharedPoster").files[0]||null,individual=[...$("#bulkLinksIndividualPosters").files];
  if(!token){status.textContent="Enter your Admin access key first.";return;}
- if(!seriesTitle){status.textContent="Enter the series / folder name.";return;}
+ if(linkType==="Series"&&!seriesTitle){status.textContent="Enter the series / folder name.";return;}
  if(!lines.length){status.textContent="Paste at least one video link.";return;}
  if(lines.length>200){status.textContent="Maximum 200 episode links per batch.";return;}
  if(sharedPoster&&sharedPoster.size>5*1024*1024){status.textContent="Shared thumbnail maximum size is 5 MB.";return;}

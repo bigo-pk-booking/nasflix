@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090811"><title>My Downloads — NASFLIX</title><link rel="stylesheet" href="styles.css?v=20261108-downloadfloatfix2"><style>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090811"><title>My Downloads — NASFLIX</title><link rel="stylesheet" href="styles.css?v=20261108-downloadsameflow1"><style>
 .download-page{max-width:1180px;margin:0 auto;padding:42px 24px 90px}.download-page .eyebrow{color:#c5a4ff;letter-spacing:.22em;font-weight:800}.download-page h1{font-size:clamp(42px,7vw,76px);margin:10px 0 42px}.download-page h1 em{color:#ad80ff;font-style:normal}.download-page .download-folders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.download-page .download-folder{min-height:190px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:28px;border:1px solid #4c3560;border-radius:28px;background:linear-gradient(145deg,#1d1428,#120e1b);color:#f7efff}.download-page .download-folder.active{border-color:#c18aff;box-shadow:0 0 0 2px #9d61d5}.download-page .download-folder span{width:72px;height:72px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(135deg,#9147ec,#c02bd0);font-size:32px}.download-page .download-folder b{font-size:25px}.download-page .download-folder small{font-size:15px;color:#a99ab8}.download-page .downloads-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:28px}.download-page .download-card{display:flex;justify-content:space-between;gap:12px;padding:18px;border:1px solid #493456;border-radius:18px;background:#171120;color:#f5eaff}.download-page .download-card-main{display:grid;gap:8px;cursor:pointer;min-width:0}.download-page .download-card-main b{overflow-wrap:anywhere}.download-page .download-card small{color:#a99ab8}.download-page .download-card button{align-self:start;border:0;background:transparent;color:#e5caff;font-size:25px}.download-page .download-type{font-size:11px;color:#c59cff;text-transform:uppercase}.download-page .download-play{font-size:13px;color:#c69aff}.download-page .empty-state{margin:80px auto 0;max-width:760px;text-align:center;font-size:clamp(18px,3vw,28px);line-height:1.55;color:#aaa0b5}.download-page .page-auth{margin-top:34px;text-align:center}.download-page .page-auth button,.download-page .page-auth a{display:inline-block;margin:5px;padding:12px 20px;border-radius:999px;border:1px solid #9861c9;background:#3d2250;color:white;text-decoration:none}.download-page .player{margin-top:24px}.download-page .player video,.download-page .player audio{width:100%;max-height:65vh}
 .download-page .offline-player-card{position:relative;margin-top:24px;padding:12px;border:1px solid #8056ad;border-radius:18px;background:#171120;box-shadow:0 12px 32px #0008}
 .download-page .offline-player-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 2px 12px}
@@ -49,9 +49,39 @@
 .download-page .offline-mini-progress{height:3px;flex:1;min-width:20px;background:#ffffff35;border-radius:4px;overflow:hidden}
 .download-page .offline-mini-progress span{display:block;width:0;height:100%;background:#c084fc}
 .download-page .offline-player-card.minimized{position:fixed;z-index:1200;left:12px;right:12px;bottom:calc(78px + env(safe-area-inset-bottom,0px));width:auto;max-width:680px;margin:0 auto;padding:10px 12px;border:1px solid #a66be0;border-radius:18px;background:rgba(27,18,39,.97);box-shadow:0 8px 30px #000b;backdrop-filter:blur(16px)}
+
+.download-page{padding-top:34px!important;padding-bottom:110px!important}
+.download-page .downloads-heading{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:22px 0 18px}
+.download-page .downloads-heading .eyebrow{width:100%;margin:0}
+.download-page .downloads-heading h1{font-size:clamp(30px,5vw,46px)!important;margin:0!important}
+.download-page .downloads-heading>span{font-size:11px;color:#a99ab8}
+.download-page .downloads-grid{margin-top:12px!important}
+.download-page .empty-state{margin:42px auto 0!important}
+.download-page .offline-player-card.minimized{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}
+@media(max-width:650px){.download-page{padding:22px 16px 105px!important}.download-page .downloads-heading{margin:18px 0 12px}.download-page .downloads-heading h1{font-size:30px!important}}
 </style></head><body>
-<header class="topbar"><div class="topbar-inner"><button class="menu-toggle" id="menuToggle" aria-label="Open navigation menu" aria-expanded="false"><span></span><span></span><span></span></button><a class="brand" href="index.html"><span class="brand-mark">N</span> NAS<span>FLIX</span></a><div class="header-actions"><a class="back-home" href="index.html">Home</a><button id="pageLogin" class="header-login">Log in</button><button id="pageLogout" class="header-logout" hidden>Log out</button></div></div><nav class="main-nav" id="mainNav"><a href="index.html">Home</a><a href="download.html">Download App</a><a class="active" href="my-downloads.html">My Downloads</a><a href="index.html#movies">Movies</a><a href="index.html#videos">AI Videos</a><a href="index.html#series">Series</a><a href="index.html#music">Music</a></nav></header>
-<main class="download-page"><p class="eyebrow">AVAILABLE WITHOUT INTERNET</p><h1>My <em>Downloads</em></h1><div class="download-folders"><button class="download-folder active" data-folder="all"><span>▦</span><b>All</b><small>Everything saved</small></button><button class="download-folder" data-folder="music"><span>♫</span><b>Music</b><small>Saved songs</small></button><button class="download-folder" data-folder="videos"><span>▣</span><b>Videos</b><small>Saved videos &amp; series</small></button></div><div class="downloads-grid" id="downloadsGrid" hidden></div><div class="empty-state" id="downloadsEmpty">Loading saved files…</div><div class="page-auth" id="pageAuth" hidden><a href="index.html">Go to Login / Sign up</a></div><section class="player offline-player-card" id="offlinePlayer" hidden><div class="offline-player-toolbar"><b id="offlinePlayerTitle">Now playing</b><div class="offline-player-actions"><button type="button" id="offlinePlayerMinimize" aria-label="Minimize player">−</button><button type="button" id="offlinePlayerClose" aria-label="Close player">×</button></div></div><div class="offline-player-content" id="offlinePlayerContent"></div><div class="offline-player-controls" id="offlinePlayerControls"><button type="button" id="offlinePlayPause" aria-label="Play or pause">▶</button><span id="offlineCurrentTime">0:00</span><input id="offlineSeek" type="range" min="0" max="1000" value="0" aria-label="Seek"><span id="offlineDuration">0:00</span><button type="button" id="offlineFullscreen" aria-label="Fullscreen" hidden>⛶</button></div><div class="offline-mini-controls" id="offlineMiniControls"><button type="button" id="offlineMiniPlay" aria-label="Play or pause">▶</button><span id="offlineMiniTime">0:00</span><div class="offline-mini-progress"><span id="offlineMiniProgress"></span></div></div></section></main>
+<header class="topbar">
+ <div class="brand-group">
+  <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mainNav"><span></span><span></span><span></span></button>
+  <a class="brand" href="index.html"><span class="brand-mark">N</span> NAS<span>FLIX</span></a>
+ </div>
+ <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+  <a href="index.html">Home</a><a href="index.html#movies">Movies &amp; Videos</a><a href="index.html#music">Music</a><a href="index.html#playlists">My Playlists</a><a class="active" href="my-downloads.html">My Downloads</a><a href="download.html">Download App</a>
+ </nav>
+ <div class="header-actions">
+  <label class="search"><span>⌕</span><input id="downloadsSearch" type="search" placeholder="Search title..." aria-label="Search downloads"></label>
+  <button id="pageLogin" class="header-login">Log in</button><button id="pageLogout" class="header-logout" hidden>Log out</button>
+ </div>
+</header>
+<nav class="media-tabs" id="downloadsTabs" aria-label="Download categories">
+ <button type="button" class="media-tab active" data-folder="all">▦ <span>All</span></button>
+ <button type="button" class="media-tab" data-folder="movies">▣ <span>Movies</span></button>
+ <button type="button" class="media-tab" data-folder="series">▤ <span>Series</span></button>
+ <button type="button" class="media-tab" data-folder="videos">▷ <span>Videos</span></button>
+ <button type="button" class="media-tab" data-folder="music">♫ <span>Music</span></button>
+</nav>
+<main class="download-page"><p class="eyebrow">AVAILABLE WITHOUT INTERNET</p><h1>My <em>Downloads</em></h1><div class="downloads-heading"><p class="eyebrow">YOUR OFFLINE LIBRARY</p><h1>My <em>Downloads</em></h1><span id="downloadsCount">Saved media</span></div><div class="downloads-grid" id="downloadsGrid" hidden></div><div class="empty-state" id="downloadsEmpty">Loading saved files…</div><div class="page-auth" id="pageAuth" hidden><a href="index.html">Go to Login / Sign up</a></div><section class="player offline-player-card" id="offlinePlayer" hidden><div class="offline-player-toolbar"><b id="offlinePlayerTitle">Now playing</b><div class="offline-player-actions"><button type="button" id="offlinePlayerMinimize" aria-label="Minimize player">−</button><button type="button" id="offlinePlayerClose" aria-label="Close player">×</button></div></div><div class="offline-player-content" id="offlinePlayerContent"></div><div class="offline-player-controls" id="offlinePlayerControls"><button type="button" id="offlinePlayPause" aria-label="Play or pause">▶</button><span id="offlineCurrentTime">0:00</span><input id="offlineSeek" type="range" min="0" max="1000" value="0" aria-label="Seek"><span id="offlineDuration">0:00</span><button type="button" id="offlineFullscreen" aria-label="Fullscreen" hidden>⛶</button></div><div class="offline-mini-controls" id="offlineMiniControls"><button type="button" id="offlineMiniPlay" aria-label="Play or pause">▶</button><span id="offlineMiniTime">0:00</span><div class="offline-mini-progress"><span id="offlineMiniProgress"></span></div></div></section></main>
+<nav class="nas-bottom-nav" id="nasBottomNav" aria-label="Main bottom navigation"><button type="button" data-bottom-page="home"><span>⌂</span><small>Home</small></button><button type="button" data-bottom-page="search"><span>⌕</span><small>Search</small></button><button type="button" data-bottom-page="playlists"><span>▤</span><small>Your Library</small></button><button type="button" data-bottom-page="music"><span>♫</span><small>Music</small></button></nav>
 <script>
 "use strict";
 const $=s=>document.querySelector(s),cacheName="nasflix-offline-media-v1";
@@ -89,15 +119,23 @@ function artwork(x){
 }
 function render(){
  if(!grid||!empty)return;
- const list=saved.filter(x=>folder==="all"||(folder==="music"?String(x.type||"").toLowerCase()==="music":String(x.type||"").toLowerCase()!=="music"));
+ const type=x=>String(x.type||"").toLowerCase();
+ const list=saved.filter(x=>{
+  const t=type(x),matchFolder=folder==="all"||(folder==="music"?t==="music":folder==="series"?t==="series":folder==="movies"?t==="movie":folder==="videos"?(t==="ai video"||t==="video"):false);
+  const q=($("#downloadsSearch")?.value||"").trim().toLowerCase(),matchQuery=!q||[x.title,x.episodeTitle,x.artist,x.seriesTitle,x.genre,x.type].some(v=>String(v||"").toLowerCase().includes(q));
+  return matchFolder&&matchQuery;
+ });
  grid.innerHTML=list.map(x=>'<article class="offline-track"><div class="offline-track-art">'+artwork(x)+'</div><div class="offline-track-info"><b>'+esc(x.episodeTitle||x.title)+'</b><small>'+esc(x.artist||x.seriesTitle||x.genre||x.type||"NASFLIX")+' · '+esc(x.type)+'</small></div><button class="offline-track-play" type="button" data-play="'+encodeURIComponent(x.id)+'" aria-label="Play offline">▶</button><button class="offline-track-delete" type="button" data-delete="'+encodeURIComponent(x.id)+'" aria-label="Remove download">×</button></article>').join("");
  grid.hidden=list.length===0;
  empty.hidden=list.length>0;
  empty.textContent=list.length?"":"No offline media saved in this folder yet.";
- document.querySelectorAll("[data-folder]").forEach(b=>b.classList.toggle("active",b.dataset.folder===folder));
+ document.querySelectorAll("#downloadsTabs [data-folder]").forEach(b=>b.classList.toggle("active",b.dataset.folder===folder));$("#downloadsCount").textContent=list.length+" saved "+(list.length===1?"item":"items");
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-document.querySelectorAll("[data-folder]").forEach(b=>b.addEventListener("click",()=>{folder=b.dataset.folder;render();}));
+document.querySelectorAll("#downloadsTabs [data-folder]").forEach(b=>b.addEventListener("click",()=>{folder=b.dataset.folder;render();}));
+$("#downloadsSearch").addEventListener("input",render);
+$("#menuToggle").addEventListener("click",()=>{const nav=$("#mainNav"),open=nav.classList.toggle("open");$("#menuToggle").setAttribute("aria-expanded",String(open));});
+document.querySelectorAll("#nasBottomNav [data-bottom-page]").forEach(b=>b.addEventListener("click",()=>{const target=b.dataset.bottomPage;if(target==="home")location.href="index.html";else if(target==="music")location.href="index.html#music";else if(target==="search"){const q=$("#downloadsSearch");q.focus();q.scrollIntoView({behavior:"smooth",block:"center"});}else location.href="index.html#playlists";}));
 grid.addEventListener("click",async e=>{
  const del=e.target.closest("[data-delete]");
  if(del){

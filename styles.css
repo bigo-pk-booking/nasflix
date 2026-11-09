@@ -1243,8 +1243,8 @@ body.app-mode nav#mediaTabs.media-tabs{
 /* NASFLIX premium video controls */
 .player-screen:has(.nas-player-controls){position:relative;background:#05040b}
 .player-screen:has(.nas-player-controls) video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding-bottom:0}
-.nas-player-controls{position:absolute;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:center;gap:10px;padding:38px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.88));color:#fff;opacity:1}
-.nas-player-controls button{flex:0 0 auto;width:36px;height:36px;border:0;border-radius:50%;background:#ffffff18;color:#fff;font-size:17px;display:grid;place-items:center}
+.nas-player-controls{position:absolute;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:center;gap:7px;padding:38px 10px 12px;background:linear-gradient(transparent,rgba(0,0,0,.88));color:#fff;opacity:1}
+.nas-player-controls button{flex:0 0 auto;min-width:32px;width:32px;height:36px;padding:0 3px;border:0;border-radius:50%;background:#ffffff18;color:#fff;font-size:15px;display:grid;place-items:center}.nas-player-controls .nas-player-rewind,.nas-player-controls .nas-player-forward{width:38px;border-radius:18px;font-size:11px;font-weight:700}
 .nas-player-timeline{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
 .nas-player-timeline span{font:11px 'DM Sans',sans-serif;color:#f5efff;white-space:nowrap;font-variant-numeric:tabular-nums}
 .nas-player-seek{width:100%;min-width:30px;accent-color:#c084fc;height:4px}

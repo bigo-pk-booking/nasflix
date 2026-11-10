@@ -76,6 +76,8 @@ public class MainActivity extends Activity {
         webView = new WebView(this);
         webView.setBackgroundColor(android.graphics.Color.rgb(9,8,17));
         WebSettings settings = webView.getSettings();
+        // Keep first-party NASFLIX login sessions enabled in the WebView.
+        CookieManager.getInstance().setAcceptCookie(true);
         webView.addJavascriptInterface(new NasflixBridge(), "NasflixAndroid");
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);

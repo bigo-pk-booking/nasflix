@@ -755,7 +755,8 @@ async function finishStartupLoading(){
   overlay.classList.add("startup-hidden");
   setTimeout(()=>overlay.remove(),700);
 }
-const isAdminRoute=/^\\/admin\\/?$/.test(location.pathname);
+const isAdminRoute=location.pathname==="/admin"||location.pathname==="/admin/";
+if(isAdminRoute)document.documentElement.classList.add("admin-route");
 if(isAdminRoute){
   // Admin opens directly without the public media startup/loading screen.
   const startupOverlay=$("#nasStartup");if(startupOverlay)startupOverlay.remove();

@@ -97,7 +97,7 @@ async function enterGuestMode(){
  await showDashboardSplash("ACCESSING GUEST DASHBOARD","");
 }
 let resetFlow=new URLSearchParams(location.search).has("reset");
-async function refreshAccount(){if(resetFlow){accountUser=null;$("#welcomeGate").hidden=false;$("#accountAuth").hidden=true;$("#resetPasswordBox").hidden=false;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=true;$("#adminOpen")?.setAttribute("hidden","");return;}try{const data=await accountRequest("me");accountUser=data.user;if(accountUser){guestMode=false;$("#adminOpen")?.toggleAttribute("hidden",accountUser.role!=="admin");$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=false;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=false;$("#accountSignedIn").hidden=false;$("#accountStatus").textContent=accountUser.role==="admin"?"Admin account":"Signed in";$("#accountEmailLabel").textContent=accountUser.email;const saved=await accountRequest("playlists");userPlaylists=Array.isArray(saved.playlists)?saved.playlists:[];activePlaylistId=userPlaylists[0]?.id||"";renderUserPlaylists();if(accountUser.role==="admin"){const admin=$("#adminModal");if(admin){admin.classList.add("open","admin-session-active");admin.setAttribute("aria-hidden","false");}const key=$("#adminToken");if(key)key.value="";}else{$("#adminModal")?.classList.remove("admin-session-active");}}else{$("#adminOpen")?.setAttribute("hidden","");userPlaylists=[];$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountSignedIn").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;$("#accountStatus").textContent="Not signed in";}}catch(e){$("#adminOpen")?.setAttribute("hidden","");accountMessage(e.message);$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;}}
+async function refreshAccount(){if(resetFlow){accountUser=null;$("#welcomeGate").hidden=false;$("#accountAuth").hidden=true;$("#resetPasswordBox").hidden=false;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=true;$("#adminOpen")?.setAttribute("hidden","");return;}try{const data=await accountRequest("me");accountUser=data.user;if(accountUser){guestMode=false;$("#adminOpen")?.toggleAttribute("hidden",accountUser.role!=="admin");$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=false;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=false;$("#accountSignedIn").hidden=false;$("#accountStatus").textContent=accountUser.role==="admin"?"Admin account":"Signed in";$("#accountEmailLabel").textContent=accountUser.email;const saved=await accountRequest("playlists");userPlaylists=Array.isArray(saved.playlists)?saved.playlists:[];activePlaylistId=userPlaylists[0]?.id||"";renderUserPlaylists();if(accountUser.role==="admin"){const admin=$("#adminModal");if(admin){admin.classList.add("open");admin.setAttribute("aria-hidden","false");}}}else{$("#adminOpen")?.setAttribute("hidden","");userPlaylists=[];$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountSignedIn").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;$("#accountStatus").textContent="Not signed in";}}catch(e){$("#adminOpen")?.setAttribute("hidden","");accountMessage(e.message);$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;}}
 let accountActionBusy=false;
 async function accountAction(kind){
  if(accountActionBusy)return;
@@ -479,7 +479,7 @@ async function readMusicTags(file){
 function cleanFileTitle(name){return name.replace(/\.[^.]+$/,"").replace(/[._]+/g," ").trim()||name;}
 function uploadWithProgress(url,formData,token,onProgress,method="POST"){
   return new Promise((resolve,reject)=>{
-    const xhr=new XMLHttpRequest();const requestMethod=method||"POST";xhr.open(requestMethod,url);if(token)xhr.setRequestHeader("authorization","Bearer "+token);
+    const xhr=new XMLHttpRequest();const requestMethod=method||"POST";xhr.open(requestMethod,url);xhr.setRequestHeader("authorization","Bearer "+token);
     xhr.upload.addEventListener("progress",event=>{if(event.lengthComputable)onProgress(event.loaded,event.total);});
     xhr.addEventListener("load",()=>{let result={};try{result=JSON.parse(xhr.responseText||"{}");}catch{}if(xhr.status>=200&&xhr.status<300)resolve(result);else reject(new Error(result.error||"Upload failed ("+xhr.status+")."));});
     xhr.addEventListener("error",()=>reject(new Error("Network error. Please try the upload again.")));
@@ -494,8 +494,8 @@ async function uploadBulkBatch(kind){
   const poster=(music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).files[0];
   const status=$(music?"#bulkMusicStatus":"#bulkVideoStatus");
   const button=$(music?"#bulkMusicSubmit":"#bulkVideoSubmit");
-  const token=$("#adminToken")?.value.trim()||"";
-  
+  const token=$("#adminToken").value.trim();
+  if(!token){status.textContent="Enter your Admin access key first.";return;}
   if(!files.length){status.textContent="Choose at least one "+(music?"music":"video")+" file.";return;}
   if(music&&!artist){status.textContent="Enter the artist / singer name.";return;}
   if(poster&&poster.size>5*1024*1024){status.textContent="Shared poster maximum size is 5 MB.";return;}
@@ -549,7 +549,7 @@ $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
  const seriesTitle=$("#bulkLinkSeries").value.trim(),linkType=$("#bulkVideoType").value,linkGenre=$("#bulkVideoGenre").value,seasonNumber=Math.max(1,Math.min(99,Number($("#bulkLinkSeason").value)||1)),startEpisode=Math.max(1,Math.min(999,Number($("#bulkLinkStartEpisode").value)||1));
  const lines=$("#bulkVideoLinks").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  const sharedPoster=$("#bulkLinksSharedPoster").files[0]||null,individual=[...$("#bulkLinksIndividualPosters").files];
- 
+ if(!token){status.textContent="Enter your Admin access key first.";return;}
  if(linkType==="Series"&&!seriesTitle){status.textContent="Enter the series / folder name.";return;}
  if(!lines.length){status.textContent="Paste at least one video link.";return;}
  if(lines.length>200){status.textContent="Maximum 200 episode links per batch.";return;}
@@ -569,7 +569,7 @@ $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
    const data={title:entry.title,type:linkType,genre:linkGenre,artist:"",albumTitle:"",description:"",url:entry.url,allowDownload:"false",seriesTitle:linkType==="Series"?seriesTitle:"",seasonNumber:String(seasonNumber),episodeNumber:linkType==="Series"?String(entry.episodeNumber):"",episodeTitle:linkType==="Series"?entry.title:""};
    Object.entries(data).forEach(([key,value])=>form.append(key,value));
    if(poster)form.append("posterFile",poster,poster.name);
-   const headers=token?{"authorization":"Bearer "+token}:{};const response=await fetch("/api/media",{method:"POST",headers,body:form,credentials:"same-origin"});
+   const response=await fetch("/api/media",{method:"POST",headers:{"authorization":"Bearer "+token},body:form});
    const result=await response.json().catch(()=>({}));if(!response.ok)throw new Error(result.error||"Failed to add episode "+entry.episodeNumber+".");done++;
   }
   status.textContent="Success! "+done+" episodes and thumbnails added to "+seriesTitle+".";
@@ -593,7 +593,7 @@ $("#contentForm").addEventListener("submit",async e=>{
   const token=$("#adminToken").value.trim(),status=$("#uploadStatus"),file=$("#itemFile").files[0],posterFile=$("#posterFile")?.files?.[0],submit=$("#contentSubmit");
   const progress=$("#uploadProgress");
   const item={title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",artist:$("#itemArtist").value.trim(),albumTitle:$("#albumTitle").value.trim(),description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),allowDownload:$("#itemDownload").checked,seriesTitle:$("#seriesTitle").value.trim(),seasonNumber:Number($("#seasonNumber").value)||1,episodeNumber:Number($("#episodeNumber").value)||null,episodeTitle:$("#episodeTitle").value.trim()};
-  
+  if(!token){status.textContent="Enter your admin access key first.";return;}
   if(!item.title){status.textContent="Enter a title.";return;}
   if(!editingId&&file&&file.size>50*1024*1024){status.textContent="Maximum upload size is 50 MB.";return;}if(posterFile&&posterFile.size>5*1024*1024){status.textContent="Poster maximum size is 5 MB.";return;}
   if(!file&&!item.url){status.textContent="Choose a media file or enter a media URL.";return;}
@@ -701,8 +701,8 @@ function renderAdmin(){
   document.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",async()=>{
     const id=b.dataset.delete;
     if(b.dataset.remote==="1"){
-      const token=$("#adminToken")?.value.trim()||"";
-      
+      const token=$("#adminToken").value.trim();
+      if(!token){$("#uploadStatus").textContent="Enter your admin access key before removing saved content.";return;}
       const response=await fetch("/api/media/"+encodeURIComponent(id),{method:"DELETE",headers:{Authorization:"Bearer "+token}});
       if(!response.ok){const result=await response.json().catch(()=>({}));$("#uploadStatus").textContent=result.error||"Could not remove this item.";return;}
     }

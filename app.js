@@ -497,7 +497,7 @@ async function uploadLargeVideo(file,title,metadata,poster,token,onProgress){
    const blob=file.slice(i*partSize,Math.min(file.size,(i+1)*partSize));let result=null,lastError=null;
    for(let attempt=1;attempt<=3;attempt++){
     try{
-     const response=await fetch("/api/upload/part?id="+encodeURIComponent(init.id)+"&uploadId="+encodeURIComponent(init.uploadId)+"&partNumber="+(i+1),{method:"PUT",headers:{"authorization":"Bearer "+token},body:blob});
+     const response=await fetch("/api/upload/part?id="+encodeURIComponent(init.id)+"&uploadId="+encodeURIComponent(init.uploadId)+"&key="+encodeURIComponent(init.key)+"&partNumber="+(i+1),{method:"PUT",headers:{"authorization":"Bearer "+token},body:blob});
      result=await response.json().catch(()=>({}));if(!response.ok)throw new Error(result.error||"Part "+(i+1)+" failed.");lastError=null;break;
     }catch(error){lastError=error;if(attempt<3)await new Promise(resolve=>setTimeout(resolve,700*attempt));}
    }
@@ -512,7 +512,7 @@ async function uploadLargeVideo(file,title,metadata,poster,token,onProgress){
   const result=await complete.json().catch(()=>({}));if(!complete.ok)throw new Error(result.error||"Could not finish "+file.name+".");
   return result;
  }catch(error){
-  try{await fetch("/api/upload/abort",{method:"POST",headers:{"authorization":"Bearer "+token,"content-type":"application/json"},body:JSON.stringify({id:init.id,uploadId:init.uploadId})});}catch{}
+  try{await fetch("/api/upload/abort",{method:"POST",headers:{"authorization":"Bearer "+token,"content-type":"application/json"},body:JSON.stringify({id:init.id,key:init.key,uploadId:init.uploadId})});}catch{}
   throw error;
  }
 }

@@ -426,7 +426,7 @@ function setMediaTab(type){
   $("#quickCats")?.classList.toggle("page-hidden",isMusic||isRadio);
   activeFilter=isMusic||isRadio?"All":type==="Movie"?"Movie":type==="Series"?"Series":type==="AI Video"?"AI Video":"All";
   if(isMusic){activeMusicArtist="All Artists";activeMusicAlbum="All Albums";musicVisibleCount=10;musicBatchLoading=false;}
-  document.querySelectorAll(".media-tab").forEach(tab=>tab.classList.toggle("active",tab.dataset.mediaTab===type));
+  document.querySelectorAll(".media-tab").forEach(tab=>{tab.hidden=false;tab.style.removeProperty("display");tab.classList.toggle("active",tab.dataset.mediaTab===type);});
   if(!isRadio)render();
   window.scrollTo({top:0,behavior:"smooth"});
 }

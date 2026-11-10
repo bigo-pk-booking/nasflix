@@ -487,47 +487,101 @@ function uploadWithProgress(url,formData,token,onProgress,method="POST"){
     xhr.send(formData);
   });
 }
+async function uploadLargeVideo(file,title,metadata,poster,token,onProgress){
+ const initResponse=await fetch("/api/upload/init",{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+token},body:JSON.stringify({name:file.name,size:file.size,contentType:file.type||"application/octet-stream",type:metadata.type})});
+ const init=await initResponse.json().catch(()=>({}));if(!initResponse.ok)throw new Error(init.error||"Could not start upload.");
+ const partSize=init.partSize||16*1024*1024,parts=[];
+ try{
+  const count=Math.ceil(file.size/partSize);
+  for(let i=0;i<count;i++){
+   const blob=file.slice(i*partSize,Math.min(file.size,(i+1)*partSize));let result=null,lastError=null;
+   for(let attempt=1;attempt<=3;attempt++){
+    try{
+     const response=await fetch("/api/upload/part?id="+encodeURIComponent(init.id)+"&uploadId="+encodeURIComponent(init.uploadId)+"&partNumber="+(i+1),{method:"PUT",headers:{"authorization":"Bearer "+token},body:blob});
+     result=await response.json().catch(()=>({}));if(!response.ok)throw new Error(result.error||"Part "+(i+1)+" failed.");lastError=null;break;
+    }catch(error){lastError=error;if(attempt<3)await new Promise(resolve=>setTimeout(resolve,700*attempt));}
+   }
+   if(lastError)throw lastError;
+   parts.push({partNumber:result.partNumber,etag:result.etag});onProgress(Math.min(file.size,(i+1)*partSize),file.size,i+1,count);
+  }
+  const ext=(file.name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,8);
+  const form=new FormData();
+  form.append("metadata",JSON.stringify({...metadata,id:init.id,key:init.key,uploadId:init.uploadId,title,size:file.size,contentType:file.type||"application/octet-stream",extension:ext}));
+  form.append("parts",JSON.stringify(parts));if(poster)form.append("posterFile",poster,poster.name);
+  const complete=await fetch("/api/upload/complete",{method:"POST",headers:{"authorization":"Bearer "+token},body:form});
+  const result=await complete.json().catch(()=>({}));if(!complete.ok)throw new Error(result.error||"Could not finish "+file.name+".");
+  return result;
+ }catch(error){
+  try{await fetch("/api/upload/abort",{method:"POST",headers:{"authorization":"Bearer "+token,"content-type":"application/json"},body:JSON.stringify({id:init.id,uploadId:init.uploadId})});}catch{}
+  throw error;
+ }
+}
+function renderVideoUploadQueue(){
+ const input=$("#bulkVideoFiles"),queue=$("#bulkVideoQueue");if(!input||!queue)return;
+ const files=[...input.files];queue.innerHTML="";
+ files.forEach((file,index)=>{
+  const row=document.createElement("label");row.className="upload-queue-row";
+  const name=document.createElement("span");name.textContent=(index+1)+". "+file.name+" · "+(file.size/1024/1024).toFixed(1)+" MB";
+  const title=document.createElement("input");title.type="text";title.maxLength=180;title.value=cleanFileTitle(file.name);title.dataset.videoTitleIndex=String(index);title.setAttribute("aria-label","Video title for "+file.name);
+  row.append(name,title);queue.append(row);
+ });
+}
+$("#bulkVideoFiles")?.addEventListener("change",renderVideoUploadQueue);
 async function uploadBulkBatch(kind){
-  const music=kind==="music";
-  const files=[...(music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).files];
-  const artist=(music?$("#bulkMusicArtist").value:$("#bulkVideoArtist").value).trim();
-  const poster=(music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).files[0];
-  const status=$(music?"#bulkMusicStatus":"#bulkVideoStatus");
-  const button=$(music?"#bulkMusicSubmit":"#bulkVideoSubmit");
-  const token=$("#adminToken").value.trim();
-  if(!token){status.textContent="Enter your Admin access key first.";return;}
-  if(!files.length){status.textContent="Choose at least one "+(music?"music":"video")+" file.";return;}
-  if(music&&!artist){status.textContent="Enter the artist / singer name.";return;}
-  if(poster&&poster.size>5*1024*1024){status.textContent="Shared poster maximum size is 5 MB.";return;}
-  const invalid=files.find(file=>file.size>50*1024*1024);
-  if(invalid){status.textContent=invalid.name+" is over the 50 MB per-file limit.";return;}
-  button.disabled=true;
-  let completed=0;
-  try{
-    for(const file of files){
-      const tags=music?await readMusicTags(file):{};
-      const title=(music&&tags.title)||cleanFileTitle(file.name);
-      const detectedArtist=music?(artist||tags.artist||""):artist;
-      const detectedAlbum=music?(tags.album||$("#bulkMusicAlbum").value.trim()):"";
-      const form=new FormData();
-      const data={title,type:music?"Music":($("#bulkVideoType")?.value||"Movie"),genre:music?"Music":($("#bulkVideoGenre")?.value||"Independent"),artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
-      Object.entries(data).forEach(([key,value])=>form.append(key,String(value)));
-      form.append("file",file);
-      if(poster)form.append("posterFile",poster);
-      status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+title+(tags.title?" · title detected from music tags":" · using filename");
-      await uploadWithProgress("/api/media",form,token,(loaded,total)=>{
-        const pct=total?Math.round(loaded/total*100):0;
-        status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+file.name+" ("+pct+"%)";
-      },"POST");
-      completed++;
-    }
-    status.textContent="Done! "+completed+" "+(music?"music tracks":"videos")+" added to NASFLIX.";
-    (music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).value="";
-    (music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).value="";
-    await loadRemote();
-  }catch(error){
-    status.textContent=completed+" of "+files.length+" uploaded. Stopped at the first error: "+error.message+" You can select the remaining files and retry.";
-  }finally{button.disabled=false;}
+ const music=kind==="music";
+ const files=[...(music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).files];
+ const artist=(music?$("#bulkMusicArtist").value:$("#bulkVideoArtist").value).trim();
+ const poster=(music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).files[0];
+ const status=$(music?"#bulkMusicStatus":"#bulkVideoStatus");
+ const button=$(music?"#bulkMusicSubmit":"#bulkVideoSubmit");
+ const token=$("#adminToken").value.trim();
+ if(!token){status.textContent="Enter your Admin access key first.";return;}
+ if(!files.length){status.textContent="Choose at least one "+(music?"music":"video")+" file.";return;}
+ if(music&&!artist){status.textContent="Enter the artist / singer name.";return;}
+ if(poster&&poster.size>5*1024*1024){status.textContent="Shared poster maximum size is 5 MB.";return;}
+ if(music&&files.some(file=>file.size>50*1024*1024)){status.textContent="Music files must be 50 MB or smaller.";return;}
+ if(!music&&files.some(file=>!/^video\/(mp4|webm)$/i.test(file.type)&&! /\.(mp4|webm)$/i.test(file.name))){status.textContent="Choose MP4 or WebM video files only.";return;}
+ const individual=music?[]:[...($("#bulkVideoIndividualPosters")?.files||[])];
+ if(individual.some(f=>f.size>5*1024*1024||!/^image\/(jpeg|png|webp)$/i.test(f.type))){status.textContent="Each thumbnail must be JPG, PNG or WebP and no larger than 5 MB.";return;}
+ if(individual.length&&individual.length!==files.length){status.textContent="Choose one individual thumbnail per video, in the same order, or clear that field.";return;}
+ button.disabled=true;let completed=0;
+ try{
+  for(let index=0;index<files.length;index++){
+   const file=files[index],tags=music?await readMusicTags(file):{};
+   const title=music?((tags.title)||cleanFileTitle(file.name)):($("#bulkVideoQueue [data-video-title-index='"+index+"']")?.value.trim()||cleanFileTitle(file.name));
+   if(!title)throw new Error("A video title is empty. Please enter a title for every file.");
+   const detectedArtist=music?(artist||tags.artist||""):artist;
+   const detectedAlbum=music?(tags.album||$("#bulkMusicAlbum").value.trim()):"";
+   const data={title,type:music?"Music":($("#bulkVideoType")?.value||"Movie"),genre:music?"Music":($("#bulkVideoGenre")?.value||"Independent"),artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
+   const selectedPoster=music?poster:(individual[index]||poster);
+   status.textContent="Preparing "+(completed+1)+" of "+files.length+": "+title;
+   if(!music){
+    const series=$("#bulkVideoSeries")?.value.trim()||"";
+    const season=Math.max(1,Math.min(99,Number($("#bulkVideoSeason")?.value)||1));
+    const episodeStart=Math.max(1,Math.min(999,Number($("#bulkVideoStartEpisode")?.value)||1));
+    if(data.type==="Series"&&!series)throw new Error("Enter the series / folder name before uploading episodes.");
+    data.seriesTitle=data.type==="Series"?series:"";data.seasonNumber=season;
+    data.episodeNumber=data.type==="Series"?episodeStart+index:"";data.episodeTitle=data.type==="Series"?title:"";
+    await uploadLargeVideo(file,title,data,selectedPoster,token,(loaded,total,part,count)=>{
+     const pct=Math.round(loaded/total*100);
+     status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+file.name+" · "+pct+"% (part "+part+"/"+count+")";
+     const progress=$("#bulkVideoProgress");if(progress)progress.value=pct;
+    });
+   }else{
+    const form=new FormData();Object.entries(data).forEach(([key,value])=>form.append(key,String(value)));
+    form.append("file",file);if(selectedPoster)form.append("posterFile",selectedPoster);
+    status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+title;
+    await uploadWithProgress("/api/media",form,token,(loaded,total)=>{status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+file.name+" ("+(total?Math.round(loaded/total*100):0)+"%)";},"POST");
+   }
+   completed++;
+  }
+  status.textContent="Done! "+completed+" "+(music?"music tracks":"videos")+" added to NASFLIX.";
+  (music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).value="";
+  (music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).value="";
+  if(!music){$("#bulkVideoIndividualPosters").value="";$("#bulkVideoQueue").innerHTML="";}
+  await loadRemote();
+ }catch(error){status.textContent=completed+" of "+files.length+" uploaded. Stopped: "+error.message+" You can retry the remaining files.";}
+ finally{button.disabled=false;const progress=$("#bulkVideoProgress");if(progress)progress.value=0;}
 }
 $("#bulkMusicSubmit")?.addEventListener("click",()=>uploadBulkBatch("music"));
 function openAdminUpload(kind){

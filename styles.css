@@ -1267,7 +1267,7 @@ body.app-mode nav#mediaTabs.media-tabs{
 
 
 /* Admin panel navigation matching the approved layout */
-.admin-access-top{margin:18px 0 20px;padding:18px;border:1px solid #6940a0;border-radius:18px;background:linear-gradient(145deg,#251238,#100d1b);box-shadow:0 12px 34px #0005}
+.admin-access-top{position:sticky;top:0;z-index:30;margin:0 0 20px;padding:14px 16px;border:1px solid #9b5be0;border-radius:14px;background:#1b1328;box-shadow:0 8px 24px #0009}.admin-access-top .eyebrow{margin:0 0 4px}.admin-access-top h3{margin:2px 0 8px;color:#fff;font:800 16px Manrope,sans-serif}.admin-access-top>label{display:block;margin:0;color:#e4d5f5}.admin-access-top input{display:block;width:100%;box-sizing:border-box;margin-top:7px;padding:12px 14px;border:1px solid #76549b;border-radius:10px;background:#0e0c16;color:#fff;font:14px Manrope,sans-serif}
 .admin-access-top h3{margin:4px 0 12px;color:#fff;font:800 19px Manrope,sans-serif}
 .admin-access-top>label{display:block;margin:0}
 .admin-access-top input{width:100%;box-sizing:border-box}

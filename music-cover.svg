@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#090711"/><stop offset=".52" stop-color="#26113f"/><stop offset="1" stop-color="#080711"/></linearGradient>
+  <radialGradient id="glow"><stop stop-color="#9b4dff" stop-opacity=".55"/><stop offset="1" stop-color="#9b4dff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d9a7ff"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+</defs>
+<rect width="800" height="800" rx="54" fill="url(#bg)"/>
+<circle cx="400" cy="330" r="330" fill="url(#glow)"/>
+<circle cx="400" cy="330" r="210" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="2"/>
+<circle cx="400" cy="330" r="165" fill="none" stroke="#ffffff" stroke-opacity=".10" stroke-width="2"/>
+<path d="M440 145v245c0 61-47 111-105 111-42 0-76-27-76-65 0-45 45-79 98-79 19 0 36 5 49 14V224l178-39v205c0 61-47 111-105 111-42 0-76-27-76-65 0-45 45-79 98-79 19 0 36 5 49 14V145z" fill="url(#accent)" opacity=".95"/>
+<text x="400" y="625" text-anchor="middle" fill="#ffffff" font-family="Arial,sans-serif" font-size="76" font-weight="800" letter-spacing="5">NASFLIX</text>
+<text x="400" y="692" text-anchor="middle" fill="#d9c6f4" font-family="Arial,sans-serif" font-size="38" font-weight="700" letter-spacing="13">MUSIC</text>
+<path d="M205 730h390" stroke="#a78bfa" stroke-opacity=".5" stroke-width="3"/>
+</svg>

@@ -1408,3 +1408,13 @@ body.policy-page .policy-footer{flex:0 0 auto;margin-top:0!important;padding:20p
   body.policy-page .policy-main section{margin-bottom:16px;padding:17px}
   body.policy-page .policy-updated{margin-bottom:20px}
 }
+
+
+/* Media tabs: center icon and label vertically and horizontally on every device. */
+nav#mediaTabs .media-tab{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  flex-direction:row!important;gap:7px!important;text-align:center!important;
+  padding:12px 10px!important;line-height:1.2!important;white-space:nowrap!important;
+}
+nav#mediaTabs .media-tab span{display:inline!important;line-height:1.2!important}
+nav#mediaTabs .media-tab[hidden]{display:none!important}

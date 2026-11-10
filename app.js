@@ -374,7 +374,7 @@ menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("ar
    const entries=mode==="music"
      ? [["home","⌂","Home"],["search","⌕","Search"],["radio","◉","Radio"],["video","▷","Videos"]]
      : mode==="radio"
-       ? [["home","⌂","Home"],["video","▷","Videos"],["music","♫","Music"]]
+       ? [["home","⌂","Home"],["search","⌕","Search"],["video","▷","Videos"],["music","♫","Music"]]
        : [["home","⌂","Home"],["search","⌕","Search"],["music","♫","Music"],["radio","◉","Radio"]];
    bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${key==="home"?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
    bottomNav.querySelectorAll("[data-bottom-page]").forEach(btn=>btn.addEventListener("click",()=>{

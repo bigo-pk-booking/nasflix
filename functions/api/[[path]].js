@@ -129,17 +129,17 @@ if(path==="/api/upload/init"&&request.method==="POST"){
 if(path==="/api/upload/part"&&request.method==="PUT"){
  if(!authorized(request,env))return json({error:"Admin access key is missing or incorrect."},401);
  if(!env.MEDIA_BUCKET)return json({error:"R2 binding MEDIA_BUCKET is not configured."},503);
- const u=new URL(request.url),id=u.searchParams.get("id")||"",uploadId=u.searchParams.get("uploadId")||"",n=Number(u.searchParams.get("partNumber")),key="media/"+id;
- if(!/^[0-9a-f-]{36}$/i.test(id)||!uploadId||!Number.isInteger(n)||n<1||n>10000||!request.body)return json({error:"Invalid upload part request."},400);
+ const u=new URL(request.url),id=u.searchParams.get("id")||"",uploadId=u.searchParams.get("uploadId")||"",n=Number(u.searchParams.get("partNumber")),key=u.searchParams.get("key")||"";
+ if(!/^[0-9a-f-]{36}$/i.test(id)||!key.startsWith("media/"+id+".")||key.length>260||!uploadId||!Number.isInteger(n)||n<1||n>10000||!request.body)return json({error:"Invalid upload part request."},400);
  try{const mpu=env.MEDIA_BUCKET.resumeMultipartUpload(key,uploadId);const part=await mpu.uploadPart(n,request.body);return json({ok:true,partNumber:part.partNumber,etag:part.etag});}catch(e){return json({error:"Part "+n+" failed: "+String(e?.message||e)},400);}
 }
 if(path==="/api/upload/abort"&&request.method==="POST"){
  if(!authorized(request,env))return json({error:"Admin access key is missing or incorrect."},401);
  if(!env.MEDIA_BUCKET)return json({error:"R2 binding MEDIA_BUCKET is not configured."},503);
  let d;try{d=await request.json();}catch{return json({error:"Invalid abort request."},400);}
- const id=String(d.id||""),uploadId=String(d.uploadId||"");
- if(!/^[0-9a-f-]{36}$/i.test(id)||!uploadId)return json({error:"Invalid upload identifier."},400);
- try{await env.MEDIA_BUCKET.resumeMultipartUpload("media/"+id,uploadId).abort();return json({ok:true});}catch(e){return json({error:String(e?.message||e)},400);}
+ const id=String(d.id||""),uploadId=String(d.uploadId||""),key=String(d.key||"");
+ if(!/^[0-9a-f-]{36}$/i.test(id)||!key.startsWith("media/"+id+".")||key.length>260||!uploadId)return json({error:"Invalid upload identifier."},400);
+ try{await env.MEDIA_BUCKET.resumeMultipartUpload(key,uploadId).abort();return json({ok:true});}catch(e){return json({error:String(e?.message||e)},400);}
 }
 if(path==="/api/upload/complete"&&request.method==="POST"){
  if(!authorized(request,env))return json({error:"Admin access key is missing or incorrect."},401);

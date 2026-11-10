@@ -388,7 +388,13 @@ menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("ar
 function showNasflixPage(page){
   document.body.classList.toggle("music-page",page==="playlists");
   document.body.classList.toggle("video-library-page",page!=="playlists" && page!=="music");
-  if(page==="playlists"){
+  if(page==="radio"){
+     document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",section.dataset.pageSection!=="radio"));
+     document.body.classList.remove("music-page");document.body.classList.add("video-library-page");
+     document.querySelectorAll(".media-tab").forEach(tab=>tab.classList.remove("active"));
+     window.scrollTo({top:0,behavior:"smooth"});return;
+   }
+   if(page==="playlists"){
     document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",section.dataset.pageSection!=="music"));
     $("#accountPlaylistPanel").hidden=false;
     $("#accountPlaylistPanel").scrollIntoView({behavior:"smooth",block:"start"});

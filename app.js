@@ -374,15 +374,16 @@ menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("ar
    const entries=mode==="music"
      ? [["home","⌂","Home"],["search","⌕","Search"],["playlists","▤","Your Library"],["music","♫","Music"]]
      : mode==="radio"
-       ? [["home","⌂","Home"],["search","⌕","Search"],["radio","◉","Radio"],["music","♫","Music"]]
+       ? [["home","⌂","Home"],["search","⌕","Search"],["radio","◉","Radio"]]
        : [["home","⌂","Home"],["search","⌕","Search"],["radio","◉","Radio"],["video","▷","Videos"]];
-   bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${(mode==="music"?key==="music":key==="home")?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
+   bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${(mode==="music"?key==="music":mode==="radio"?key==="radio":key==="home")?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
    bottomNav.querySelectorAll("[data-bottom-page]").forEach(btn=>btn.addEventListener("click",()=>{
      closeNav();
      if(accountUser){const gate=$("#welcomeGate");if(gate)gate.hidden=true;const login=$("#accountLoginHeader"),logout=$("#accountLogoutHeader");if(login)login.hidden=true;if(logout)logout.hidden=false;}
      const page=btn.dataset.bottomPage;
      bottomNav.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===btn));
      if(page==="search"){const input=$("#searchInput");input?.focus();window.scrollTo({top:0,behavior:"smooth"});}
+     else if(page==="home" && document.body.classList.contains("radio-page")){document.getElementById("radio")?.scrollIntoView({behavior:"smooth",block:"start"});}
      else if(page==="movie")setMediaTab("Radio");
      else if(page==="series")setMediaTab("Series");
      else if(page==="video")setMediaTab("AI Video");
@@ -425,7 +426,7 @@ function setMediaTab(type){
   $("#quickCats")?.classList.toggle("page-hidden",isMusic||isRadio);
   activeFilter=isMusic||isRadio?"All":type==="Movie"?"Movie":type==="Series"?"Series":type==="AI Video"?"AI Video":"All";
   if(isMusic){activeMusicArtist="All Artists";activeMusicAlbum="All Albums";musicVisibleCount=10;musicBatchLoading=false;}
-  document.querySelectorAll(".media-tab").forEach(tab=>tab.classList.toggle("active",tab.dataset.mediaTab===type));
+  document.querySelectorAll(".media-tab").forEach(tab=>{tab.classList.toggle("active",tab.dataset.mediaTab===type);tab.hidden=isRadio&&tab.dataset.mediaTab==="Music";});
   if(!isRadio)render();
   window.scrollTo({top:0,behavior:"smooth"});
 }

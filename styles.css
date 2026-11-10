@@ -1355,3 +1355,17 @@ body.radio-playing{padding-bottom:140px!important}
 .footer-links{display:flex;gap:16px;flex-wrap:wrap}
 .footer-links a:hover{color:#fff}
 @media(max-width:650px){.policy-header{padding:17px 6vw}.policy-main{width:88vw;padding:40px 0 60px}.policy-main section{padding:20px}.policy-main p,.policy-main li{font-size:13px}.policy-footer{padding:24px 6vw}.footer-links{gap:12px}}
+
+
+/* Compact, balanced site footer on desktop and mobile. */
+body > footer{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"brand links" "copyright copyright";align-items:center;column-gap:28px;row-gap:14px;padding:24px 6vw 20px;margin-top:24px}
+body > footer > .brand{grid-area:brand;white-space:nowrap}
+body > footer > .footer-links{grid-area:links;display:flex;justify-content:flex-end;align-items:center;gap:clamp(10px,1.8vw,22px);flex-wrap:wrap}
+body > footer > p{grid-area:copyright;margin:0;padding-top:12px;border-top:1px solid var(--line);line-height:1.5}
+body > footer .footer-links a{white-space:nowrap;transition:color .2s ease}
+body > footer .footer-links a:hover{color:#fff}
+@media(max-width:650px){
+  body > footer{grid-template-columns:1fr;grid-template-areas:"brand" "links" "copyright";justify-items:start;gap:14px;padding:22px 6vw 18px;margin-top:18px}
+  body > footer > .footer-links{justify-content:flex-start;gap:10px 16px;width:100%}
+  body > footer > p{width:100%;padding-top:12px;margin:0;font-size:11px}
+}

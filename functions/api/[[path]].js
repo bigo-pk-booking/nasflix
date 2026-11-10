@@ -16,7 +16,7 @@ export async function onRequest({request,env}){if(!env.DB)return json({error:"D1
 
 if(path.startsWith("/api/account/")){try{await ensureAccounts(env.DB);const route=path.slice("/api/account/".length);
 if(route==="register"&&request.method==="POST"){let d;try{d=await request.json();}catch{return accountJson({error:"Invalid request."},400);}const fullName=String(d.fullName||"").trim().replace(/\s+/g," "),email=String(d.email||"").trim().toLowerCase(),password=String(d.password||"");if(fullName.length<2||fullName.length>100)return accountJson({error:"Enter your full name (2–100 characters)."},400);if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>190)return accountJson({error:"Enter a valid email address."},400);if(password.length<8||password.length>128)return accountJson({error:"Password must be 8 to 128 characters."},400);const exists=await env.DB.prepare("SELECT id FROM nasflix_users WHERE email=?").bind(email).first();if(exists)return accountJson({error:"An account with this email already exists. Please log in."},409);const id=crypto.randomUUID(),salt=randomHex(16),hash=await passwordHash(password,salt);await env.DB.prepare("INSERT INTO nasflix_users(id,email,password_hash,password_salt,full_name) VALUES(?,?,?,?,?)").bind(id,email,hash,salt,fullName).run();const cookie=await createSession(id,env.DB);return accountJson({ok:true,user:{email,fullName,role:isAdminEmail(email,env)?"admin":"user"}},201,{"set-cookie":cookie});}
-if(route==="login"&&request.method==="POST"){let d;try{d=await request.json();}catch{return accountJson({error:"Invalid request."},400);}const email=String(d.email||"").trim().toLowerCase(),password=String(d.password||""),user=await env.DB.prepare("SELECT id,email,password_hash,password_salt FROM nasflix_users WHERE email=?").bind(email).first();if(!user||await passwordHash(password,user.password_salt)!==user.password_hash)return accountJson({error:"Email or password is incorrect."},401);const cookie=await createSession(user.id,env.DB);return accountJson({ok:true,user:{email:user.email,role:isAdminEmail(user.email,env)?"admin":"user"}},200,{"set-cookie":cookie});}
+if(route==="login"&&request.method==="POST"){let d;try{d=await request.json();}catch{return accountJson({error:"Invalid request."},400);}const email=String(d.email||"").trim().toLowerCase(),password=String(d.password||""),user=await env.DB.prepare("SELECT id,email,password_hash,password_salt,status FROM nasflix_users WHERE email=?").bind(email).first();if(!user||await passwordHash(password,user.password_salt)!==user.password_hash)return accountJson({error:"Email or password is incorrect."},401);if(user.status==="suspended")return accountJson({error:"This account is suspended. Please contact NASFLIX support."},403);const cookie=await createSession(user.id,env.DB);return accountJson({ok:true,user:{email:user.email,role:isAdminEmail(user.email,env)?"admin":"user"}},200,{"set-cookie":cookie});}
 if(route==="me"&&request.method==="GET"){const user=await accountUser(request,env.DB);if(!user)return accountJson({user:null});const detail=await env.DB.prepare("SELECT full_name FROM nasflix_users WHERE id=?").bind(user.id).first();return accountJson({user:{email:user.email,fullName:detail?.full_name||"",role:isAdminEmail(user.email,env)?"admin":"user"}});}
 if(route==="forgot-password"&&request.method==="POST"){let d;try{d=await request.json();}catch{return accountJson({error:"Invalid request."},400);}const email=String(d.email||"").trim().toLowerCase();if(!email)return accountJson({error:"Enter your account email."},400);if(!env.RESEND_API_KEY||!env.MAIL_FROM)return accountJson({error:"Password recovery email is not configured. The site owner must set RESEND_API_KEY and MAIL_FROM in Cloudflare."},503);const user=await env.DB.prepare("SELECT id,email FROM nasflix_users WHERE email=?").bind(email).first();if(user){const token=randomHex(32),hash=await tokenHash(token),expires=Math.floor(Date.now()/1000)+3600;await env.DB.prepare("DELETE FROM nasflix_password_resets WHERE user_id=?").bind(user.id).run();await env.DB.prepare("INSERT INTO nasflix_password_resets(token_hash,user_id,expires_at) VALUES(?,?,?)").bind(hash,user.id,expires).run();const link=new URL("/?reset="+token,request.url).toString();const sent=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"authorization":"Bearer "+env.RESEND_API_KEY,"content-type":"application/json"},body:JSON.stringify({from:env.MAIL_FROM,to:[user.email],subject:"Reset your NASFLIX password",html:"<p>Reset your NASFLIX password using the link below. It expires in one hour.</p><p><a href=\""+link+"\">Reset password</a></p><p>If you did not request this, ignore this email.</p>"})});if(!sent.ok)return accountJson({error:"The reset email could not be sent. Check the email service settings."},502);}return accountJson({ok:true,message:"If the account exists, a reset link has been sent."});}
 if(route==="reset-password"&&request.method==="POST"){let d;try{d=await request.json();}catch{return accountJson({error:"Invalid request."},400);}const token=String(d.token||""),password=String(d.password||"");if(password.length<8||password.length>128)return accountJson({error:"New password must be 8 to 128 characters."},400);const reset=await env.DB.prepare("SELECT user_id FROM nasflix_password_resets WHERE token_hash=? AND expires_at>?").bind(await tokenHash(token),Math.floor(Date.now()/1000)).first();if(!reset)return accountJson({error:"Reset link is invalid or expired. Request another link."},400);const salt=randomHex(16),hash=await passwordHash(password,salt);await env.DB.prepare("UPDATE nasflix_users SET password_hash=?,password_salt=? WHERE id=?").bind(hash,salt,reset.user_id).run();await env.DB.prepare("DELETE FROM nasflix_password_resets WHERE user_id=?").bind(reset.user_id).run();await env.DB.prepare("DELETE FROM nasflix_sessions WHERE user_id=?").bind(reset.user_id).run();return accountJson({ok:true,message:"Password updated. Please log in again."});}
@@ -24,6 +24,76 @@ if(route==="logout"&&request.method==="POST"){const cookie=request.headers.get("
 if(route==="playlists"&&(request.method==="GET"||request.method==="PUT")){const user=await accountUser(request,env.DB);if(!user)return accountJson({error:"Please log in to sync your playlists."},401);if(request.method==="GET"){const row=await env.DB.prepare("SELECT playlists_json FROM nasflix_playlists WHERE user_id=?").bind(user.id).first();let playlists=[];try{playlists=JSON.parse(row?.playlists_json||"[]");}catch{}return accountJson({playlists});}let d;try{d=await request.json();}catch{return accountJson({error:"Invalid playlist data."},400);}if(!Array.isArray(d.playlists)||d.playlists.length>100)return accountJson({error:"Invalid playlist list."},400);const safe=d.playlists.map(p=>({id:String(p.id||"").slice(0,80),name:String(p.name||"").trim().slice(0,60),trackIds:Array.isArray(p.trackIds)?[...new Set(p.trackIds.map(String))].slice(0,1000):[]})).filter(p=>p.id&&p.name);await env.DB.prepare("INSERT INTO nasflix_playlists(user_id,playlists_json,updated_at) VALUES(?,?,strftime('%Y-%m-%dT%H:%M:%fZ','now')) ON CONFLICT(user_id) DO UPDATE SET playlists_json=excluded.playlists_json,updated_at=excluded.updated_at").bind(user.id,JSON.stringify(safe)).run();return accountJson({ok:true});}
 return accountJson({error:"Not found."},404);}catch(error){return accountJson({error:"Account service error: "+String(error?.message||error)},500);}}
 
+
+if(path.startsWith("/api/admin/")){
+  const admin=await accountUser(request,env.DB);
+  if(!admin||!isAdminEmail(admin.email,env))return accountJson({error:"Admin account required."},403);
+  try{
+    await ensureAccounts(env.DB);
+    await env.DB.prepare("ALTER TABLE nasflix_users ADD COLUMN status TEXT NOT NULL DEFAULT 'active'").run().catch(()=>{});
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS nasflix_admin_settings (setting_key TEXT PRIMARY KEY,setting_value TEXT NOT NULL DEFAULT '',updated_by TEXT,updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS nasflix_notifications (id TEXT PRIMARY KEY,title TEXT NOT NULL,message TEXT NOT NULL,type TEXT NOT NULL DEFAULT 'announcement',active INTEGER NOT NULL DEFAULT 1,created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS nasflix_admin_logs (id TEXT PRIMARY KEY,actor_email TEXT NOT NULL,action TEXT NOT NULL,details TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();
+    const log=async(action,details="")=>env.DB.prepare("INSERT INTO nasflix_admin_logs(id,actor_email,action,details) VALUES(?,?,?,?)").bind(crypto.randomUUID(),admin.email,action,String(details).slice(0,500)).run();
+    const route=path.slice("/api/admin/".length);
+    if(route==="overview"&&request.method==="GET"){
+      await ensureTable(env.DB);
+      await env.DB.prepare("CREATE TABLE IF NOT EXISTS media_engagement (media_id TEXT PRIMARY KEY,views INTEGER NOT NULL DEFAULT 0,listens INTEGER NOT NULL DEFAULT 0,last_viewed_at INTEGER,last_listened_at INTEGER,updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();
+      const [users,media,views,downloads,top,activity]=await Promise.all([
+        env.DB.prepare("SELECT COUNT(*) AS total FROM nasflix_users").first(),
+        env.DB.prepare("SELECT COUNT(*) AS total,SUM(CASE WHEN lower(type)='music' THEN 1 ELSE 0 END) AS music,SUM(CASE WHEN lower(type)!='music' THEN 1 ELSE 0 END) AS videos FROM media_links").first(),
+        env.DB.prepare("SELECT COALESCE(SUM(views),0) AS views,COALESCE(SUM(listens),0) AS listens FROM media_engagement").first(),
+        env.DB.prepare("SELECT COUNT(*) AS total FROM media_links WHERE allow_download=1").first(),
+        env.DB.prepare("SELECT m.title,COALESCE(e.views,0)+COALESCE(e.listens,0) AS plays FROM media_links m LEFT JOIN media_engagement e ON e.media_id=m.id ORDER BY plays DESC LIMIT 5").all(),
+        env.DB.prepare("SELECT action,details,created_at FROM nasflix_admin_logs ORDER BY created_at DESC LIMIT 8").all()
+      ]);
+      return accountJson({users:users?.total||0,media:media?.total||0,music:media?.music||0,videos:media?.videos||0,views:views?.views||0,listens:views?.listens||0,downloadable:downloads?.total||0,top:top.results||[],activity:activity.results||[]});
+    }
+    if(route==="users"&&request.method==="GET"){
+      const result=await env.DB.prepare("SELECT id,email,full_name,created_at,status FROM nasflix_users ORDER BY created_at DESC LIMIT 500").all();
+      return accountJson({users:result.results||[]});
+    }
+    if(route.startsWith("users/")&&request.method==="POST"){
+      const id=decodeURIComponent(route.slice(6));let d;try{d=await request.json();}catch{return accountJson({error:"Invalid request."},400);}
+      const status=d.status==="suspended"?"suspended":"active";
+      const target=await env.DB.prepare("SELECT email FROM nasflix_users WHERE id=?").bind(id).first();
+      if(!target)return accountJson({error:"User not found."},404);
+      if(isAdminEmail(target.email,env))return accountJson({error:"The primary admin account cannot be suspended here."},400);
+      await env.DB.prepare("UPDATE nasflix_users SET status=? WHERE id=?").bind(status,id).run();
+      if(status==="suspended")await env.DB.prepare("DELETE FROM nasflix_sessions WHERE user_id=?").bind(id).run();
+      await log("user_"+status,target.email);return accountJson({ok:true,status});
+    }
+    if(route==="notifications"&&request.method==="GET"){
+      const result=await env.DB.prepare("SELECT id,title,message,type,active,created_at FROM nasflix_notifications ORDER BY created_at DESC LIMIT 100").all();
+      return accountJson({notifications:result.results||[]});
+    }
+    if(route==="notifications"&&request.method==="POST"){
+      let d;try{d=await request.json();}catch{return accountJson({error:"Invalid request."},400);}
+      const title=String(d.title||"").trim().slice(0,100),message=String(d.message||"").trim().slice(0,1000),type=["announcement","maintenance","update"].includes(d.type)?d.type:"announcement";
+      if(!title||!message)return accountJson({error:"Title and message are required."},400);
+      const id=crypto.randomUUID();await env.DB.prepare("INSERT INTO nasflix_notifications(id,title,message,type) VALUES(?,?,?,?)").bind(id,title,message,type).run();
+      await log("notification_created",title);return accountJson({ok:true,id},201);
+    }
+    if(route.startsWith("notifications/")&&request.method==="DELETE"){
+      const id=decodeURIComponent(route.slice("notifications/".length));await env.DB.prepare("DELETE FROM nasflix_notifications WHERE id=?").bind(id).run();await log("notification_deleted",id);return accountJson({ok:true});
+    }
+    if(route==="settings"&&request.method==="GET"){
+      const result=await env.DB.prepare("SELECT setting_key,setting_value,updated_at FROM nasflix_admin_settings ORDER BY setting_key").all();
+      return accountJson({settings:result.results||[]});
+    }
+    if(route==="settings"&&request.method==="PUT"){
+      let d;try{d=await request.json();}catch{return accountJson({error:"Invalid settings."},400);}
+      const allowed=["site_name","homepage_message","maintenance_mode","seo_description","social_facebook","social_telegram"];
+      for(const key of allowed){if(Object.prototype.hasOwnProperty.call(d,key)){const value=String(d[key]).slice(0,1000);await env.DB.prepare("INSERT INTO nasflix_admin_settings(setting_key,setting_value,updated_by,updated_at) VALUES(?,?,?,strftime('%Y-%m-%dT%H:%M:%fZ','now')) ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,updated_by=excluded.updated_by,updated_at=excluded.updated_at").bind(key,value,admin.email).run();}}
+      await log("settings_updated",Object.keys(d).filter(k=>allowed.includes(k)).join(", "));return accountJson({ok:true});
+    }
+    if(route==="logs"&&request.method==="GET"){
+      const result=await env.DB.prepare("SELECT actor_email,action,details,created_at FROM nasflix_admin_logs ORDER BY created_at DESC LIMIT 200").all();
+      return accountJson({logs:result.results||[]});
+    }
+    return accountJson({error:"Admin route not found."},404);
+  }catch(error){return accountJson({error:"Admin service error: "+String(error?.message||error)},500);}
+}
 if(path==="/api/metrics/top"&&request.method==="GET"){
 await ensureTable(env.DB);
 await env.DB.prepare("CREATE TABLE IF NOT EXISTS media_engagement (media_id TEXT PRIMARY KEY,views INTEGER NOT NULL DEFAULT 0,listens INTEGER NOT NULL DEFAULT 0,last_viewed_at INTEGER,last_listened_at INTEGER,updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();

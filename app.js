@@ -373,7 +373,9 @@ menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("ar
    if(!bottomNav)return;
    const entries=mode==="music"
      ? [["home","⌂","Home"],["search","⌕","Search"],["playlists","▤","Your Library"],["music","♫","Music"]]
-     : [["home","⌂","Home"],["movie","▣","Movies"],["series","▤","Series"],["video","▷","Videos"]];
+     : mode==="radio"
+       ? [["home","⌂","Home"],["search","⌕","Search"],["radio","◉","Radio"],["music","♫","Music"]]
+       : [["home","⌂","Home"],["search","⌕","Search"],["radio","◉","Radio"],["video","▷","Videos"]];
    bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${(mode==="music"?key==="music":key==="home")?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
    bottomNav.querySelectorAll("[data-bottom-page]").forEach(btn=>btn.addEventListener("click",()=>{
      closeNav();
@@ -381,9 +383,10 @@ menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("ar
      const page=btn.dataset.bottomPage;
      bottomNav.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===btn));
      if(page==="search"){const input=$("#searchInput");input?.focus();window.scrollTo({top:0,behavior:"smooth"});}
-     else if(page==="movie")setMediaTab("Movie");
+     else if(page==="movie")setMediaTab("Radio");
      else if(page==="series")setMediaTab("Series");
      else if(page==="video")setMediaTab("AI Video");
+     else if(page==="radio")setMediaTab("Radio");
      else if(page==="music")setMediaTab("Music");
      else showNasflixPage(page);
    }));
@@ -393,12 +396,7 @@ menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("ar
 function showNasflixPage(page){
   document.body.classList.toggle("music-page",page==="playlists");
   document.body.classList.toggle("video-library-page",page!=="playlists" && page!=="music");
-  if(page==="radio"){
-     document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",section.dataset.pageSection!=="radio"));
-     document.body.classList.remove("music-page");document.body.classList.add("video-library-page");
-     document.querySelectorAll(".media-tab").forEach(tab=>tab.classList.remove("active"));
-     window.scrollTo({top:0,behavior:"smooth"});return;
-   }
+  if(page==="radio"){setMediaTab("Radio");return;}
    if(page==="playlists"){
     document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",section.dataset.pageSection!=="music"));
     $("#accountPlaylistPanel").hidden=false;
@@ -414,16 +412,16 @@ function showNasflixPage(page){
   setMediaTab(page==="music"?"Music":"Movie");
 }
 function setMediaTab(type){
-  const isMusic=type==="Music";
+  const isMusic=type==="Music",isRadio=type==="Radio";
   document.body.classList.toggle("music-page",isMusic);
-  document.body.classList.toggle("video-library-page",!isMusic);
-  renderBottomNav(isMusic?"music":"video");
-  document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",isMusic?section.dataset.pageSection!=="music":section.dataset.pageSection!=="movies"));
-  $("#quickCats")?.classList.toggle("page-hidden",isMusic);
-  activeFilter=isMusic?"All":type==="Movie"?"Movie":type==="Series"?"Series":type==="AI Video"?"AI Video":"All";
+  document.body.classList.toggle("video-library-page",!isMusic&&!isRadio);
+  renderBottomNav(isMusic?"music":isRadio?"radio":"video");
+  document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",isMusic?section.dataset.pageSection!=="music":isRadio?section.dataset.pageSection!=="radio":section.dataset.pageSection!=="movies"));
+  $("#quickCats")?.classList.toggle("page-hidden",isMusic||isRadio);
+  activeFilter=isMusic||isRadio?"All":type==="Movie"?"Movie":type==="Series"?"Series":type==="AI Video"?"AI Video":"All";
   if(isMusic){activeMusicArtist="All Artists";activeMusicAlbum="All Albums";musicVisibleCount=10;musicBatchLoading=false;}
   document.querySelectorAll(".media-tab").forEach(tab=>tab.classList.toggle("active",tab.dataset.mediaTab===type));
-  render();
+  if(!isRadio)render();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 document.querySelectorAll("[data-media-tab]").forEach(tab=>tab.addEventListener("click",()=>setMediaTab(tab.dataset.mediaTab)));

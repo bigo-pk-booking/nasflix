@@ -1389,3 +1389,22 @@ body.radio-page>footer{margin-top:0!important}
 .nav-about a{display:flex;align-items:center;min-height:40px;padding:9px 8px;border-radius:8px;color:#c9bfd7;font-size:12px;line-height:1.25}
 .nav-about a:hover{background:#2a1c40;color:#fff}
 @media(max-width:650px){.nav-about{gap:4px 6px}.nav-about a{font-size:12px;min-height:42px}}
+
+
+/* FINAL: isolate the Radio view from the Music library, regardless of stale display rules. */
+body.radio-page main#home>.music-section{display:none!important}
+body.radio-page main#home>.radio-section{display:block!important}
+body.radio-page #mediaTabs .media-tab[data-media-tab="Music"]{display:flex!important;visibility:visible!important}
+body.radio-page #mediaTabs .media-tab{flex:1 1 0!important}
+
+/* Policy pages do not have the fixed app header or media tabs.
+   Cancel the global app-shell offsets so content starts directly below Android status bar. */
+body.policy-page{display:flex!important;flex-direction:column!important;min-height:100vh!important;margin:0!important;padding:0!important;overflow-x:hidden}
+body.policy-page .policy-header{flex:0 0 auto;margin:0!important;padding:16px 6vw!important}
+body.policy-page .policy-main{flex:1 0 auto;min-height:0!important;padding:22px 0 28px!important}
+body.policy-page .policy-footer{flex:0 0 auto;margin-top:0!important;padding:20px 6vw!important}
+@media(max-width:650px){
+  body.policy-page .policy-main{width:88vw;padding:18px 0 24px!important}
+  body.policy-page .policy-main section{margin-bottom:16px;padding:17px}
+  body.policy-page .policy-updated{margin-bottom:20px}
+}

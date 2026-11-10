@@ -94,7 +94,7 @@ async function syncPlaylists(){clearTimeout(playlistSaveTimer);await accountRequ
 function schedulePlaylistSync(){clearTimeout(playlistSaveTimer);playlistSaveTimer=setTimeout(()=>syncPlaylists().catch(e=>accountMessage(e.message)),500);}
 async function enterGuestMode(){
  guestMode=true;accountUser=null;$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;
- await showDashboardSplash("ACCESSING GUEST DASHBOARD","");
+ if(!/^\\/admin\\/?$/.test(location.pathname))await showDashboardSplash("ACCESSING GUEST DASHBOARD","");
 }
 let resetFlow=new URLSearchParams(location.search).has("reset");
 async function refreshAccount(){if(resetFlow){accountUser=null;$("#welcomeGate").hidden=false;$("#accountAuth").hidden=true;$("#resetPasswordBox").hidden=false;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=true;$("#adminOpen")?.setAttribute("hidden","");return;}try{const data=await accountRequest("me");accountUser=data.user;if(accountUser){guestMode=false;$("#adminOpen")?.toggleAttribute("hidden",accountUser.role!=="admin");$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=false;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=false;$("#accountSignedIn").hidden=false;$("#accountStatus").textContent=accountUser.role==="admin"?"Admin account":"Signed in";$("#accountEmailLabel").textContent=accountUser.email;const saved=await accountRequest("playlists");userPlaylists=Array.isArray(saved.playlists)?saved.playlists:[];activePlaylistId=userPlaylists[0]?.id||"";renderUserPlaylists();if(accountUser.role==="admin"){const admin=$("#adminModal");if(admin){admin.classList.add("open");admin.setAttribute("aria-hidden","false");}}}else{$("#adminOpen")?.setAttribute("hidden","");userPlaylists=[];$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountSignedIn").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;$("#accountStatus").textContent="Not signed in";}}catch(e){$("#adminOpen")?.setAttribute("hidden","");accountMessage(e.message);$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;}}
@@ -111,7 +111,7 @@ async function accountAction(kind){
   const data=await accountRequest(kind,{email,password,...(kind==="register"?{fullName}:{})});
   accountUser=data.user;$("#accountPassword").value="";$("#accountConfirmPassword").value="";$("#accountFullName").value="";
   const welcomeName=accountUser?.fullName||accountUser?.name||accountUser?.displayName||fullName||String(accountUser?.email||"").split("@")[0].replace(/[._-]+/g," ").trim();
-  await showDashboardSplash("ACCESSING USER DASHBOARD",welcomeName);
+  if(accountUser?.role!=="admin"&&!/^\\/admin\\/?$/.test(location.pathname))await showDashboardSplash("ACCESSING USER DASHBOARD",welcomeName);
   await refreshAccount();
   accountMessage(kind==="register"?"Account created successfully!":"Welcome back!");
  }catch(e){accountMessage(e.message||"Something went wrong. Please try again.");}
@@ -750,10 +750,16 @@ async function finishStartupLoading(){
   overlay.classList.add("startup-hidden");
   setTimeout(()=>overlay.remove(),700);
 }
-setStartupStep(0);
-let startupStep=0;
-startupStepTimer=setInterval(()=>{startupStep=Math.min(4,startupStep+1);setStartupStep(startupStep);},650);
-loadRemote().finally(finishStartupLoading);
+const isAdminRoute=/^\\/admin\\/?$/.test(location.pathname);
+if(isAdminRoute){
+  // Admin opens directly without the public media startup/loading screen.
+  const startupOverlay=$("#nasStartup");if(startupOverlay)startupOverlay.remove();
+}else{
+  setStartupStep(0);
+  let startupStep=0;
+  startupStepTimer=setInterval(()=>{startupStep=Math.min(4,startupStep+1);setStartupStep(startupStep);},650);
+}
+loadRemote().finally(()=>{if(!isAdminRoute)finishStartupLoading();});
 loadTrending();
 refreshAccount();
 

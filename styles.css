@@ -1333,3 +1333,25 @@ body:not(.radio-playing) #radioNow.radio-now{position:static!important;margin-to
 .radio-station-current{border-color:#b66be9!important;box-shadow:0 0 0 1px #a855f744,0 8px 25px #0004}
 body.radio-playing{padding-bottom:140px!important}
 @media(max-width:650px){nav#mediaTabs.media-tabs{grid-template-columns:repeat(3,minmax(0,1fr))!important}.media-tab{min-height:48px!important;font-size:clamp(12px,3.3vw,15px)!important}body.radio-playing #radioNow.radio-now{left:10px!important;right:10px!important;bottom:calc(68px + env(safe-area-inset-bottom))!important}}
+
+
+/* NASFLIX information and policy pages */
+.policy-page{min-height:100vh;background:var(--bg);color:var(--text)}
+.policy-header{display:flex;align-items:center;justify-content:space-between;padding:22px 8vw;border-bottom:1px solid var(--line);background:#0d0b16}
+.policy-home{color:#d8b4fe;font-size:13px}
+.policy-main{width:min(820px,88vw);margin:0 auto;padding:58px 0 90px;min-height:65vh}
+.policy-main h1{font:800 clamp(34px,6vw,54px)/1.1 Manrope,sans-serif;letter-spacing:-1.8px;margin:10px 0 8px}
+.policy-updated{color:#938aa3;font-size:12px;margin:0 0 34px}
+.policy-main section{margin:0 0 28px;padding:24px 26px;border:1px solid #332641;border-radius:15px;background:linear-gradient(145deg,#171321,#100e18)}
+.policy-main h2{font:700 19px Manrope,sans-serif;margin:0 0 12px;color:#e9ddff}
+.policy-main p,.policy-main li{color:#bdb5ca;font-size:14px;line-height:1.8}
+.policy-main ul{padding-left:22px}
+.policy-main a:not(.brand){color:#c4a3ff;text-decoration:underline;text-underline-offset:3px}
+.policy-main a:hover{color:#f0d9ff}
+.contact-card{margin-top:22px;padding:24px;border:1px solid #65428a;border-radius:15px;background:linear-gradient(120deg,#261637,#171120)}
+.contact-email{display:inline-block;margin:9px 0;font:700 clamp(19px,4vw,27px) Manrope,sans-serif;overflow-wrap:anywhere}
+.contact-card p{margin-bottom:0}
+.policy-footer{border-top:1px solid var(--line);padding:28px 8vw;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:11px}
+.footer-links{display:flex;gap:16px;flex-wrap:wrap}
+.footer-links a:hover{color:#fff}
+@media(max-width:650px){.policy-header{padding:17px 6vw}.policy-main{width:88vw;padding:40px 0 60px}.policy-main section{padding:20px}.policy-main p,.policy-main li{font-size:13px}.policy-footer{padding:24px 6vw}.footer-links{gap:12px}}

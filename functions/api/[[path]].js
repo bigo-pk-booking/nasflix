@@ -113,6 +113,55 @@ if(path==="/api/metrics/track"&&request.method==="POST"){
 await ensureTable(env.DB);
 await env.DB.prepare("CREATE TABLE IF NOT EXISTS media_engagement (media_id TEXT PRIMARY KEY,views INTEGER NOT NULL DEFAULT 0,listens INTEGER NOT NULL DEFAULT 0,last_viewed_at INTEGER,last_listened_at INTEGER,updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();
 let d;try{d=await request.json();}catch{return json({error:"Invalid request."},400);}const id=String(d.id||"").slice(0,100),kind=String(d.kind||"");if(!id||!["view","listen"].includes(kind))return json({error:"Invalid engagement event."},400);const media=await env.DB.prepare("SELECT id,type FROM media_links WHERE id=?").bind(id).first();if(!media)return json({error:"Media not found."},404);if((kind==="listen")!==(String(media.type).toLowerCase()==="music"))return json({error:"Event type does not match media."},400);const column=kind==="view"?"views":"listens",timeColumn=kind==="view"?"last_viewed_at":"last_listened_at";await env.DB.prepare("INSERT INTO media_engagement(media_id,"+column+","+timeColumn+") VALUES(?,1,unixepoch()) ON CONFLICT(media_id) DO UPDATE SET "+column+"="+column+"+1,"+timeColumn+"=unixepoch(),updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')").bind(id).run();return json({ok:true});}
+// Authenticated R2 multipart upload API for large video files.
+if(path==="/api/upload/init"&&request.method==="POST"){
+ if(!authorized(request,env))return json({error:"Admin access key is missing or incorrect."},401);
+ if(!env.MEDIA_BUCKET)return json({error:"R2 binding MEDIA_BUCKET is not configured."},503);
+ let d;try{d=await request.json();}catch{return json({error:"Invalid upload request."},400);}
+ const size=Number(d.size),name=String(d.name||"video").slice(0,240),contentType=String(d.contentType||"application/octet-stream");
+ const type=String(d.type||"Movie");
+ if(!Number.isSafeInteger(size)||size<=0||size>5*1024*1024*1024*1024)return json({error:"File size is invalid or exceeds R2's 5 TiB object limit."},413);
+ if(!["Movie","AI Video","Series"].includes(type))return json({error:"Invalid video type."},400);
+ if(!["video/mp4","video/webm","application/octet-stream"].includes(contentType))return json({error:"Use an MP4 or WebM video file."},400);
+ const id=crypto.randomUUID(),ext=(name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,8),key="media/"+id+(ext?"."+ext:"");
+ try{const mpu=await env.MEDIA_BUCKET.createMultipartUpload(key,{httpMetadata:{contentType,cacheControl:"public, max-age=3600"},customMetadata:{mediaId:id}});return json({ok:true,id,key,uploadId:mpu.uploadId,partSize:16*1024*1024},201);}catch(e){return json({error:"Could not start R2 upload: "+String(e?.message||e)},500);}
+}
+if(path==="/api/upload/part"&&request.method==="PUT"){
+ if(!authorized(request,env))return json({error:"Admin access key is missing or incorrect."},401);
+ if(!env.MEDIA_BUCKET)return json({error:"R2 binding MEDIA_BUCKET is not configured."},503);
+ const u=new URL(request.url),id=u.searchParams.get("id")||"",uploadId=u.searchParams.get("uploadId")||"",n=Number(u.searchParams.get("partNumber")),key="media/"+id;
+ if(!/^[0-9a-f-]{36}$/i.test(id)||!uploadId||!Number.isInteger(n)||n<1||n>10000||!request.body)return json({error:"Invalid upload part request."},400);
+ try{const mpu=env.MEDIA_BUCKET.resumeMultipartUpload(key,uploadId);const part=await mpu.uploadPart(n,request.body);return json({ok:true,partNumber:part.partNumber,etag:part.etag});}catch(e){return json({error:"Part "+n+" failed: "+String(e?.message||e)},400);}
+}
+if(path==="/api/upload/abort"&&request.method==="POST"){
+ if(!authorized(request,env))return json({error:"Admin access key is missing or incorrect."},401);
+ if(!env.MEDIA_BUCKET)return json({error:"R2 binding MEDIA_BUCKET is not configured."},503);
+ let d;try{d=await request.json();}catch{return json({error:"Invalid abort request."},400);}
+ const id=String(d.id||""),uploadId=String(d.uploadId||"");
+ if(!/^[0-9a-f-]{36}$/i.test(id)||!uploadId)return json({error:"Invalid upload identifier."},400);
+ try{await env.MEDIA_BUCKET.resumeMultipartUpload("media/"+id,uploadId).abort();return json({ok:true});}catch(e){return json({error:String(e?.message||e)},400);}
+}
+if(path==="/api/upload/complete"&&request.method==="POST"){
+ if(!authorized(request,env))return json({error:"Admin access key is missing or incorrect."},401);
+ if(!env.MEDIA_BUCKET)return json({error:"R2 binding MEDIA_BUCKET is not configured."},503);
+ await ensureTable(env.DB);
+ let form;try{form=await request.formData();}catch{return json({error:"Invalid completion form."},400);}
+ let d,parts;try{d=JSON.parse(String(form.get("metadata")||"{}"));parts=JSON.parse(String(form.get("parts")||"[]"));}catch{return json({error:"Upload metadata or parts are invalid."},400);}
+ const id=String(d.id||""),key=String(d.key||""),uploadId=String(d.uploadId||""),title=String(d.title||"").trim(),type=String(d.type||"Movie"),genre=String(d.genre||"Independent").slice(0,35),seriesTitle=String(d.seriesTitle||"").slice(0,90),seasonNumber=Math.max(1,Math.min(99,Number(d.seasonNumber)||1)),episodeNumber=d.episodeNumber?Math.max(1,Math.min(999,Number(d.episodeNumber))):null,episodeTitle=String(d.episodeTitle||"").slice(0,90),size=Number(d.size),contentType=String(d.contentType||"application/octet-stream");
+ if(!/^[0-9a-f-]{36}$/i.test(id)||key!==("media/"+id+(String(d.extension||"")?"."+String(d.extension).replace(/[^a-z0-9]/gi,"").slice(0,8):""))||!uploadId||!title||title.length>180||!["Movie","AI Video","Series"].includes(type)||!Number.isSafeInteger(size)||size<=0||!Array.isArray(parts)||!parts.length||parts.length>10000)return json({error:"Upload completion details are invalid."},400);
+ if(parts.some((p,i)=>Number(p.partNumber)!==i+1||typeof p.etag!=="string"||!p.etag||p.etag.length>200))return json({error:"Uploaded part list is incomplete or invalid."},400);
+ const poster=form.get("posterFile");if(poster instanceof File&&poster.size>5*1024*1024)return json({error:"Thumbnail maximum size is 5 MB."},413);
+ if(poster instanceof File&&poster.size&&!["image/jpeg","image/png","image/webp"].includes(poster.type))return json({error:"Thumbnail must be JPG, PNG or WebP."},400);
+ let posterKey=null;
+ try{
+  const mpu=env.MEDIA_BUCKET.resumeMultipartUpload(key,uploadId),object=await mpu.complete(parts.map(p=>({partNumber:Number(p.partNumber),etag:p.etag})));
+  if(object.size!==size){await env.MEDIA_BUCKET.delete(key);return json({error:"Completed file size does not match the selected file."},400);}
+  if(poster instanceof File&&poster.size){const ext=(poster.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");posterKey="posters/"+id+(ext?"."+ext:".jpg");await env.MEDIA_BUCKET.put(posterKey,poster.stream(),{httpMetadata:{contentType:poster.type,cacheControl:"public, max-age=86400"},customMetadata:{title}});}
+  const mediaUrl="/api/file/"+id;
+  await env.DB.prepare("INSERT INTO media_links (id,title,type,genre,artist,album_title,description,media_url,allow_download,series_title,season_number,episode_number,episode_title,object_key,content_type,size,poster_object_key,poster_content_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,title,type,genre,"","","",mediaUrl,0,seriesTitle,seasonNumber,episodeNumber,episodeTitle,key,contentType,size,posterKey,poster instanceof File&&poster.size?poster.type:null).run();
+  return json({ok:true,id,media_url:mediaUrl,poster_url:posterKey?"/api/poster/"+id:""},201);
+ }catch(e){return json({error:"Could not finish upload: "+String(e?.message||e)},400);}
+}
 if(path==="/api/media"&&request.method==="GET"){await ensureTable(env.DB);const {results=[]}=await env.DB.prepare("SELECT id,title,type,genre,artist,album_title,description,media_url,allow_download,series_title,season_number,episode_number,episode_title,object_key,content_type,size,poster_object_key,poster_content_type,created_at FROM media_links ORDER BY created_at DESC").all();return json(results.map(row=>({...row,poster_url:row.poster_object_key?"/api/poster/"+row.id:""})));}
 if(path==="/api/media"&&request.method==="POST"&&request.headers.get("content-type")?.includes("multipart/form-data")){
 if(!authorized(request,env))return json({error:"Admin access key is missing or incorrect."},401);

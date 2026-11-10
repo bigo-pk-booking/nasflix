@@ -1427,3 +1427,8 @@ body.app-mode>footer{display:none!important}
 
 .language-picker{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font-size:12px}.language-picker select{max-width:112px;background:transparent;color:inherit;border:0;outline:0;font:inherit}.language-picker option{background:#171421;color:#fff}html[dir=rtl] body{direction:rtl}@media(max-width:700px){.language-picker{padding:4px 6px}.language-picker select{max-width:82px;font-size:11px}}
 
+/* Keep public media navigation out of the private Admin Panel only. */
+body:has(#adminModal.open) #mediaTabs,
+body:has(#adminModal.open) #nasBottomNav{
+  display:none!important;
+}

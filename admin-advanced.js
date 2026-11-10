@@ -3,7 +3,7 @@
 const $=(s,r=document)=>r.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let active="dashboard";
-const legacySelectors=[".admin-intro",".admin-access-top",".admin-upload-choices",".admin-choice-hint",".admin-items"];
+const legacySelectors=[".admin-intro",".admin-upload-choices",".admin-choice-hint",".admin-items"];
 const api=async(path,options={})=>{const r=await fetch("/api/admin/"+path,{credentials:"same-origin",cache:"no-store",headers:{"content-type":"application/json",...(options.headers||{})},...options});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Admin request failed.");return d;};
 function ensureUI(){
  const card=$(".admin-card");if(!card||$("#adminAdvanced"))return;

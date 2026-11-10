@@ -372,24 +372,21 @@ menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("ar
  function renderBottomNav(mode="video"){
    if(!bottomNav)return;
    const entries=mode==="music"
-     ? [["home","⌂","Home"],["search","⌕","Search"],["playlists","▤","Your Library"],["music","♫","Music"]]
+     ? [["home","⌂","Home"],["search","⌕","Search"],["radio","◉","Radio"],["video","▷","Videos"]]
      : mode==="radio"
-       ? [["home","⌂","Home"],["search","⌕","Search"],["radio","◉","Radio"]]
-       : [["home","⌂","Home"],["search","⌕","Search"],["radio","◉","Radio"],["video","▷","Videos"]];
-   bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${(mode==="music"?key==="music":mode==="radio"?key==="radio":key==="home")?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
+       ? [["home","⌂","Home"],["video","▷","Videos"],["music","♫","Music"]]
+       : [["home","⌂","Home"],["search","⌕","Search"],["music","♫","Music"],["radio","◉","Radio"]];
+   bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${key==="home"?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
    bottomNav.querySelectorAll("[data-bottom-page]").forEach(btn=>btn.addEventListener("click",()=>{
      closeNav();
      if(accountUser){const gate=$("#welcomeGate");if(gate)gate.hidden=true;const login=$("#accountLoginHeader"),logout=$("#accountLogoutHeader");if(login)login.hidden=true;if(logout)logout.hidden=false;}
      const page=btn.dataset.bottomPage;
      bottomNav.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===btn));
      if(page==="search"){const input=$("#searchInput");input?.focus();window.scrollTo({top:0,behavior:"smooth"});}
-     else if(page==="home" && document.body.classList.contains("radio-page")){document.getElementById("radio")?.scrollIntoView({behavior:"smooth",block:"start"});}
-     else if(page==="movie")setMediaTab("Radio");
-     else if(page==="series")setMediaTab("Series");
      else if(page==="video")setMediaTab("AI Video");
      else if(page==="radio")setMediaTab("Radio");
      else if(page==="music")setMediaTab("Music");
-     else showNasflixPage(page);
+     else showNasflixPage("home");
    }));
  }
  renderBottomNav("video");

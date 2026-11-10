@@ -1369,3 +1369,15 @@ body > footer .footer-links a:hover{color:#fff}
   body > footer > .footer-links{justify-content:flex-start;gap:10px 16px;width:100%}
   body > footer > p{width:100%;padding-top:12px;margin:0;font-size:11px}
 }
+
+
+/* Radio view: remove the artificial full-screen gap and unrelated promo card. */
+body.radio-page .radio-section{min-height:0!important;padding-top:24px!important;padding-bottom:28px!important}
+body.radio-page .join-banner{display:none!important}
+body.radio-page>footer{margin-top:0!important}
+@media(max-width:650px){
+  body.radio-page .radio-section{padding:22px 5vw 24px!important}
+  body.radio-page .radio-section .section-heading{margin-bottom:16px}
+  body.radio-page .radio-grid{gap:10px}
+  body.radio-page .radio-station{padding:12px;min-height:72px}
+}

@@ -1418,3 +1418,9 @@ nav#mediaTabs .media-tab{
 }
 nav#mediaTabs .media-tab span{display:inline!important;line-height:1.2!important}
 nav#mediaTabs .media-tab[hidden]{display:none!important}
+
+
+/* Android app only: hide the duplicate main-site footer.
+   The hamburger menu already contains About, Privacy, Terms, Contact and DMCA.
+   Keep the footer visible on the public website for visitors and AdSense review. */
+body.app-mode>footer{display:none!important}

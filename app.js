@@ -488,12 +488,18 @@ function uploadWithProgress(url,formData,token,onProgress,method="POST"){
   });
 }
 async function uploadLargeVideo(file,title,metadata,poster,token,onProgress){
- const initResponse=await fetch("/api/upload/init",{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+token},body:JSON.stringify({name:file.name,size:file.size,contentType:file.type||"application/octet-stream",type:metadata.type})});
- const init=await initResponse.json().catch(()=>({}));if(!initResponse.ok)throw new Error(init.error||"Could not start upload.");
- const partSize=init.partSize||16*1024*1024,parts=[];
+ const fingerprint=[file.name,file.size,file.lastModified].join("|"),storageKey="nasflix_mpu_"+btoa(unescape(encodeURIComponent(fingerprint))).replace(/[^a-z0-9]/gi,"").slice(0,80);
+ let saved=null;try{saved=JSON.parse(localStorage.getItem(storageKey)||"null");}catch{}
+ let init=saved?.init;
+ if(!init||Date.now()-(saved.createdAt||0)>6*24*60*60*1000){
+  const initResponse=await fetch("/api/upload/init",{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+token},body:JSON.stringify({name:file.name,size:file.size,contentType:file.type||"application/octet-stream",type:metadata.type})});
+  init=await initResponse.json().catch(()=>({}));if(!initResponse.ok)throw new Error(init.error||"Could not start upload.");
+  saved={init,parts:[],createdAt:Date.now()};localStorage.setItem(storageKey,JSON.stringify(saved));
+ }
+ const partSize=init.partSize||16*1024*1024,parts=[...(saved.parts||[])],count=Math.ceil(file.size/partSize);
  try{
-  const count=Math.ceil(file.size/partSize);
   for(let i=0;i<count;i++){
+   if(parts.some(p=>p.partNumber===i+1)){onProgress(Math.min(file.size,(i+1)*partSize),file.size,i+1,count);continue;}
    const blob=file.slice(i*partSize,Math.min(file.size,(i+1)*partSize));let result=null,lastError=null;
    for(let attempt=1;attempt<=3;attempt++){
     try{
@@ -502,19 +508,17 @@ async function uploadLargeVideo(file,title,metadata,poster,token,onProgress){
     }catch(error){lastError=error;if(attempt<3)await new Promise(resolve=>setTimeout(resolve,700*attempt));}
    }
    if(lastError)throw lastError;
-   parts.push({partNumber:result.partNumber,etag:result.etag});onProgress(Math.min(file.size,(i+1)*partSize),file.size,i+1,count);
+   parts.push({partNumber:result.partNumber,etag:result.etag});saved.parts=parts;saved.createdAt=Date.now();localStorage.setItem(storageKey,JSON.stringify(saved));
+   onProgress(Math.min(file.size,(i+1)*partSize),file.size,i+1,count);
   }
   const ext=(file.name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,8);
   const form=new FormData();
   form.append("metadata",JSON.stringify({...metadata,id:init.id,key:init.key,uploadId:init.uploadId,title,size:file.size,contentType:file.type||"application/octet-stream",extension:ext}));
-  form.append("parts",JSON.stringify(parts));if(poster)form.append("posterFile",poster,poster.name);
+  form.append("parts",JSON.stringify(parts.sort((a,b)=>a.partNumber-b.partNumber)));if(poster)form.append("posterFile",poster,poster.name);
   const complete=await fetch("/api/upload/complete",{method:"POST",headers:{"authorization":"Bearer "+token},body:form});
   const result=await complete.json().catch(()=>({}));if(!complete.ok)throw new Error(result.error||"Could not finish "+file.name+".");
-  return result;
- }catch(error){
-  try{await fetch("/api/upload/abort",{method:"POST",headers:{"authorization":"Bearer "+token,"content-type":"application/json"},body:JSON.stringify({id:init.id,key:init.key,uploadId:init.uploadId})});}catch{}
-  throw error;
- }
+  localStorage.removeItem(storageKey);return result;
+ }catch(error){throw new Error(error.message+" Upload progress is saved on this device. Re-select the same file to resume.");}
 }
 function renderVideoUploadQueue(){
  const input=$("#bulkVideoFiles"),queue=$("#bulkVideoQueue");if(!input||!queue)return;
@@ -560,6 +564,7 @@ async function uploadBulkBatch(kind){
     const season=Math.max(1,Math.min(99,Number($("#bulkVideoSeason")?.value)||1));
     const episodeStart=Math.max(1,Math.min(999,Number($("#bulkVideoStartEpisode")?.value)||1));
     if(data.type==="Series"&&!series)throw new Error("Enter the series / folder name before uploading episodes.");
+    if(data.type==="Series"&&episodeStart+files.length-1>999)throw new Error("Episode numbers cannot exceed 999.");
     data.seriesTitle=data.type==="Series"?series:"";data.seasonNumber=season;
     data.episodeNumber=data.type==="Series"?episodeStart+index:"";data.episodeTitle=data.type==="Series"?title:"";
     await uploadLargeVideo(file,title,data,selectedPoster,token,(loaded,total,part,count)=>{

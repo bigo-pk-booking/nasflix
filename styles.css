@@ -1432,3 +1432,7 @@ body:has(#adminModal.open) #mediaTabs,
 body:has(#adminModal.open) #nasBottomNav{
   display:none!important;
 }
+
+
+/* Hide legacy static key entry for a verified signed-in admin session. */
+#adminModal.admin-session-active .admin-access-top{display:none!important}

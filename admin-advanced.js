@@ -35,6 +35,6 @@ async function loadSettings(){try{const d=await api("settings");const map=Object
 async function loadLogs(){try{const d=await api("logs");$("#aaLogs").innerHTML=(d.logs||[]).map(x=>'<div class="aa-row"><span><b>'+esc(x.action)+'</b><br>'+esc(x.actor_email)+' · '+esc(x.details)+'</span><small>'+esc(x.created_at)+'</small></div>').join("")||"<p>No logs yet.</p>";}catch(e){$("#aaLogsMsg").textContent=e.message;}}
 function renderContentSummary(){const box=$("#aaContentSummary");if(box)box.innerHTML='<p>Current catalogue entries: '+(document.querySelectorAll("#adminItems .admin-row").length||0)+'. Existing upload, edit, and remove controls are preserved below.</p>';}
 document.addEventListener("click",e=>{if(e.target.closest("#adminOpen"))setTimeout(()=>{ensureUI();switchTab("dashboard");},80);});
-document.addEventListener("DOMContentLoaded",()=>{ensureUI();});
+document.addEventListener("DOMContentLoaded",()=>{ensureUI();switchTab("dashboard");});
 window.NASFLIXAdminRefresh=()=>{loadOverview();renderContentSummary();};
 })();

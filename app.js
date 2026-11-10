@@ -94,7 +94,7 @@ async function syncPlaylists(){clearTimeout(playlistSaveTimer);await accountRequ
 function schedulePlaylistSync(){clearTimeout(playlistSaveTimer);playlistSaveTimer=setTimeout(()=>syncPlaylists().catch(e=>accountMessage(e.message)),500);}
 async function enterGuestMode(){
  guestMode=true;accountUser=null;$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;
- if(!/^\\/admin\\/?$/.test(location.pathname))await showDashboardSplash("ACCESSING GUEST DASHBOARD","");
+ await showDashboardSplash("ACCESSING GUEST DASHBOARD","");
 }
 let resetFlow=new URLSearchParams(location.search).has("reset");
 async function refreshAccount(){if(resetFlow){accountUser=null;$("#welcomeGate").hidden=false;$("#accountAuth").hidden=true;$("#resetPasswordBox").hidden=false;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=true;$("#adminOpen")?.setAttribute("hidden","");return;}try{const data=await accountRequest("me");accountUser=data.user;if(accountUser){guestMode=false;$("#adminOpen")?.toggleAttribute("hidden",accountUser.role!=="admin");$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=false;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=false;$("#accountSignedIn").hidden=false;$("#accountStatus").textContent=accountUser.role==="admin"?"Admin account":"Signed in";$("#accountEmailLabel").textContent=accountUser.email;const saved=await accountRequest("playlists");userPlaylists=Array.isArray(saved.playlists)?saved.playlists:[];activePlaylistId=userPlaylists[0]?.id||"";renderUserPlaylists();if(accountUser.role==="admin"){const admin=$("#adminModal");if(admin){admin.classList.add("open");admin.setAttribute("aria-hidden","false");}}}else{$("#adminOpen")?.setAttribute("hidden","");userPlaylists=[];$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountSignedIn").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;$("#accountStatus").textContent="Not signed in";}}catch(e){$("#adminOpen")?.setAttribute("hidden","");accountMessage(e.message);$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;}}
@@ -111,7 +111,7 @@ async function accountAction(kind){
   const data=await accountRequest(kind,{email,password,...(kind==="register"?{fullName}:{})});
   accountUser=data.user;$("#accountPassword").value="";$("#accountConfirmPassword").value="";$("#accountFullName").value="";
   const welcomeName=accountUser?.fullName||accountUser?.name||accountUser?.displayName||fullName||String(accountUser?.email||"").split("@")[0].replace(/[._-]+/g," ").trim();
-  if(accountUser?.role!=="admin"&&!/^\\/admin\\/?$/.test(location.pathname))await showDashboardSplash("ACCESSING USER DASHBOARD",welcomeName);
+  await showDashboardSplash("ACCESSING USER DASHBOARD",welcomeName);
   await refreshAccount();
   accountMessage(kind==="register"?"Account created successfully!":"Welcome back!");
  }catch(e){accountMessage(e.message||"Something went wrong. Please try again.");}
@@ -531,19 +531,14 @@ async function uploadBulkBatch(kind){
 }
 $("#bulkMusicSubmit")?.addEventListener("click",()=>uploadBulkBatch("music"));
 function openAdminUpload(kind){
- const music=kind==="music",musicArea=$("#musicUploadArea"),videoArea=$("#videoUploadArea"),singleArea=$("#singleUploadArea");
- const wasOpen=music?!musicArea.hidden:!videoArea.hidden;
- musicArea.hidden=true;videoArea.hidden=true;singleArea.hidden=true;
- if(wasOpen){
-  $("#adminUploadHint").textContent="Upload tools closed. Choose Music Upload or Video Upload to open them again.";
-  document.querySelectorAll(".admin-choice").forEach(button=>{button.classList.remove("active");button.setAttribute("aria-expanded","false");});
-  return;
- }
- (music?musicArea:videoArea).hidden=false;singleArea.hidden=false;
+ const music=kind==="music";
+ $("#musicUploadArea").hidden=!music;
+ $("#videoUploadArea").hidden=music;
+ $("#singleUploadArea").hidden=false;
  $("#itemType").value=music?"Music":"Movie";
  $("#itemType").dispatchEvent(new Event("change",{bubbles:true}));
- $("#adminUploadHint").textContent=music?"Music upload tools are open below. Tap Music Upload again to close.":"Video upload tools are open below. Tap Video Upload again to close.";
- document.querySelectorAll(".admin-choice").forEach(button=>{const selected=button.id===(music?"openMusicUpload":"openVideoUpload");button.classList.toggle("active",selected);button.setAttribute("aria-expanded",String(selected));});
+ $("#adminUploadHint").textContent=music?"Music upload tools are open below.":"Video upload tools are open below.";
+ document.querySelectorAll(".admin-choice").forEach(button=>button.classList.toggle("active",button.id===(music?"openMusicUpload":"openVideoUpload")));
 }
 $("#openMusicUpload")?.addEventListener("click",()=>openAdminUpload("music"));
 $("#openVideoUpload")?.addEventListener("click",()=>openAdminUpload("video"));
@@ -755,17 +750,10 @@ async function finishStartupLoading(){
   overlay.classList.add("startup-hidden");
   setTimeout(()=>overlay.remove(),700);
 }
-const isAdminRoute=location.pathname==="/admin"||location.pathname==="/admin/";
-if(isAdminRoute)document.documentElement.classList.add("admin-route");
-if(isAdminRoute){
-  // Admin opens directly without the public media startup/loading screen.
-  const startupOverlay=$("#nasStartup");if(startupOverlay)startupOverlay.remove();
-}else{
-  setStartupStep(0);
-  let startupStep=0;
-  startupStepTimer=setInterval(()=>{startupStep=Math.min(4,startupStep+1);setStartupStep(startupStep);},650);
-}
-loadRemote().finally(()=>{if(!isAdminRoute)finishStartupLoading();});
+setStartupStep(0);
+let startupStep=0;
+startupStepTimer=setInterval(()=>{startupStep=Math.min(4,startupStep+1);setStartupStep(startupStep);},650);
+loadRemote().finally(finishStartupLoading);
 loadTrending();
 refreshAccount();
 

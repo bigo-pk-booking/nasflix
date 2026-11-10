@@ -531,14 +531,19 @@ async function uploadBulkBatch(kind){
 }
 $("#bulkMusicSubmit")?.addEventListener("click",()=>uploadBulkBatch("music"));
 function openAdminUpload(kind){
- const music=kind==="music";
- $("#musicUploadArea").hidden=!music;
- $("#videoUploadArea").hidden=music;
- $("#singleUploadArea").hidden=false;
+ const music=kind==="music",musicArea=$("#musicUploadArea"),videoArea=$("#videoUploadArea"),singleArea=$("#singleUploadArea");
+ const wasOpen=music?!musicArea.hidden:!videoArea.hidden;
+ musicArea.hidden=true;videoArea.hidden=true;singleArea.hidden=true;
+ if(wasOpen){
+  $("#adminUploadHint").textContent="Upload tools closed. Choose Music Upload or Video Upload to open them again.";
+  document.querySelectorAll(".admin-choice").forEach(button=>{button.classList.remove("active");button.setAttribute("aria-expanded","false");});
+  return;
+ }
+ (music?musicArea:videoArea).hidden=false;singleArea.hidden=false;
  $("#itemType").value=music?"Music":"Movie";
  $("#itemType").dispatchEvent(new Event("change",{bubbles:true}));
- $("#adminUploadHint").textContent=music?"Music upload tools are open below.":"Video upload tools are open below.";
- document.querySelectorAll(".admin-choice").forEach(button=>button.classList.toggle("active",button.id===(music?"openMusicUpload":"openVideoUpload")));
+ $("#adminUploadHint").textContent=music?"Music upload tools are open below. Tap Music Upload again to close.":"Video upload tools are open below. Tap Video Upload again to close.";
+ document.querySelectorAll(".admin-choice").forEach(button=>{const selected=button.id===(music?"openMusicUpload":"openVideoUpload");button.classList.toggle("active",selected);button.setAttribute("aria-expanded",String(selected));});
 }
 $("#openMusicUpload")?.addEventListener("click",()=>openAdminUpload("music"));
 $("#openVideoUpload")?.addEventListener("click",()=>openAdminUpload("video"));

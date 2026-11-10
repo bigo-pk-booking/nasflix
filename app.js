@@ -184,14 +184,9 @@ function card(x){const yt=youtubeId(x.url);const thumb=x.poster_url||x.thumbnail
 function track(x){const saved=offlineItems.some(s=>String(s.id)===String(x.id)),playing=String(activeMusicTrackId)===String(x.id);return `<div class="track ${playing?"is-now-playing":""}" data-music-row="${esc(x.id)}"><div class="track-cover"><img src="${esc(musicArtwork(x))}" alt="${esc(x.title)} artwork" loading="lazy"></div><div class="track-info"><b class="track-title-marquee" title="${esc(x.title)}">${esc(x.title)}</b><small>${esc(x.artist||"Unknown artist")} · ${esc(x.genre||"Music")}</small></div><button data-track="${x.id}">${playing?"Ⅱ Now Playing":"▶ Listen"}</button><button class="track-playlist-add" type="button" data-add-playlist="${esc(x.id)}" title="Add to playlist">＋</button><button class="track-save" type="button" data-offline-save="${esc(x.id)}">${saved?"✓":"↓"}</button></div>`}
 function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function musicArtwork(item){
- const uploaded=item?.poster_url||item?.thumbnail;if(uploaded)return uploaded;
- const title=String(item?.title||"NASFLIX MUSIC"),artist=String(item?.artist||"Music");
- let hash=0;for(const ch of title+"|"+artist)hash=(hash*31+ch.charCodeAt(0))>>>0;
- const palettes=[["#6d28d9","#db2777"],["#0e7490","#7c3aed"],["#be185d","#7c3aed"],["#4338ca","#c026d3"],["#0f766e","#9333ea"]];
- const colors=palettes[hash%palettes.length],initials=title.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
- const shortTitle=title.length>27?title.slice(0,25)+"…":title;
- const svg='<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs><linearGradient id="g"><stop stop-color="'+colors[0]+'"/><stop offset="1" stop-color="'+colors[1]+'"/></linearGradient></defs><rect width="512" height="512" rx="48" fill="url(#g)"/><circle cx="420" cy="90" r="180" fill="#fff" opacity=".12"/><path d="M350 70v190a58 58 0 1 1-28-49V130l120-30v130a58 58 0 1 1-28-49V70z" fill="#fff" opacity=".22"/><text x="42" y="300" fill="#fff" font-family="Arial,sans-serif" font-size="108" font-weight="800">'+esc(initials||"♫")+'</text><text x="44" y="390" fill="#fff" font-family="Arial,sans-serif" font-size="25" font-weight="700">'+esc(shortTitle)+'</text><text x="44" y="430" fill="#fff" font-family="Arial,sans-serif" font-size="19">'+esc(artist.slice(0,32))+'</text></svg>';
- return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
+ // One shared NASFLIX MUSIC artwork is used for every track.
+ // A future shared Drive cover can replace this single asset without per-track edits.
+ return "/music-cover.svg";
 }
 function moviepireEmbedUrl(value){try{const u=new URL(value);if(u.protocol!=="https:"||u.hostname!=="video.moviepire.co")return "";const m=u.pathname.match(/^\/embed\/movie\/(\d+)\/?$/);return m?"https://video.moviepire.co/embed/movie/"+m[1]:"";}catch{return "";}}
 function internetArchiveId(value){try{const u=new URL(value);if(u.hostname==="archive.org"||u.hostname==="www.archive.org"){const parts=u.pathname.split("/").filter(Boolean);if((parts[0]==="details"||parts[0]==="embed")&&parts[1])return parts[1];}}catch{}return "";}

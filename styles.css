@@ -1427,5 +1427,3 @@ body.app-mode>footer{display:none!important}
 
 .language-picker{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font-size:12px}.language-picker select{max-width:112px;background:transparent;color:inherit;border:0;outline:0;font:inherit}.language-picker option{background:#171421;color:#fff}html[dir=rtl] body{direction:rtl}@media(max-width:700px){.language-picker{padding:4px 6px}.language-picker select{max-width:82px;font-size:11px}}
 
-/* Keep the mobile app header compact: language selection lives inside the hamburger menu. */
-.nav-language{padding:12px 8px;border-bottom:1px solid var(--line);margin-bottom:8px}.nav-language .language-picker{width:100%;justify-content:space-between;padding:11px 12px}.nav-language .language-picker select{width:100%;max-width:none;flex:1}.header-actions .language-picker{display:none!important}

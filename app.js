@@ -415,8 +415,13 @@ function setMediaTab(type){
   const isMusic=type==="Music",isRadio=type==="Radio";
   document.body.classList.toggle("music-page",isMusic);
   document.body.classList.toggle("video-library-page",!isMusic&&!isRadio);
+  document.body.classList.toggle("radio-page",isRadio);
   renderBottomNav(isMusic?"music":isRadio?"radio":"video");
-  document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",isMusic?section.dataset.pageSection!=="music":isRadio?section.dataset.pageSection!=="radio":section.dataset.pageSection!=="movies"));
+  document.querySelectorAll("[data-page-section]").forEach(section=>{
+    const visible=isMusic?section.dataset.pageSection==="music":isRadio?section.dataset.pageSection==="radio":section.dataset.pageSection==="movies";
+    section.classList.toggle("page-hidden",!visible);
+    section.hidden=!visible;
+  });
   $("#quickCats")?.classList.toggle("page-hidden",isMusic||isRadio);
   activeFilter=isMusic||isRadio?"All":type==="Movie"?"Movie":type==="Series"?"Series":type==="AI Video"?"AI Video":"All";
   if(isMusic){activeMusicArtist="All Artists";activeMusicAlbum="All Albums";musicVisibleCount=10;musicBatchLoading=false;}
@@ -425,7 +430,7 @@ function setMediaTab(type){
   window.scrollTo({top:0,behavior:"smooth"});
 }
 document.querySelectorAll("[data-media-tab]").forEach(tab=>tab.addEventListener("click",()=>setMediaTab(tab.dataset.mediaTab)));
-setMediaTab("Movie");
+setMediaTab("Radio");
 mainNav?.querySelectorAll("a").forEach(link=>link.addEventListener("click",event=>{
    closeNav();
    if(accountUser){const gate=$("#welcomeGate");if(gate)gate.hidden=true;const login=$("#accountLoginHeader"),logout=$("#accountLogoutHeader");if(login)login.hidden=true;if(logout)logout.hidden=false;}

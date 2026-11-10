@@ -479,7 +479,7 @@ async function readMusicTags(file){
 function cleanFileTitle(name){return name.replace(/\.[^.]+$/,"").replace(/[._]+/g," ").trim()||name;}
 function uploadWithProgress(url,formData,token,onProgress,method="POST"){
   return new Promise((resolve,reject)=>{
-    const xhr=new XMLHttpRequest();const requestMethod=method||"POST";xhr.open(requestMethod,url);xhr.setRequestHeader("authorization","Bearer "+token);
+    const xhr=new XMLHttpRequest();const requestMethod=method||"POST";xhr.open(requestMethod,url);if(token)xhr.setRequestHeader("authorization","Bearer "+token);
     xhr.upload.addEventListener("progress",event=>{if(event.lengthComputable)onProgress(event.loaded,event.total);});
     xhr.addEventListener("load",()=>{let result={};try{result=JSON.parse(xhr.responseText||"{}");}catch{}if(xhr.status>=200&&xhr.status<300)resolve(result);else reject(new Error(result.error||"Upload failed ("+xhr.status+")."));});
     xhr.addEventListener("error",()=>reject(new Error("Network error. Please try the upload again.")));
@@ -569,7 +569,7 @@ $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
    const data={title:entry.title,type:linkType,genre:linkGenre,artist:"",albumTitle:"",description:"",url:entry.url,allowDownload:"false",seriesTitle:linkType==="Series"?seriesTitle:"",seasonNumber:String(seasonNumber),episodeNumber:linkType==="Series"?String(entry.episodeNumber):"",episodeTitle:linkType==="Series"?entry.title:""};
    Object.entries(data).forEach(([key,value])=>form.append(key,value));
    if(poster)form.append("posterFile",poster,poster.name);
-   const response=await fetch("/api/media",{method:"POST",headers:{"authorization":"Bearer "+token},body:form});
+   const headers=token?{"authorization":"Bearer "+token}:{};const response=await fetch("/api/media",{method:"POST",headers,body:form,credentials:"same-origin"});
    const result=await response.json().catch(()=>({}));if(!response.ok)throw new Error(result.error||"Failed to add episode "+entry.episodeNumber+".");done++;
   }
   status.textContent="Success! "+done+" episodes and thumbnails added to "+seriesTitle+".";

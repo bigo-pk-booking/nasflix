@@ -1432,3 +1432,16 @@ body:has(#adminModal.open) #mediaTabs,
 body:has(#adminModal.open) #nasBottomNav{
   display:none!important;
 }
+
+
+/* Large video batch upload queue */
+.upload-queue{display:grid;gap:9px;margin:12px 0}
+.upload-queue-row{display:grid;gap:7px;padding:11px;border:1px solid #ffffff20;border-radius:10px;background:#ffffff08}
+.upload-queue-row span{font-size:12px;color:#cfc5dc;overflow-wrap:anywhere}
+.upload-queue-row input{width:100%;min-width:0}
+#bulkVideoProgress{display:block;width:100%;height:9px;margin:12px 0 16px;accent-color:#a879ed}
+
+
+/* Signed-in admin accounts are authorized by the HttpOnly server session.
+   Never show or prefill the legacy static Admin Access Key field for them. */
+#adminModal.admin-session-active .admin-access-top{display:none!important}

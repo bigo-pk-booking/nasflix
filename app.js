@@ -97,7 +97,7 @@ async function enterGuestMode(){
  await showDashboardSplash("ACCESSING GUEST DASHBOARD","");
 }
 let resetFlow=new URLSearchParams(location.search).has("reset");
-async function refreshAccount(){if(resetFlow){accountUser=null;$("#welcomeGate").hidden=false;$("#accountAuth").hidden=true;$("#resetPasswordBox").hidden=false;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=true;$("#adminOpen")?.setAttribute("hidden","");return;}try{const data=await accountRequest("me");accountUser=data.user;if(accountUser){guestMode=false;$("#adminOpen")?.toggleAttribute("hidden",accountUser.role!=="admin");$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=false;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=false;$("#accountSignedIn").hidden=false;$("#accountStatus").textContent=accountUser.role==="admin"?"Admin account":"Signed in";$("#accountEmailLabel").textContent=accountUser.email;const saved=await accountRequest("playlists");userPlaylists=Array.isArray(saved.playlists)?saved.playlists:[];activePlaylistId=userPlaylists[0]?.id||"";renderUserPlaylists();if(accountUser.role==="admin"){const admin=$("#adminModal");if(admin){admin.classList.add("open");admin.setAttribute("aria-hidden","false");}}}else{$("#adminOpen")?.setAttribute("hidden","");userPlaylists=[];$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountSignedIn").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;$("#accountStatus").textContent="Not signed in";}}catch(e){$("#adminOpen")?.setAttribute("hidden","");accountMessage(e.message);$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;}}
+async function refreshAccount(){if(resetFlow){accountUser=null;$("#welcomeGate").hidden=false;$("#accountAuth").hidden=true;$("#resetPasswordBox").hidden=false;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=true;$("#adminOpen")?.setAttribute("hidden","");return;}try{const data=await accountRequest("me");accountUser=data.user;if(accountUser){guestMode=false;$("#adminOpen")?.toggleAttribute("hidden",accountUser.role!=="admin");$("#welcomeGate").hidden=true;$("#accountPlaylistPanel").hidden=false;$("#accountLoginHeader").hidden=true;$("#accountLogoutHeader").hidden=false;$("#accountSignedIn").hidden=false;$("#accountStatus").textContent=accountUser.role==="admin"?"Admin account":"Signed in";$("#accountEmailLabel").textContent=accountUser.email;const saved=await accountRequest("playlists");userPlaylists=Array.isArray(saved.playlists)?saved.playlists:[];activePlaylistId=userPlaylists[0]?.id||"";renderUserPlaylists();if(accountUser.role==="admin"){const admin=$("#adminModal");if(admin){admin.classList.add("open","admin-session-active");admin.setAttribute("aria-hidden","false");}const key=$("#adminToken");if(key)key.value="";}else{$("#adminModal")?.classList.remove("admin-session-active");}}else{$("#adminModal")?.classList.remove("admin-session-active");$("#adminOpen")?.setAttribute("hidden","");userPlaylists=[];$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountSignedIn").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;$("#accountStatus").textContent="Not signed in";}}catch(e){$("#adminOpen")?.setAttribute("hidden","");accountMessage(e.message);$("#welcomeGate").hidden=guestMode;$("#accountPlaylistPanel").hidden=true;$("#accountLoginHeader").hidden=false;$("#accountLogoutHeader").hidden=true;}}
 let accountActionBusy=false;
 async function accountAction(kind){
  if(accountActionBusy)return;
@@ -487,47 +487,106 @@ function uploadWithProgress(url,formData,token,onProgress,method="POST"){
     xhr.send(formData);
   });
 }
+async function uploadLargeVideo(file,title,metadata,poster,token,onProgress){
+ const fingerprint=[file.name,file.size,file.lastModified].join("|"),storageKey="nasflix_mpu_"+btoa(unescape(encodeURIComponent(fingerprint))).replace(/[^a-z0-9]/gi,"").slice(0,80);
+ let saved=null;try{saved=JSON.parse(localStorage.getItem(storageKey)||"null");}catch{}
+ let init=saved?.init;
+ if(!init||Date.now()-(saved.createdAt||0)>6*24*60*60*1000){
+  const initResponse=await fetch("/api/upload/init",{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+token},body:JSON.stringify({name:file.name,size:file.size,contentType:file.type||"application/octet-stream",type:metadata.type})});
+  init=await initResponse.json().catch(()=>({}));if(!initResponse.ok)throw new Error(init.error||"Could not start upload.");
+  saved={init,parts:[],createdAt:Date.now()};localStorage.setItem(storageKey,JSON.stringify(saved));
+ }
+ const partSize=init.partSize||16*1024*1024,parts=[...(saved.parts||[])],count=Math.ceil(file.size/partSize);
+ try{
+  for(let i=0;i<count;i++){
+   if(parts.some(p=>p.partNumber===i+1)){onProgress(Math.min(file.size,(i+1)*partSize),file.size,i+1,count);continue;}
+   const blob=file.slice(i*partSize,Math.min(file.size,(i+1)*partSize));let result=null,lastError=null;
+   for(let attempt=1;attempt<=3;attempt++){
+    try{
+     const response=await fetch("/api/upload/part?id="+encodeURIComponent(init.id)+"&uploadId="+encodeURIComponent(init.uploadId)+"&key="+encodeURIComponent(init.key)+"&partNumber="+(i+1),{method:"PUT",headers:{"authorization":"Bearer "+token},body:blob});
+     result=await response.json().catch(()=>({}));if(!response.ok)throw new Error(result.error||"Part "+(i+1)+" failed.");lastError=null;break;
+    }catch(error){lastError=error;if(attempt<3)await new Promise(resolve=>setTimeout(resolve,700*attempt));}
+   }
+   if(lastError)throw lastError;
+   parts.push({partNumber:result.partNumber,etag:result.etag});saved.parts=parts;saved.createdAt=Date.now();localStorage.setItem(storageKey,JSON.stringify(saved));
+   onProgress(Math.min(file.size,(i+1)*partSize),file.size,i+1,count);
+  }
+  const ext=(file.name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,8);
+  const form=new FormData();
+  form.append("metadata",JSON.stringify({...metadata,id:init.id,key:init.key,uploadId:init.uploadId,title,size:file.size,contentType:file.type||"application/octet-stream",extension:ext}));
+  form.append("parts",JSON.stringify(parts.sort((a,b)=>a.partNumber-b.partNumber)));if(poster)form.append("posterFile",poster,poster.name);
+  const complete=await fetch("/api/upload/complete",{method:"POST",headers:{"authorization":"Bearer "+token},body:form});
+  const result=await complete.json().catch(()=>({}));if(!complete.ok)throw new Error(result.error||"Could not finish "+file.name+".");
+  localStorage.removeItem(storageKey);return result;
+ }catch(error){throw new Error(error.message+" Upload progress is saved on this device. Re-select the same file to resume.");}
+}
+function renderVideoUploadQueue(){
+ const input=$("#bulkVideoFiles"),queue=$("#bulkVideoQueue");if(!input||!queue)return;
+ const files=[...input.files];queue.innerHTML="";
+ files.forEach((file,index)=>{
+  const row=document.createElement("label");row.className="upload-queue-row";
+  const name=document.createElement("span");name.textContent=(index+1)+". "+file.name+" · "+(file.size/1024/1024).toFixed(1)+" MB";
+  const title=document.createElement("input");title.type="text";title.maxLength=180;title.value=cleanFileTitle(file.name);title.dataset.videoTitleIndex=String(index);title.setAttribute("aria-label","Video title for "+file.name);
+  row.append(name,title);queue.append(row);
+ });
+}
+$("#bulkVideoFiles")?.addEventListener("change",renderVideoUploadQueue);
 async function uploadBulkBatch(kind){
-  const music=kind==="music";
-  const files=[...(music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).files];
-  const artist=(music?$("#bulkMusicArtist").value:$("#bulkVideoArtist").value).trim();
-  const poster=(music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).files[0];
-  const status=$(music?"#bulkMusicStatus":"#bulkVideoStatus");
-  const button=$(music?"#bulkMusicSubmit":"#bulkVideoSubmit");
-  const token=$("#adminToken").value.trim();
-  if(!token){status.textContent="Enter your Admin access key first.";return;}
-  if(!files.length){status.textContent="Choose at least one "+(music?"music":"video")+" file.";return;}
-  if(music&&!artist){status.textContent="Enter the artist / singer name.";return;}
-  if(poster&&poster.size>5*1024*1024){status.textContent="Shared poster maximum size is 5 MB.";return;}
-  const invalid=files.find(file=>file.size>50*1024*1024);
-  if(invalid){status.textContent=invalid.name+" is over the 50 MB per-file limit.";return;}
-  button.disabled=true;
-  let completed=0;
-  try{
-    for(const file of files){
-      const tags=music?await readMusicTags(file):{};
-      const title=(music&&tags.title)||cleanFileTitle(file.name);
-      const detectedArtist=music?(artist||tags.artist||""):artist;
-      const detectedAlbum=music?(tags.album||$("#bulkMusicAlbum").value.trim()):"";
-      const form=new FormData();
-      const data={title,type:music?"Music":($("#bulkVideoType")?.value||"Movie"),genre:music?"Music":($("#bulkVideoGenre")?.value||"Independent"),artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
-      Object.entries(data).forEach(([key,value])=>form.append(key,String(value)));
-      form.append("file",file);
-      if(poster)form.append("posterFile",poster);
-      status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+title+(tags.title?" · title detected from music tags":" · using filename");
-      await uploadWithProgress("/api/media",form,token,(loaded,total)=>{
-        const pct=total?Math.round(loaded/total*100):0;
-        status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+file.name+" ("+pct+"%)";
-      },"POST");
-      completed++;
-    }
-    status.textContent="Done! "+completed+" "+(music?"music tracks":"videos")+" added to NASFLIX.";
-    (music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).value="";
-    (music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).value="";
-    await loadRemote();
-  }catch(error){
-    status.textContent=completed+" of "+files.length+" uploaded. Stopped at the first error: "+error.message+" You can select the remaining files and retry.";
-  }finally{button.disabled=false;}
+ const music=kind==="music";
+ const files=[...(music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).files];
+ const artist=(music?$("#bulkMusicArtist").value:$("#bulkVideoArtist").value).trim();
+ const poster=(music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).files[0];
+ const status=$(music?"#bulkMusicStatus":"#bulkVideoStatus");
+ const button=$(music?"#bulkMusicSubmit":"#bulkVideoSubmit");
+ const token=$("#adminToken")?.value.trim()||"";
+ 
+ if(!files.length){status.textContent="Choose at least one "+(music?"music":"video")+" file.";return;}
+ if(music&&!artist){status.textContent="Enter the artist / singer name.";return;}
+ if(poster&&poster.size>5*1024*1024){status.textContent="Shared poster maximum size is 5 MB.";return;}
+ if(music&&files.some(file=>file.size>50*1024*1024)){status.textContent="Music files must be 50 MB or smaller.";return;}
+ if(!music&&files.some(file=>!/^video\/(mp4|webm)$/i.test(file.type)&&! /\.(mp4|webm)$/i.test(file.name))){status.textContent="Choose MP4 or WebM video files only.";return;}
+ const individual=music?[]:[...($("#bulkVideoIndividualPosters")?.files||[])];
+ if(individual.some(f=>f.size>5*1024*1024||!/^image\/(jpeg|png|webp)$/i.test(f.type))){status.textContent="Each thumbnail must be JPG, PNG or WebP and no larger than 5 MB.";return;}
+ if(individual.length&&individual.length!==files.length){status.textContent="Choose one individual thumbnail per video, in the same order, or clear that field.";return;}
+ button.disabled=true;let completed=0;
+ try{
+  for(let index=0;index<files.length;index++){
+   const file=files[index],tags=music?await readMusicTags(file):{};
+   const title=music?((tags.title)||cleanFileTitle(file.name)):($("#bulkVideoQueue [data-video-title-index='"+index+"']")?.value.trim()||cleanFileTitle(file.name));
+   if(!title)throw new Error("A video title is empty. Please enter a title for every file.");
+   const detectedArtist=music?(artist||tags.artist||""):artist;
+   const detectedAlbum=music?(tags.album||$("#bulkMusicAlbum").value.trim()):"";
+   const data={title,type:music?"Music":($("#bulkVideoType")?.value||"Movie"),genre:music?"Music":($("#bulkVideoGenre")?.value||"Independent"),artist:detectedArtist,albumTitle:detectedAlbum,description:"",url:"",allowDownload:false,seriesTitle:"",seasonNumber:1,episodeNumber:"",episodeTitle:""};
+   const selectedPoster=music?poster:(individual[index]||poster);
+   status.textContent="Preparing "+(completed+1)+" of "+files.length+": "+title;
+   if(!music){
+    const series=$("#bulkVideoSeries")?.value.trim()||"";
+    const season=Math.max(1,Math.min(99,Number($("#bulkVideoSeason")?.value)||1));
+    const episodeStart=Math.max(1,Math.min(999,Number($("#bulkVideoStartEpisode")?.value)||1));
+    if(data.type==="Series"&&!series)throw new Error("Enter the series / folder name before uploading episodes.");
+    if(data.type==="Series"&&episodeStart+files.length-1>999)throw new Error("Episode numbers cannot exceed 999.");
+    data.seriesTitle=data.type==="Series"?series:"";data.seasonNumber=season;
+    data.episodeNumber=data.type==="Series"?episodeStart+index:"";data.episodeTitle=data.type==="Series"?title:"";
+    await uploadLargeVideo(file,title,data,selectedPoster,token,(loaded,total,part,count)=>{
+     const pct=Math.round(loaded/total*100);
+     status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+file.name+" · "+pct+"% (part "+part+"/"+count+")";
+     const progress=$("#bulkVideoProgress");if(progress)progress.value=pct;
+    });
+   }else{
+    const form=new FormData();Object.entries(data).forEach(([key,value])=>form.append(key,String(value)));
+    form.append("file",file);if(selectedPoster)form.append("posterFile",selectedPoster);
+    status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+title;
+    await uploadWithProgress("/api/media",form,token,(loaded,total)=>{status.textContent="Uploading "+(completed+1)+" of "+files.length+": "+file.name+" ("+(total?Math.round(loaded/total*100):0)+"%)";},"POST");
+   }
+   completed++;
+  }
+  status.textContent="Done! "+completed+" "+(music?"music tracks":"videos")+" added to NASFLIX.";
+  (music?$("#bulkMusicFiles"):$("#bulkVideoFiles")).value="";
+  (music?$("#bulkMusicPoster"):$("#bulkVideoPoster")).value="";
+  if(!music){$("#bulkVideoIndividualPosters").value="";$("#bulkVideoQueue").innerHTML="";}
+  await loadRemote();
+ }catch(error){status.textContent=completed+" of "+files.length+" uploaded. Stopped: "+error.message+" You can retry the remaining files.";}
+ finally{button.disabled=false;const progress=$("#bulkVideoProgress");if(progress)progress.value=0;}
 }
 $("#bulkMusicSubmit")?.addEventListener("click",()=>uploadBulkBatch("music"));
 function openAdminUpload(kind){
@@ -549,7 +608,7 @@ $("#bulkVideoLinksSubmit")?.addEventListener("click",async()=>{
  const seriesTitle=$("#bulkLinkSeries").value.trim(),linkType=$("#bulkVideoType").value,linkGenre=$("#bulkVideoGenre").value,seasonNumber=Math.max(1,Math.min(99,Number($("#bulkLinkSeason").value)||1)),startEpisode=Math.max(1,Math.min(999,Number($("#bulkLinkStartEpisode").value)||1));
  const lines=$("#bulkVideoLinks").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  const sharedPoster=$("#bulkLinksSharedPoster").files[0]||null,individual=[...$("#bulkLinksIndividualPosters").files];
- if(!token){status.textContent="Enter your Admin access key first.";return;}
+ 
  if(linkType==="Series"&&!seriesTitle){status.textContent="Enter the series / folder name.";return;}
  if(!lines.length){status.textContent="Paste at least one video link.";return;}
  if(lines.length>200){status.textContent="Maximum 200 episode links per batch.";return;}
@@ -593,7 +652,7 @@ $("#contentForm").addEventListener("submit",async e=>{
   const token=$("#adminToken").value.trim(),status=$("#uploadStatus"),file=$("#itemFile").files[0],posterFile=$("#posterFile")?.files?.[0],submit=$("#contentSubmit");
   const progress=$("#uploadProgress");
   const item={title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",artist:$("#itemArtist").value.trim(),albumTitle:$("#albumTitle").value.trim(),description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),allowDownload:$("#itemDownload").checked,seriesTitle:$("#seriesTitle").value.trim(),seasonNumber:Number($("#seasonNumber").value)||1,episodeNumber:Number($("#episodeNumber").value)||null,episodeTitle:$("#episodeTitle").value.trim()};
-  if(!token){status.textContent="Enter your admin access key first.";return;}
+  
   if(!item.title){status.textContent="Enter a title.";return;}
   if(!editingId&&file&&file.size>50*1024*1024){status.textContent="Maximum upload size is 50 MB.";return;}if(posterFile&&posterFile.size>5*1024*1024){status.textContent="Poster maximum size is 5 MB.";return;}
   if(!file&&!item.url){status.textContent="Choose a media file or enter a media URL.";return;}
@@ -701,8 +760,8 @@ function renderAdmin(){
   document.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",async()=>{
     const id=b.dataset.delete;
     if(b.dataset.remote==="1"){
-      const token=$("#adminToken").value.trim();
-      if(!token){$("#uploadStatus").textContent="Enter your admin access key before removing saved content.";return;}
+      const token=$("#adminToken")?.value.trim()||"";
+      
       const response=await fetch("/api/media/"+encodeURIComponent(id),{method:"DELETE",headers:{Authorization:"Bearer "+token}});
       if(!response.ok){const result=await response.json().catch(()=>({}));$("#uploadStatus").textContent=result.error||"Could not remove this item.";return;}
     }

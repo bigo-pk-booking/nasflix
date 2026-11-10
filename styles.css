@@ -1381,3 +1381,11 @@ body.radio-page>footer{margin-top:0!important}
   body.radio-page .radio-grid{gap:10px}
   body.radio-page .radio-station{padding:12px;min-height:72px}
 }
+
+
+/* About and legal links grouped at the bottom of the hamburger drawer. */
+.nav-about{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:13px 5px 4px;margin-top:9px;border-top:1px solid var(--line)}
+.nav-about>span{grid-column:1/-1;padding:4px 8px 8px;color:#a99bbd;font-size:10px;letter-spacing:1.5px;font-weight:700}
+.nav-about a{display:flex;align-items:center;min-height:40px;padding:9px 8px;border-radius:8px;color:#c9bfd7;font-size:12px;line-height:1.25}
+.nav-about a:hover{background:#2a1c40;color:#fff}
+@media(max-width:650px){.nav-about{gap:4px 6px}.nav-about a{font-size:12px;min-height:42px}}

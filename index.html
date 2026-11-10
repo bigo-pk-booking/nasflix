@@ -188,8 +188,13 @@
         <button class="primary full" id="bulkVideoLinksSubmit" type="button">Add episode links batch</button>
         <p class="upload-hint" id="bulkVideoLinksStatus" role="status" aria-live="polite">Paste multiple direct video links to begin.</p>
       </div>
-      <label>Video files (MP4, WebM)<input id="bulkVideoFiles" type="file" accept="video/mp4,video/webm,.mp4,.webm" multiple></label>
-      <label>Shared video poster (optional)<input id="bulkVideoPoster" type="file" accept="image/jpeg,image/png,image/webp"></label>
+      <div class="form-row"><label>Series name (required for Series)<input id="bulkVideoSeries" maxlength="90" placeholder="Series / folder name"></label><label>Season number<input id="bulkVideoSeason" type="number" min="1" max="99" value="1"></label><label>Starting episode<input id="bulkVideoStartEpisode" type="number" min="1" max="999" value="1"></label></div>
+      <label>Video files (MP4, WebM · large files supported)<input id="bulkVideoFiles" type="file" accept="video/mp4,video/webm,.mp4,.webm" multiple></label>
+      <div id="bulkVideoQueue" class="upload-queue" aria-live="polite"></div>
+      <label>Shared thumbnail for all uploaded videos (optional)<input id="bulkVideoPoster" type="file" accept="image/jpeg,image/png,image/webp"></label>
+      <label>Individual thumbnails (optional, same order as videos)<input id="bulkVideoIndividualPosters" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
+      <p class="upload-hint">Each video title can be edited above. Individual thumbnails override the shared thumbnail for their matching video. Large files upload in 16 MB parts with automatic retry.</p>
+      <progress id="bulkVideoProgress" max="100" value="0" aria-label="Current video upload progress"></progress>
       <button class="primary full" id="bulkVideoSubmit" type="button">Upload video batch</button>
       <p class="upload-hint" id="bulkVideoStatus" role="status" aria-live="polite">Choose multiple video files to begin.</p>
     </div>

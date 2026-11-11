@@ -1692,3 +1692,19 @@ body.tv-page,
 body.app-mode.tv-page{
   padding-top:var(--nas-header-fixed-height,78px)!important;
 }
+
+
+/* Tighten the space between the TV player and Worldwide Channel Guide. */
+body.tv-page #tv .tv-player-wrap,
+body.app-mode.tv-page #tv .tv-player-wrap{
+  margin-bottom:6px!important;
+}
+body.tv-page #tv .tv-browser-heading,
+body.app-mode.tv-page #tv .tv-browser-heading{
+  margin-top:0!important;
+  padding-top:0!important;
+}
+body.tv-page #tv .tv-browser-heading .eyebrow,
+body.app-mode.tv-page #tv .tv-browser-heading .eyebrow{
+  margin-top:0!important;
+}

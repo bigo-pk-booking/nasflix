@@ -442,6 +442,39 @@ function setMediaTab(type){
   if(!isRadio)render();
   window.scrollTo({top:0,behavior:"smooth"});
 }
+
+// Official public broadcaster live streams. Playback availability can vary by region/platform.
+const NASFLIX_TV_CHANNELS=[
+ {id:"france24-en",name:"France 24 English",country:"France",flag:"🇫🇷",category:"News",language:"English",channelId:"UCQfwfsi5VrQ8yKZ-UWmAEFg",source:"https://www.youtube.com/@FRANCE24English/live"},
+ {id:"dw-news",name:"DW News",country:"Germany",flag:"🇩🇪",category:"News",language:"English",channelId:"UCknLrEdhRCp1aegoMqRaCZg",source:"https://www.youtube.com/@dwnews/live"},
+ {id:"aljazeera-en",name:"Al Jazeera English",country:"Qatar",flag:"🇶🇦",category:"News",language:"English",channelId:"UCNye-wNBqNL5ZzHSJj3l8Bg",source:"https://www.youtube.com/@aljazeeraenglish/live"},
+ {id:"nasa",name:"NASA Live",country:"United States",flag:"🇺🇸",category:"Science",language:"English",channelId:"UCLA_DiR1FfKNvjuUpBHmylQ",source:"https://www.youtube.com/@NASA/live"}
+];
+let activeTvCategory="All",activeTvChannelId="";
+function selectTvChannel(channel){
+ const screen=$("#tvPlayerScreen");if(!screen)return;
+ activeTvChannelId=channel.id;
+ screen.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/live_stream?channel='+encodeURIComponent(channel.channelId)+'&autoplay=1" title="'+channel.name.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+' live stream" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+ $("#tvNowTitle").textContent=channel.name;
+ $("#tvNowInfo").textContent=channel.flag+" "+channel.country+" · "+channel.category+" · "+channel.language;
+ $("#tvOpenSource").href=channel.source;
+ document.querySelectorAll("[data-tv-channel]").forEach(card=>card.classList.toggle("active",card.dataset.tvChannel===channel.id));
+}
+function renderTvChannels(){
+ const grid=$("#tvChannelGrid");if(!grid)return;
+ const query=($("#tvChannelSearch")?.value||"").trim().toLowerCase();
+ const channels=NASFLIX_TV_CHANNELS.filter(c=>(activeTvCategory==="All"||c.category===activeTvCategory)&&[c.name,c.country,c.category,c.language].join(" ").toLowerCase().includes(query));
+ grid.innerHTML=channels.map(c=>'<button type="button" class="tv-channel-card '+(c.id===activeTvChannelId?"active":"")+'" data-tv-channel="'+c.id+'"><span class="tv-channel-flag">'+c.flag+'</span><span class="tv-channel-copy"><b>'+c.name+'</b><small>'+c.country+' · '+c.category+'</small></span><span class="tv-channel-live">LIVE</span></button>').join("")||'<p class="tv-no-results">No channels match your search.</p>';
+ grid.querySelectorAll("[data-tv-channel]").forEach(card=>card.addEventListener("click",()=>{const channel=NASFLIX_TV_CHANNELS.find(c=>c.id===card.dataset.tvChannel);if(channel)selectTvChannel(channel);}));
+}
+$("#tvChannelSearch")?.addEventListener("input",renderTvChannels);
+$("#tvCategoryFilters")?.querySelectorAll("[data-tv-category]").forEach(button=>button.addEventListener("click",()=>{
+ activeTvCategory=button.dataset.tvCategory;
+ $("#tvCategoryFilters").querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===button));
+ renderTvChannels();
+}));
+renderTvChannels();
+
 document.querySelectorAll("[data-media-tab]").forEach(tab=>tab.addEventListener("click",()=>setMediaTab(tab.dataset.mediaTab)));
 setMediaTab("Radio");
 mainNav?.querySelectorAll("a").forEach(link=>link.addEventListener("click",event=>{

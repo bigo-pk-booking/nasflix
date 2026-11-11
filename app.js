@@ -397,6 +397,7 @@ function showNasflixPage(page){
   document.body.classList.toggle("video-library-page",page!=="playlists" && page!=="music");
   if(page==="radio"){setMediaTab("Radio");return;}
   if(page==="tv"){
+     loadSharedTvPlaylists();
     document.body.classList.remove("music-page","radio-page");
     document.body.classList.add("video-library-page");
     document.querySelectorAll("[data-page-section]").forEach(section=>{
@@ -495,8 +496,10 @@ function addTvPlaylist(name,channels){
  if(!channels.length){setTvPlaylistStatus("No playable channel URLs were found in that playlist.","error");return;}
  const id="pl-"+Date.now()+"-"+Math.abs(hashTv(name+channels.length));tvPlaylists.push({id,name:name||"My Playlist",channels});
  saveTvPlaylists();renderSavedTvPlaylists();renderTvChannels();
+loadSharedTvPlaylists();
 window.addEventListener("storage",event=>{if(event.key===TV_PLAYLIST_KEY){try{tvPlaylists=JSON.parse(event.newValue||"[]");if(!Array.isArray(tvPlaylists))tvPlaylists=[];}catch(_){tvPlaylists=[];}renderSavedTvPlaylists();renderTvChannels();}});setTvPlaylistStatus("Added "+channels.length+" channels from "+(name||"your playlist")+". Saved on this device.","success");
 }
+async function loadSharedTvPlaylists(){try{const response=await fetch("/api/tv-playlists",{cache:"no-store"});if(!response.ok)throw new Error("Shared TV playlists unavailable");const data=await response.json();tvPlaylists=Array.isArray(data.playlists)?data.playlists:[];try{localStorage.setItem(TV_PLAYLIST_KEY,JSON.stringify(tvPlaylists));}catch(_){}renderSavedTvPlaylists();renderTvChannels();}catch(error){console.warn("NASFLIX shared TV playlists:",error);}}
 function selectTvChannel(channel){
  const screen=$("#tvPlayerScreen");if(!screen)return;activeTvChannelId=channel.id;
  if(channel.streamUrl){screen.innerHTML='<video controls autoplay playsinline preload="metadata" style="width:100%;height:100%;background:#000" src="'+tvEscape(channel.streamUrl)+'"></video>';}

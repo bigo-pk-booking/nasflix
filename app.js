@@ -4,6 +4,12 @@ const OFFLINE_CACHE_NAME="nasflix-offline-media-v1";
 function loadOfflineList(){try{return JSON.parse(localStorage.getItem("nasflix-offline-items")||"[]");}catch{return [];}}
 function saveOfflineList(){localStorage.setItem("nasflix-offline-items",JSON.stringify(offlineItems));}
 const $ = s => document.querySelector(s);
+const mainNav = $("#mainNav");
+function closeNav(){
+  const toggle=$("#menuToggle");
+  if(toggle){toggle.setAttribute("aria-expanded","false");toggle.setAttribute("aria-label","Open navigation menu");}
+  mainNav?.classList.remove("open");
+}
 /* Bind the main navigation immediately so unrelated page initialization cannot disable the hamburger. */
 (()=>{
  const toggle=$("#menuToggle"),nav=$("#mainNav");

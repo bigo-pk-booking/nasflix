@@ -1613,3 +1613,13 @@ body.tv-page .tv-section-heading .eyebrow{margin:0 0 4px!important}
 body.tv-page .tv-section-heading h2{margin:0!important}
 body.tv-page .tv-player-wrap{position:sticky;top:calc(var(--nas-topbar-height,78px) + 6px);z-index:20;margin:0 auto 22px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
 body.tv-page .tv-saved-playlists{margin:0 0 16px}
+
+
+/* Final TV layout correction: no blank gap below the fixed navbar. */
+body.tv-page main#home{padding-top:0!important;margin-top:0!important}
+body.tv-page .tv-section{padding-top:0!important;margin-top:0!important}
+body.tv-page .tv-section-heading{margin-top:0!important;margin-bottom:8px!important;padding-top:0!important}
+body.tv-page .tv-section-heading .eyebrow{margin-top:0!important;margin-bottom:2px!important}
+body.tv-page .tv-section-heading h2{margin-top:0!important;margin-bottom:0!important}
+body.tv-page .tv-player-wrap{position:sticky!important;top:calc(var(--nas-topbar-height,78px) + 4px)!important;z-index:550!important;margin-top:0!important}
+body.tv-page #tvSavedPlaylists{display:none!important}

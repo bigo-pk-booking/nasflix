@@ -406,6 +406,10 @@ function showNasflixPage(page){
     });
     document.querySelectorAll(".media-tab").forEach(tab=>tab.classList.remove("active"));
     renderBottomNav("tv");
+    const tvSearch=$("#tvChannelSearch");
+    if(tvSearch)tvSearch.value="";
+    activeTvCategory="All";
+    $("#tvCategoryFilters")?.querySelectorAll("[data-tv-category]").forEach(button=>button.classList.toggle("active",button.dataset.tvCategory==="All"));
     renderTvChannels();
     if(!activeTvChannelId)selectTvChannel(NASFLIX_TV_CHANNELS[0]);
     window.scrollTo({top:0,behavior:"smooth"});

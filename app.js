@@ -488,7 +488,7 @@ function selectTvChannel(channel){
  if(channel.streamUrl){screen.innerHTML='<video controls autoplay playsinline preload="metadata" style="width:100%;height:100%;background:#000" src="'+tvEscape(channel.streamUrl)+'"></video>';}
  else{screen.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/live_stream?channel='+encodeURIComponent(channel.channelId)+'&autoplay=1" title="'+tvEscape(channel.name)+' live stream" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';}
  $("#tvNowTitle").textContent=channel.name;$("#tvNowInfo").textContent=channel.flag+" "+channel.country+" · "+channel.category+" · "+channel.language;
- $("#tvOpenSource").href=channel.source;$("#tvOpenSource").hidden=!channel.source;
+
  document.querySelectorAll("[data-tv-channel]").forEach(card=>card.classList.toggle("active",card.dataset.tvChannel===channel.id));
 }
 function renderTvChannels(){

@@ -1476,3 +1476,18 @@ body:has(#adminModal.open) #nasBottomNav{
  .artist-filter .artist-avatar{width:88px!important;height:88px!important;min-width:88px!important;min-height:88px!important;flex-basis:88px!important}
  .music-category-grid .music-category-card{flex-basis:220px!important;width:220px!important;min-width:220px!important;height:210px!important;min-height:210px!important;max-height:210px!important}
 }
+
+
+/* Browse by Artist: use the large landscape artwork-card treatment */
+.artist-filters{display:flex!important;align-items:stretch!important;gap:14px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:10px 4px 16px!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important}
+.artist-filter{position:relative!important;display:flex!important;flex:0 0 260px!important;width:260px!important;min-width:260px!important;max-width:260px!important;height:230px!important;min-height:230px!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-end!important;gap:0!important;padding:0 14px 14px!important;border:1px solid #70418e!important;border-radius:20px!important;background:linear-gradient(145deg,hsl(var(--artist-hue) 55% 28%),#17111f 78%)!important;box-shadow:none!important;overflow:hidden!important;scroll-snap-align:start!important}
+.artist-filter .artist-avatar{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;min-width:100%!important;min-height:100%!important;flex:none!important;border:0!important;border-radius:0!important;overflow:hidden!important;background:linear-gradient(145deg,hsl(var(--artist-hue) 60% 30%),#17111f)!important}
+.artist-filter .artist-avatar:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(180deg,transparent,#100b19 96%);pointer-events:none}
+.artist-filter .artist-avatar img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;border:0!important;border-radius:0!important}
+.artist-filter .artist-avatar-initials{position:absolute!important;inset:0!important;display:grid!important;place-items:center!important;font-size:64px!important;color:#fff9!important}
+.artist-filter>b{position:relative!important;z-index:2!important;width:100%!important;font-size:19px!important;line-height:1.2!important;text-align:left!important;text-shadow:0 2px 8px #000!important;color:#fff!important;overflow-wrap:anywhere!important}
+.artist-filter.selected{border-color:#d18aff!important;box-shadow:0 0 0 2px #d18aff,0 0 20px #a34ad655!important;transform:none!important}
+.artist-filter.selected .artist-avatar{box-shadow:none!important}
+@media(max-width:600px){
+ .artist-filter{flex-basis:260px!important;width:260px!important;min-width:260px!important;max-width:260px!important;height:230px!important;min-height:230px!important}
+}

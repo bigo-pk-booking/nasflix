@@ -1576,3 +1576,28 @@ body.app-mode{ -webkit-text-size-adjust:100%!important; text-size-adjust:100%!im
 
 /* Keep the secondary media shortcuts out of the dedicated TV screen. */
 body.tv-page nav#mediaTabs.media-tabs{display:none!important}
+
+/* NASFLIX Live TV channel guide */
+.tv-section{padding:24px clamp(16px,4vw,40px) 110px}
+.tv-player-wrap{max-width:1100px;margin:18px auto 30px;background:#100d19;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.tv-player-screen{width:100%;aspect-ratio:16/9;background:#05040a;display:grid;place-items:center}
+.tv-player-screen iframe{width:100%;height:100%;border:0}
+.tv-player-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#d9cbea;text-align:center;padding:20px}
+.tv-player-placeholder span{font-size:42px}.tv-player-placeholder small{color:#9d91aa}
+.tv-player-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px}
+.tv-player-meta h3{margin:3px 0;font-size:clamp(17px,3vw,22px)}.tv-player-meta p:not(.eyebrow){margin:0;color:#aaa0b7;font-size:13px}
+.tv-player-meta>a{color:#d5a7ff;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}
+.tv-browser-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:22px 0 14px}
+.tv-browser-heading h3{margin:4px 0;font-size:22px}.tv-search{display:flex;align-items:center;gap:8px;max-width:300px;width:48%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#15111f;color:#bbaacb}
+.tv-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#fff}
+.tv-category-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.tv-category-filters button{padding:8px 15px;border:1px solid #49345f;border-radius:20px;background:#15111f;color:#d8cbe6;font-weight:700}
+.tv-category-filters button.active{background:linear-gradient(110deg,#7836c7,#b12bd0);color:#fff;border-color:#c477f5}
+.tv-channel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.tv-channel-card{display:flex;align-items:center;gap:12px;text-align:left;padding:14px;border:1px solid var(--line);border-radius:14px;background:#15111f;color:#f6efff;min-width:0}
+.tv-channel-card.active{border-color:#b56bea;box-shadow:0 0 0 1px #b56bea44;background:#21152f}
+.tv-channel-flag{font-size:28px}.tv-channel-copy{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.tv-channel-copy b{font-size:14px}.tv-channel-copy small{font-size:12px;color:#a99db4}
+.tv-channel-live{font-size:10px;font-weight:800;letter-spacing:.08em;color:#ff7777}
+.tv-no-results{color:#aaa0b7}
+@media(max-width:600px){.tv-section{padding:18px 14px 100px}.tv-browser-heading{align-items:stretch;flex-direction:column}.tv-search{width:100%;max-width:none}.tv-player-meta{align-items:flex-start}.tv-channel-grid{grid-template-columns:1fr}}

@@ -466,7 +466,7 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 .artist-filters{display:flex;gap:18px;overflow-x:auto;padding:3px 2px 12px}
 .artist-filter{flex:0 0 92px;display:flex;flex-direction:column;align-items:center;gap:8px;border:0;background:transparent;color:#f5eaff;font-size:12px}
 .artist-avatar{width:76px;height:76px;border:2px solid #b45ce7;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,hsl(var(--artist-hue) 70% 38%),#17111f);font-size:21px;font-weight:800}
-.music-category-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.music-category-grid{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#7652a4 transparent}.music-category-grid .music-category-card{flex:0 0 158px;scroll-snap-align:start}.album-browser[hidden]{display:none!important}
 .music-category-card{min-height:90px;padding:13px;border:1px solid #67427f;border-radius:15px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:5px;text-align:left;color:#fff;background:linear-gradient(135deg,hsl(var(--category-hue) 65% 30%),#17111f 80%)}
 .music-category-card span{font-size:15px;font-weight:800}
 .music-category-card small{font-size:11px;color:#d2c0df}

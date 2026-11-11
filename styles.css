@@ -1440,3 +1440,22 @@ body:has(#adminModal.open) #mediaTabs,
 body:has(#adminModal.open) #nasBottomNav{
   display:none!important;
 }
+
+
+/* NASFLIX visual music cards: folder/artist artwork with stable horizontal rails */
+.music-category-grid{display:flex!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:4px 2px 14px!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important}
+.music-category-grid .music-category-card{position:relative!important;display:flex!important;flex:0 0 190px!important;width:190px!important;min-width:190px!important;height:164px!important;min-height:164px!important;max-height:164px!important;overflow:hidden!important;justify-content:flex-end!important;align-items:flex-start!important;gap:4px!important;padding:0 13px 13px!important;border:1px solid #70418e!important;border-radius:18px!important;text-align:left!important;scroll-snap-align:start!important;background:linear-gradient(145deg,hsl(var(--category-hue) 55% 28%),#17111f 78%)!important;isolation:isolate!important}
+.music-category-art{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;z-index:-2!important;opacity:.88!important}
+.music-category-card:before{content:"";position:absolute;inset:25% 0 0;background:linear-gradient(180deg,transparent,#100b19 95%);z-index:-1}
+.music-category-card .music-category-placeholder{position:absolute;inset:0;display:grid;place-items:center;font-size:54px;color:#fff7;z-index:-1}
+.music-category-card .music-category-title{font-size:16px!important;font-weight:800!important;line-height:1.2!important;color:#fff!important;text-shadow:0 2px 8px #000!important}
+.music-category-card small{font-size:12px!important;color:#eee!important;text-shadow:0 1px 5px #000!important}
+.music-category-card>i{position:absolute;right:11px;bottom:12px;width:30px;height:30px;display:grid;place-items:center;border:1px solid #d7a5ff99;border-radius:50%;background:#8b36bdcc;color:white;font-size:12px;font-style:normal}
+.artist-filters{display:flex!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:12px 2px 14px!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important}
+.artist-filter{flex:0 0 150px!important;width:150px!important;min-width:150px!important;max-width:150px!important;height:142px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-end!important;gap:0!important;position:relative!important;overflow:hidden!important;padding:0 12px 12px!important;border:1px solid #70418e!important;border-radius:17px!important;background:linear-gradient(145deg,#302044,#17111f)!important;scroll-snap-align:start!important}
+.artist-filter .artist-avatar{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-width:100%!important;min-height:100%!important;border:0!important;border-radius:0!important;flex:none!important;overflow:hidden!important;background:linear-gradient(145deg,hsl(var(--artist-hue) 60% 30%),#17111f)!important}
+.artist-filter .artist-avatar img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;border:0!important;border-radius:0!important}
+.artist-filter .artist-avatar-initials{font-size:42px!important;color:#fff9!important}
+.artist-filter>b{position:relative!important;z-index:2!important;font-size:14px!important;text-align:left!important;text-shadow:0 2px 7px #000!important;color:#fff!important}
+.artist-filter.selected{border-color:#d18aff!important;box-shadow:0 0 0 1px #d18aff,0 0 18px #9c42cf55!important;transform:none!important}
+@media(max-width:600px){.music-category-grid .music-category-card{flex-basis:166px!important;width:166px!important;min-width:166px!important;height:148px!important;min-height:148px!important;max-height:148px!important}.artist-filter{flex-basis:132px!important;width:132px!important;min-width:132px!important;max-width:132px!important;height:126px!important}}

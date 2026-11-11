@@ -494,7 +494,8 @@ function renderSavedTvPlaylists(){
 function addTvPlaylist(name,channels){
  if(!channels.length){setTvPlaylistStatus("No playable channel URLs were found in that playlist.","error");return;}
  const id="pl-"+Date.now()+"-"+Math.abs(hashTv(name+channels.length));tvPlaylists.push({id,name:name||"My Playlist",channels});
- saveTvPlaylists();renderSavedTvPlaylists();renderTvChannels();setTvPlaylistStatus("Added "+channels.length+" channels from "+(name||"your playlist")+". Saved on this device.","success");
+ saveTvPlaylists();renderSavedTvPlaylists();renderTvChannels();
+window.addEventListener("storage",event=>{if(event.key===TV_PLAYLIST_KEY){try{tvPlaylists=JSON.parse(event.newValue||"[]");if(!Array.isArray(tvPlaylists))tvPlaylists=[];}catch(_){tvPlaylists=[];}renderSavedTvPlaylists();renderTvChannels();}});setTvPlaylistStatus("Added "+channels.length+" channels from "+(name||"your playlist")+". Saved on this device.","success");
 }
 function selectTvChannel(channel){
  const screen=$("#tvPlayerScreen");if(!screen)return;activeTvChannelId=channel.id;

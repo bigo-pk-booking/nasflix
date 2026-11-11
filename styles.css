@@ -1685,3 +1685,10 @@ body.app-mode.tv-page #tv .tv-player-wrap{
   top:82px!important;
   align-self:start!important;
 }
+
+
+/* TV only: media tabs are hidden on this page, so do not reserve their 64px slot. */
+body.tv-page,
+body.app-mode.tv-page{
+  padding-top:var(--nas-header-fixed-height,78px)!important;
+}

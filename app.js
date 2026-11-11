@@ -449,44 +449,62 @@ function setMediaTab(type){
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-// Official public broadcaster live streams. Playback availability can vary by region/platform.
+// Official public broadcaster streams plus user-imported M3U playlists.
 const NASFLIX_TV_CHANNELS=[
  {id:"france24-en",name:"France 24 English",country:"France",flag:"🇫🇷",category:"News",language:"English",channelId:"UCQfwfsi5VrQ8yKZ-UWmAEFg",source:"https://www.youtube.com/@FRANCE24English/live"},
  {id:"dw-news",name:"DW News",country:"Germany",flag:"🇩🇪",category:"News",language:"English",channelId:"UCknLrEdhRCp1aegoMqRaCZg",source:"https://www.youtube.com/@dwnews/live"},
  {id:"aljazeera-en",name:"Al Jazeera English",country:"Qatar",flag:"🇶🇦",category:"News",language:"English",channelId:"UCNye-wNBqNL5ZzHSJj3l8Bg",source:"https://www.youtube.com/@aljazeeraenglish/live"},
  {id:"nasa",name:"NASA Live",country:"United States",flag:"🇺🇸",category:"Science",language:"English",channelId:"UCLA_DiR1FfKNvjuUpBHmylQ",source:"https://www.youtube.com/@NASA/live"}
 ];
+const TV_PLAYLIST_KEY="nasflix_tv_playlists_v1";
+let tvPlaylists=[];try{tvPlaylists=JSON.parse(localStorage.getItem(TV_PLAYLIST_KEY)||"[]");if(!Array.isArray(tvPlaylists))tvPlaylists=[];}catch(_){tvPlaylists=[];}
 let activeTvCategory="All",activeTvChannelId="";
+const tvEscape=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function allTvChannels(){return [...NASFLIX_TV_CHANNELS,...tvPlaylists.flatMap(p=>p.channels||[])];}
+function saveTvPlaylists(){try{localStorage.setItem(TV_PLAYLIST_KEY,JSON.stringify(tvPlaylists));}catch(_){setTvPlaylistStatus("Could not save: device storage may be full.","error");}}
+function setTvPlaylistStatus(message,type=""){const el=$("#tvPlaylistStatus");if(el){el.textContent=message;el.className="tv-playlist-status "+type;}}
+function parseM3U(text,playlistName){
+ const lines=String(text||"").replace(/^\uFEFF/,"").split(/\r?\n/);const out=[];let meta={};
+ for(const raw of lines){const line=raw.trim();if(!line)continue;
+  if(line.startsWith("#EXTINF:")){const comma=line.indexOf(",");const attrs=comma>=0?line.slice(0,comma):line;const name=comma>=0?line.slice(comma+1).trim():"Channel "+(out.length+1);const get=k=>{const m=attrs.match(new RegExp(k+'="([^"]*)"','i'));return m?m[1]:"";};meta={name:name||"Unnamed channel",logo:get("tvg-logo"),group:get("group-title"),country:get("tvg-country")||"Playlist",language:get("tvg-language")||"Unknown"};continue;}
+  if(line.startsWith("#"))continue;
+  let url;try{url=new URL(line,location.href);if(!["http:","https:"].includes(url.protocol))continue;}catch(_){continue;}
+  const m=meta;const id="m3u-"+out.length+"-"+Math.abs(hashTv(line));out.push({id,name:m.name||playlistName||"Channel "+(out.length+1),country:m.country||playlistName||"Playlist",flag:"📺",category:m.group||"Playlist",language:m.language||"Unknown",source:url.href,streamUrl:url.href,logo:m.logo||""});meta={};
+ }
+ return out;
+}
+function hashTv(s){let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;return h;}
+function renderSavedTvPlaylists(){
+ const el=$("#tvSavedPlaylists");if(!el)return;
+ el.innerHTML=tvPlaylists.map(p=>'<span class="tv-saved-playlist">'+tvEscape(p.name)+' · '+(p.channels||[]).length+' channels <button type="button" data-tv-remove-playlist="'+tvEscape(p.id)+'" aria-label="Remove '+tvEscape(p.name)+'">×</button></span>').join("");
+}
+function addTvPlaylist(name,channels){
+ if(!channels.length){setTvPlaylistStatus("No playable channel URLs were found in that playlist.","error");return;}
+ const id="pl-"+Date.now()+"-"+Math.abs(hashTv(name+channels.length));tvPlaylists.push({id,name:name||"My Playlist",channels});
+ saveTvPlaylists();renderSavedTvPlaylists();renderTvChannels();setTvPlaylistStatus("Added "+channels.length+" channels from "+(name||"your playlist")+". Saved on this device.","success");
+}
 function selectTvChannel(channel){
- const screen=$("#tvPlayerScreen");if(!screen)return;
- activeTvChannelId=channel.id;
- screen.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/live_stream?channel='+encodeURIComponent(channel.channelId)+'&autoplay=1" title="'+channel.name.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+' live stream" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
- $("#tvNowTitle").textContent=channel.name;
- $("#tvNowInfo").textContent=channel.flag+" "+channel.country+" · "+channel.category+" · "+channel.language;
- $("#tvOpenSource").href=channel.source;
+ const screen=$("#tvPlayerScreen");if(!screen)return;activeTvChannelId=channel.id;
+ if(channel.streamUrl){screen.innerHTML='<video controls autoplay playsinline preload="metadata" style="width:100%;height:100%;background:#000" src="'+tvEscape(channel.streamUrl)+'"></video>';}
+ else{screen.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/live_stream?channel='+encodeURIComponent(channel.channelId)+'&autoplay=1" title="'+tvEscape(channel.name)+' live stream" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';}
+ $("#tvNowTitle").textContent=channel.name;$("#tvNowInfo").textContent=channel.flag+" "+channel.country+" · "+channel.category+" · "+channel.language;
+ $("#tvOpenSource").href=channel.source;$("#tvOpenSource").hidden=!channel.source;
  document.querySelectorAll("[data-tv-channel]").forEach(card=>card.classList.toggle("active",card.dataset.tvChannel===channel.id));
 }
 function renderTvChannels(){
- const grid=$("#tvChannelGrid");if(!grid)return;
- const query=($("#tvChannelSearch")?.value||"").trim().toLowerCase();
- const channels=NASFLIX_TV_CHANNELS.filter(c=>(activeTvCategory==="All"||c.category===activeTvCategory)&&[c.name,c.country,c.category,c.language].join(" ").toLowerCase().includes(query));
- grid.innerHTML=channels.map(c=>'<button type="button" class="tv-channel-card '+(c.id===activeTvChannelId?"active":"")+'" data-tv-channel="'+c.id+'"><span class="tv-channel-flag">'+c.flag+'</span><span class="tv-channel-copy"><b>'+c.name+'</b><small>'+c.country+' · '+c.category+'</small></span><span class="tv-channel-live">LIVE</span></button>').join("")||'<p class="tv-no-results">No channels match your search.</p>';
- 
+ const grid=$("#tvChannelGrid");if(!grid)return;const query=($("#tvChannelSearch")?.value||"").trim().toLowerCase();
+ const channels=allTvChannels().filter(c=>(activeTvCategory==="All"||c.category===activeTvCategory)&&[c.name,c.country,c.category,c.language].join(" ").toLowerCase().includes(query));
+ grid.innerHTML=channels.map(c=>'<button type="button" class="tv-channel-card '+(c.id===activeTvChannelId?"active":"")+'" data-tv-channel="'+tvEscape(c.id)+'"><span class="tv-channel-flag">'+tvEscape(c.flag||"📺")+'</span><span class="tv-channel-copy"><b>'+tvEscape(c.name)+'</b><small>'+tvEscape(c.country)+' · '+tvEscape(c.category)+'</small></span><span class="tv-channel-live">LIVE</span></button>').join("")||'<p class="tv-no-results">No channels match your search.</p>';
 }
 document.addEventListener("click",event=>{
- const card=event.target.closest("[data-tv-channel]");
- if(!card)return;
- const channel=NASFLIX_TV_CHANNELS.find(c=>c.id===card.dataset.tvChannel);
- if(channel)selectTvChannel(channel);
+ const remove=event.target.closest("[data-tv-remove-playlist]");if(remove){tvPlaylists=tvPlaylists.filter(p=>p.id!==remove.dataset.tvRemovePlaylist);saveTvPlaylists();renderSavedTvPlaylists();renderTvChannels();setTvPlaylistStatus("Playlist removed from this device.");return;}
+ const card=event.target.closest("[data-tv-channel]");if(!card)return;const channel=allTvChannels().find(c=>c.id===card.dataset.tvChannel);if(channel)selectTvChannel(channel);
 });
 $("#tvChannelSearch")?.addEventListener("input",renderTvChannels);
-$("#tvCategoryFilters")?.querySelectorAll("[data-tv-category]").forEach(button=>button.addEventListener("click",()=>{
- activeTvCategory=button.dataset.tvCategory;
- $("#tvCategoryFilters").querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===button));
- renderTvChannels();
-}));
-renderTvChannels();
-
+$("#tvCategoryFilters")?.querySelectorAll("[data-tv-category]").forEach(button=>button.addEventListener("click",()=>{activeTvCategory=button.dataset.tvCategory;$("#tvCategoryFilters").querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===button));renderTvChannels();}));
+$("#tvM3uFile")?.addEventListener("change",async event=>{const file=event.target.files?.[0];if(!file)return;try{const channels=parseM3U(await file.text(),file.name.replace(/\.m3u8?$/i,""));addTvPlaylist(file.name,channels);}catch(_){setTvPlaylistStatus("Could not read that playlist file.","error");}event.target.value="";});
+$("#tvPlaylistUrlForm")?.addEventListener("submit",async event=>{event.preventDefault();const input=$("#tvPlaylistUrl"),url=(input?.value||"").trim();if(!url)return;try{const parsed=new URL(url);if(!["http:","https:"].includes(parsed.protocol))throw Error("Invalid URL");setTvPlaylistStatus("Loading playlist link…");const response=await fetch(parsed.href,{mode:"cors"});if(!response.ok)throw Error("HTTP "+response.status);const channels=parseM3U(await response.text(),parsed.pathname.split("/").pop()||"Online Playlist");addTvPlaylist(parsed.hostname,channels);input.value="";}catch(_){setTvPlaylistStatus("Could not read this link. The playlist host may block browser access (CORS), require login, or the URL may not be a direct public M3U file. Try uploading the .m3u file instead.","error");}});
+renderSavedTvPlaylists();renderTvChannels();
 document.querySelectorAll("[data-media-tab]").forEach(tab=>tab.addEventListener("click",()=>setMediaTab(tab.dataset.mediaTab)));
 setMediaTab("Radio");
 mainNav?.querySelectorAll("a").forEach(link=>link.addEventListener("click",event=>{

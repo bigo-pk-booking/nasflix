@@ -1491,3 +1491,15 @@ body:has(#adminModal.open) #nasBottomNav{
 @media(max-width:600px){
  .artist-filter{flex-basis:260px!important;width:260px!important;min-width:260px!important;max-width:260px!important;height:230px!important;min-height:230px!important}
 }
+
+
+/* Explore Music category search and requested card dimensions */
+.music-category-search{display:flex;align-items:center;gap:10px;width:100%;min-height:54px;margin:14px 0 16px;padding:0 15px;border:1px solid #65427c;border-radius:15px;background:#110d19;color:#cbb3e3}
+.music-category-search>span{font-size:25px;line-height:1}
+.music-category-search input{flex:1;min-width:0;height:52px;border:0;outline:0;background:transparent;color:#fff;font:inherit;font-size:15px}
+.music-category-search input::placeholder{color:#9688a2}
+.music-category-search button{width:30px;height:30px;border:0;border-radius:50%;background:#33213f;color:#fff;font-size:20px}
+.music-category-empty{padding:14px;color:#bba8cc;text-align:center}
+.music-category-empty[hidden]{display:none!important}
+.music-category-grid .music-category-card{flex:0 0 320px!important;width:320px!important;min-width:320px!important;max-width:320px!important;height:230px!important;min-height:230px!important;max-height:230px!important}
+@media(max-width:600px){.music-category-grid .music-category-card{flex-basis:320px!important;width:320px!important;min-width:320px!important;max-width:320px!important;height:230px!important;min-height:230px!important;max-height:230px!important}}

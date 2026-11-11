@@ -505,6 +505,7 @@ function selectTvChannel(channel){
  document.querySelectorAll("[data-tv-channel]").forEach(card=>card.classList.toggle("active",card.dataset.tvChannel===channel.id));
 }
 function renderTvChannels(){
+  try{const latest=JSON.parse(localStorage.getItem(TV_PLAYLIST_KEY)||"[]");if(Array.isArray(latest))tvPlaylists=latest;}catch(_){}
  const grid=$("#tvChannelGrid");if(!grid)return;const query=($("#tvChannelSearch")?.value||"").trim().toLowerCase();
  const channels=allTvChannels().filter(c=>(activeTvCategory==="All"||c.category===activeTvCategory)&&[c.name,c.country,c.category,c.language].join(" ").toLowerCase().includes(query));
  grid.innerHTML=channels.map(c=>'<button type="button" class="tv-channel-card '+(c.id===activeTvChannelId?"active":"")+'" data-tv-channel="'+tvEscape(c.id)+'"><span class="tv-channel-flag">'+tvEscape(c.flag||"📺")+'</span><span class="tv-channel-copy"><b>'+tvEscape(c.name)+'</b><small>'+tvEscape(c.country)+' · '+tvEscape(c.category)+'</small></span><span class="tv-channel-live">LIVE</span></button>').join("")||'<p class="tv-no-results">No channels match your search.</p>';

@@ -42,6 +42,7 @@
         const button = document.getElementById("menuToggle");
         const menu = document.getElementById("mainNav");
         if (!button || !menu) return;
+        button.dataset.menuBound = "1";
         const closeMenu = () => {
           button.setAttribute("aria-expanded", "false");
           button.setAttribute("aria-label", "Open navigation menu");

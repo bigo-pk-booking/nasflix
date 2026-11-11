@@ -392,6 +392,7 @@ menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("ar
  renderBottomNav("video");
 
 function showNasflixPage(page){
+  document.body.classList.toggle("tv-page",page==="tv");
   document.body.classList.toggle("music-page",page==="playlists");
   document.body.classList.toggle("video-library-page",page!=="playlists" && page!=="music");
   if(page==="radio"){setMediaTab("Radio");return;}
@@ -423,6 +424,7 @@ function showNasflixPage(page){
   setMediaTab(page==="music"?"Music":"Movie");
 }
 function setMediaTab(type){
+  document.body.classList.remove("tv-page");
   const isMusic=type==="Music",isRadio=type==="Radio";
   document.body.classList.toggle("music-page",isMusic);
   document.body.classList.toggle("video-library-page",!isMusic&&!isRadio);

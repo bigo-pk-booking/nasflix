@@ -369,17 +369,20 @@ menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("ar
  function renderBottomNav(mode="video"){
    if(!bottomNav)return;
    const entries=mode==="music"
-     ? [["home","⌂","Home"],["search","⌕","Search"],["radio","◉","Radio"],["video","▷","Videos"]]
+     ? [["tv","📺","TV"],["search","⌕","Search"],["radio","◉","Radio"],["video","▷","Videos"]]
      : mode==="radio"
-       ? [["home","⌂","Home"],["search","⌕","Search"],["video","▷","Videos"],["music","♫","Music"]]
-       : [["home","⌂","Home"],["search","⌕","Search"],["music","♫","Music"],["radio","◉","Radio"]];
-   bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${key==="home"?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
+       ? [["tv","📺","TV"],["search","⌕","Search"],["video","▷","Videos"],["music","♫","Music"]]
+       : mode==="tv"
+         ? [["tv","📺","TV"],["search","⌕","Search"],["music","♫","Music"],["radio","◉","Radio"]]
+         : [["tv","📺","TV"],["search","⌕","Search"],["music","♫","Music"],["radio","◉","Radio"]];
+   bottomNav.innerHTML=entries.map(([key,icon,label])=>`<button type="button" data-bottom-page="${key}" class="${key==="tv"?"active":""}"><span>${icon}</span><small>${label}</small></button>`).join("");
    bottomNav.querySelectorAll("[data-bottom-page]").forEach(btn=>btn.addEventListener("click",()=>{
      closeNav();
      if(accountUser){const gate=$("#welcomeGate");if(gate)gate.hidden=true;const login=$("#accountLoginHeader"),logout=$("#accountLogoutHeader");if(login)login.hidden=true;if(logout)logout.hidden=false;}
      const page=btn.dataset.bottomPage;
      bottomNav.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===btn));
      if(page==="search"){const input=$("#searchInput");input?.focus();window.scrollTo({top:0,behavior:"smooth"});}
+     else if(page==="tv")showNasflixPage("tv");
      else if(page==="video")setMediaTab("AI Video");
      else if(page==="radio")setMediaTab("Radio");
      else if(page==="music")setMediaTab("Music");
@@ -392,6 +395,19 @@ function showNasflixPage(page){
   document.body.classList.toggle("music-page",page==="playlists");
   document.body.classList.toggle("video-library-page",page!=="playlists" && page!=="music");
   if(page==="radio"){setMediaTab("Radio");return;}
+  if(page==="tv"){
+    document.body.classList.remove("music-page","radio-page");
+    document.body.classList.add("video-library-page");
+    document.querySelectorAll("[data-page-section]").forEach(section=>{
+      const visible=section.dataset.pageSection==="tv";
+      section.classList.toggle("page-hidden",!visible);
+      section.hidden=!visible;
+    });
+    document.querySelectorAll(".media-tab").forEach(tab=>tab.classList.remove("active"));
+    renderBottomNav("tv");
+    window.scrollTo({top:0,behavior:"smooth"});
+    return;
+  }
    if(page==="playlists"){
     document.querySelectorAll("[data-page-section]").forEach(section=>section.classList.toggle("page-hidden",section.dataset.pageSection!=="music"));
     $("#accountPlaylistPanel").hidden=false;

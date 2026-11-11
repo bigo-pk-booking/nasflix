@@ -454,7 +454,16 @@ const NASFLIX_TV_CHANNELS=[
  {id:"france24-en",name:"France 24 English",country:"France",flag:"🇫🇷",category:"News",language:"English",channelId:"UCQfwfsi5VrQ8yKZ-UWmAEFg",source:"https://www.youtube.com/@FRANCE24English/live"},
  {id:"dw-news",name:"DW News",country:"Germany",flag:"🇩🇪",category:"News",language:"English",channelId:"UCknLrEdhRCp1aegoMqRaCZg",source:"https://www.youtube.com/@dwnews/live"},
  {id:"aljazeera-en",name:"Al Jazeera English",country:"Qatar",flag:"🇶🇦",category:"News",language:"English",channelId:"UCNye-wNBqNL5ZzHSJj3l8Bg",source:"https://www.youtube.com/@aljazeeraenglish/live"},
- {id:"nasa",name:"NASA Live",country:"United States",flag:"🇺🇸",category:"Science",language:"English",channelId:"UCLA_DiR1FfKNvjuUpBHmylQ",source:"https://www.youtube.com/@NASA/live"}
+ {id:"nasa",name:"NASA Live",country:"United States",flag:"🇺🇸",category:"Science",language:"English",channelId:"UCLA_DiR1FfKNvjuUpBHmylQ",source:"https://www.youtube.com/@NASA/live"},
+ {id:"abc-news",name:"ABC News Live",country:"United States",flag:"🇺🇸",category:"News",language:"English",channelId:"UCBi2mrWuNuyYy4gbM6fU18Q",source:"https://www.youtube.com/@ABCNews/live"},
+ {id:"cbs-news",name:"CBS News",country:"United States",flag:"🇺🇸",category:"News",language:"English",channelId:"UC8p1vwvWtl6T73JiExfWs1g",source:"https://www.youtube.com/@CBSNews/live"},
+ {id:"cna",name:"CNA",country:"Singapore",flag:"🇸🇬",category:"News",language:"English",channelId:"UC83jt4dlz1Gjl58fzQrrKZg",source:"https://www.youtube.com/@channelnewsasia/live"},
+ {id:"nhk-world",name:"NHK WORLD-JAPAN",country:"Japan",flag:"🇯🇵",category:"News",language:"English",channelId:"UCSPEjw8F2nQDtmUKPFNF7_A",source:"https://www.youtube.com/@NHKWORLDJAPAN/live"},
+ {id:"trt-world",name:"TRT World",country:"Türkiye",flag:"🇹🇷",category:"News",language:"English",channelId:"UC7fWeaHhqgM4Ry-RMpM2YYw",source:"https://www.youtube.com/@trtworld/live"},
+ {id:"wion",name:"WION",country:"India",flag:"🇮🇳",category:"News",language:"English",channelId:"UC_gUM8rL-Lrg6O3adPW9K1g",source:"https://www.youtube.com/@WION/live"},
+ {id:"cgtn",name:"CGTN",country:"China",flag:"🇨🇳",category:"News",language:"English",channelId:"UCgrNz-aDmcr2uuto8_DL2jg",source:"https://www.youtube.com/@CGTN/live"},
+ {id:"bloomberg",name:"Bloomberg Television",country:"United States",flag:"🇺🇸",category:"News",language:"English",channelId:"UCIALMKvObZNtJ6AmdCLP7Lg",source:"https://www.youtube.com/@markets/live"},
+ {id:"bbc-news",name:"BBC News",country:"United Kingdom",flag:"🇬🇧",category:"News",language:"English",channelId:"UC16niRr50-MSBwiO3YDb3RA",source:"https://www.youtube.com/@BBCNews/live"}
 ];
 const TV_PLAYLIST_KEY="nasflix_tv_playlists_v1";
 let tvPlaylists=[];try{tvPlaylists=JSON.parse(localStorage.getItem(TV_PLAYLIST_KEY)||"[]");if(!Array.isArray(tvPlaylists))tvPlaylists=[];}catch(_){tvPlaylists=[];}

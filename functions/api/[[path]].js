@@ -30,6 +30,12 @@ if(route==="playlists"&&(request.method==="GET"||request.method==="PUT"||request
 return accountJson({error:"Not found."},404);}catch(error){return accountJson({error:"Account service error: "+String(error?.message||error)},500);}}
 
 
+if(path==="/api/tv-playlists"&&request.method==="GET"){
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS nasflix_tv_playlists (id TEXT PRIMARY KEY,playlists_json TEXT NOT NULL DEFAULT '[]',updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();
+  const row=await env.DB.prepare("SELECT playlists_json FROM nasflix_tv_playlists WHERE id='global'").first();
+  let playlists=[];try{playlists=JSON.parse(row?.playlists_json||"[]");if(!Array.isArray(playlists))playlists=[];}catch{}
+  return json({playlists});
+}
 if(path.startsWith("/api/admin/")){
   const admin=await accountUser(request,env.DB);
   if(!admin||!isAdminEmail(admin.email,env))return accountJson({error:"Admin account required."},403);
@@ -40,7 +46,21 @@ if(path.startsWith("/api/admin/")){
     await env.DB.prepare("CREATE TABLE IF NOT EXISTS nasflix_notifications (id TEXT PRIMARY KEY,title TEXT NOT NULL,message TEXT NOT NULL,type TEXT NOT NULL DEFAULT 'announcement',active INTEGER NOT NULL DEFAULT 1,created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();
     await env.DB.prepare("CREATE TABLE IF NOT EXISTS nasflix_admin_logs (id TEXT PRIMARY KEY,actor_email TEXT NOT NULL,action TEXT NOT NULL,details TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();
     const log=async(action,details="")=>env.DB.prepare("INSERT INTO nasflix_admin_logs(id,actor_email,action,details) VALUES(?,?,?,?)").bind(crypto.randomUUID(),admin.email,action,String(details).slice(0,500)).run();
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS nasflix_tv_playlists (id TEXT PRIMARY KEY,playlists_json TEXT NOT NULL DEFAULT '[]',updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();
     const route=path.slice("/api/admin/".length);
+    if(route==="tv-playlists"&&request.method==="GET"){
+      const row=await env.DB.prepare("SELECT playlists_json FROM nasflix_tv_playlists WHERE id='global'").first();
+      let playlists=[];try{playlists=JSON.parse(row?.playlists_json||"[]");if(!Array.isArray(playlists))playlists=[];}catch{}
+      return accountJson({playlists});
+    }
+    if(route==="tv-playlists"&&request.method==="PUT"){
+      let d;try{d=await request.json();}catch{return accountJson({error:"Invalid playlist data."},400);}
+      if(!Array.isArray(d.playlists)||d.playlists.length>100)return accountJson({error:"Invalid playlist collection."},400);
+      const safe=d.playlists.map(p=>({id:String(p.id||crypto.randomUUID()).slice(0,120),name:String(p.name||"TV Playlist").slice(0,160),channels:Array.isArray(p.channels)?p.channels.slice(0,1000).map(ch=>({id:String(ch.id||"").slice(0,160),name:String(ch.name||"Channel").slice(0,240),country:String(ch.country||"International").slice(0,100),flag:String(ch.flag||"📺").slice(0,12),category:String(ch.category||"Other").slice(0,100),language:String(ch.language||"Unknown").slice(0,100),source:String(ch.source||ch.streamUrl||"").slice(0,2000),streamUrl:String(ch.streamUrl||ch.source||"").slice(0,2000),logo:String(ch.logo||"").slice(0,2000),channelId:String(ch.channelId||"").slice(0,160)})):[]}));
+      await env.DB.prepare("INSERT INTO nasflix_tv_playlists(id,playlists_json,updated_at) VALUES('global',?,strftime('%Y-%m-%dT%H:%M:%fZ','now')) ON CONFLICT(id) DO UPDATE SET playlists_json=excluded.playlists_json,updated_at=excluded.updated_at").bind(JSON.stringify(safe)).run();
+      await log("tv_playlists_updated",safe.reduce((n,p)=>n+p.channels.length,0)+" channels");
+      return accountJson({ok:true,playlists:safe});
+    }
     if(route==="overview"&&request.method==="GET"){
       await ensureTable(env.DB);
       await env.DB.prepare("CREATE TABLE IF NOT EXISTS media_engagement (media_id TEXT PRIMARY KEY,views INTEGER NOT NULL DEFAULT 0,listens INTEGER NOT NULL DEFAULT 0,last_viewed_at INTEGER,last_listened_at INTEGER,updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')))").run();

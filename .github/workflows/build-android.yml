@@ -7,6 +7,7 @@ on:
       - 'app/**'
       - 'styles.css'
       - 'index.html'
+      - 'app.js'
       - 'sw.js'
       - 'build.gradle'
       - 'settings.gradle'

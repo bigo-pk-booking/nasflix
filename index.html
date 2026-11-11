@@ -37,6 +37,36 @@
       <div class="nav-categories"><span>Browse categories</span><a href="#movies" data-menu-filter="All">For you</a><a href="#movies" data-menu-filter="Movie">Movies</a><a href="#videos" data-menu-filter="AI Video">AI Videos</a><a href="#series" data-menu-filter="Series">Series</a><a href="#music" data-menu-filter="Music">Music</a><a href="#movies" data-menu-filter="Animation">Animation</a><a href="#movies" data-menu-filter="Anime">Anime</a><a href="#movies" data-menu-filter="Action">Action</a><a href="#movies" data-menu-filter="Comedy">Comedy</a><a href="#movies" data-menu-filter="Horror">Horror</a><a href="#movies" data-menu-filter="Romance">Romance</a><a href="#movies" data-menu-filter="Fantasy">Fantasy</a><a href="#movies" data-menu-filter="Sci-Fi">Sci-Fi</a></div>
       <div class="nav-about"><span>ABOUT NASFLIX</span><a href="/about.html">ⓘ About NASFLIX</a><a href="/blog.html">✦ Entertainment Guides</a><a href="/privacy.html">♧ Privacy Policy</a><a href="/terms.html">▤ Terms of Service</a><a href="/contact.html">✉ Contact Us</a><a href="/dmca.html">© DMCA</a></div>
     </nav>
+    <script>
+      (() => {
+        const button = document.getElementById("menuToggle");
+        const menu = document.getElementById("mainNav");
+        if (!button || !menu || button.dataset.menuBound === "1") return;
+        button.dataset.menuBound = "1";
+        const closeMenu = () => {
+          button.setAttribute("aria-expanded", "false");
+          button.setAttribute("aria-label", "Open navigation menu");
+          menu.classList.remove("open");
+        };
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const isOpen = button.getAttribute("aria-expanded") !== "true";
+          button.setAttribute("aria-expanded", String(isOpen));
+          button.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
+          menu.classList.toggle("open", isOpen);
+        });
+        menu.addEventListener("click", (event) => {
+          if (event.target.closest("a")) closeMenu();
+        });
+        document.addEventListener("click", (event) => {
+          if (!menu.contains(event.target) && !button.contains(event.target)) closeMenu();
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") closeMenu();
+        });
+      })();
+    </script>
     <div class="header-actions">
       <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search titles..." aria-label="Search titles"></label>
       <button type="button" class="header-login" id="accountLoginHeader">Log in</button><button type="button" class="header-logout" id="accountLogoutHeader" hidden>Log out</button>
@@ -270,6 +300,6 @@
       <div class="startup-foot">PLEASE WAIT <span>✦</span></div>
     </div>
   </div>
-  <script defer src="admin-advanced.js?v=shared-tv-20261111a"></script><script defer src="app.js?v=hamburger-fix-20261111b"></script><script defer src="radio.js?v=1"></script>
+  <script defer src="admin-advanced.js?v=shared-tv-20261111a"></script><script defer src="app.js?v=hamburger-inline-fix-20261111c"></script><script defer src="radio.js?v=1"></script>
 </body>
 </html>

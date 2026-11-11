@@ -1708,3 +1708,39 @@ body.tv-page #tv .tv-browser-heading .eyebrow,
 body.app-mode.tv-page #tv .tv-browser-heading .eyebrow{
   margin-top:0!important;
 }
+
+
+/* TV sticky stack: title, player, channel search and category filters stay together. */
+body.tv-page #tv .tv-sticky-stack,
+body.app-mode.tv-page #tv .tv-sticky-stack{
+  position:sticky!important;
+  position:-webkit-sticky!important;
+  top:78px!important;
+  z-index:560!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:0!important;
+  padding:0 0 8px!important;
+  margin:0 0 12px!important;
+  background:#090811!important;
+}
+body.tv-page #tv .tv-sticky-stack .tv-section-heading{
+  margin:0 0 6px!important;
+  padding:0!important;
+}
+body.tv-page #tv .tv-sticky-stack .tv-player-wrap,
+body.app-mode.tv-page #tv .tv-sticky-stack .tv-player-wrap{
+  position:relative!important;
+  top:auto!important;
+  margin:0 0 8px!important;
+}
+body.tv-page #tv .tv-sticky-stack .tv-search,
+body.app-mode.tv-page #tv .tv-sticky-stack .tv-search{
+  width:100%!important;
+  max-width:none!important;
+  margin:0 0 8px!important;
+}
+body.tv-page #tv .tv-sticky-stack .tv-category-filters,
+body.app-mode.tv-page #tv .tv-sticky-stack .tv-category-filters{
+  margin:0!important;
+}

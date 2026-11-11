@@ -585,20 +585,6 @@ $("#itemFile")?.addEventListener("change",async e=>{
   status.textContent=tags.title?"Music details detected. You can still edit the title, artist, and album before saving.":"No embedded music title found. You can enter or edit the title manually.";
  }else if(!$("#itemTitle").value.trim())$("#itemTitle").value=cleanFileTitle(file.name);
 });
-async function uploadLargeMovie(file,item,posterFile,token){
- const auth={"authorization":"Bearer "+token};
- const start=await fetch("/api/media-upload?action=create",{method:"POST",headers:{...auth,"content-type":"application/json"},body:JSON.stringify({title:item.title,type:item.type,contentType:file.type||"video/mp4",name:file.name,size:file.size})});
- const session=await start.json().catch(()=>({}));if(!start.ok)throw new Error(session.error||"Could not start large-file upload.");
- const partSize=session.partSize||10*1024*1024,total=Math.ceil(file.size/partSize),parts=[];
- for(let i=0;i<total;i++){
-  const chunk=file.slice(i*partSize,Math.min(file.size,(i+1)*partSize));let uploaded=null,lastError=null;
-  for(let attempt=1;attempt<=3&&!uploaded;attempt++){try{const response=await fetch("/api/media-upload?key="+encodeURIComponent(session.key)+"&uploadId="+encodeURIComponent(session.uploadId)+"&partNumber="+(i+1),{method:"PUT",headers:auth,body:chunk});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||"Chunk "+(i+1)+" failed.");uploaded=data;}catch(error){lastError=error;if(attempt<3)await new Promise(resolve=>setTimeout(resolve,900*attempt));}}
-  if(!uploaded)throw new Error("Upload stopped at part "+(i+1)+" of "+total+". "+(lastError?.message||"Please retry."));
-  parts.push({partNumber:uploaded.partNumber,etag:uploaded.etag});const pct=Math.round((i+1)/total*100);setUploadProgress(pct,"Uploading movie… "+pct+"%","Part "+(i+1)+" of "+total+" · "+(file.size/1024/1024).toFixed(1)+" MB total");
- }
- const form=new FormData();form.append("key",session.key);form.append("uploadId",session.uploadId);form.append("id",session.id);form.append("parts",JSON.stringify(parts));form.append("metadata",JSON.stringify({...item,size:file.size,contentType:file.type||"video/mp4"}));if(posterFile)form.append("posterFile",posterFile);
- const response=await fetch("/api/media-upload?action=complete",{method:"POST",headers:auth,body:form});const result=await response.json().catch(()=>({}));if(!response.ok)throw new Error(result.error||"Could not finalize movie upload.");return result;
-}
 $("#contentForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const token=$("#adminToken").value.trim(),status=$("#uploadStatus"),file=$("#itemFile").files[0],posterFile=$("#posterFile")?.files?.[0],submit=$("#contentSubmit");
@@ -606,7 +592,7 @@ $("#contentForm").addEventListener("submit",async e=>{
   const item={title:$("#itemTitle").value.trim(),type:$("#itemType").value,genre:$("#itemGenre").value.trim()||"Independent",artist:$("#itemArtist").value.trim(),albumTitle:$("#albumTitle").value.trim(),description:$("#itemDescription").value.trim(),url:$("#itemUrl").value.trim(),allowDownload:$("#itemDownload").checked,seriesTitle:$("#seriesTitle").value.trim(),seasonNumber:Number($("#seasonNumber").value)||1,episodeNumber:Number($("#episodeNumber").value)||null,episodeTitle:$("#episodeTitle").value.trim()};
   if(!token){status.textContent="Enter your admin access key first.";return;}
   if(!item.title){status.textContent="Enter a title.";return;}
-  if(!editingId&&file&&file.size>5*1024*1024*1024){status.textContent="Maximum movie upload size is 5 GB.";return;}if(posterFile&&posterFile.size>5*1024*1024){status.textContent="Poster maximum size is 5 MB.";return;}
+  if(!editingId&&file&&file.size>50*1024*1024){status.textContent="Maximum upload size is 50 MB.";return;}if(posterFile&&posterFile.size>5*1024*1024){status.textContent="Poster maximum size is 5 MB.";return;}
   if(!file&&!item.url){status.textContent="Choose a media file or enter a media URL.";return;}
   if(!file&&item.url&&!/^https?:\/\//i.test(item.url)&&!/^\/api\/file\/[a-z0-9-]+$/i.test(item.url)){status.textContent="Enter a valid media URL.";return;}
   submit.disabled=true;submit.textContent=(file||posterFile)?"Uploading…":"Saving…";
@@ -614,12 +600,7 @@ $("#contentForm").addEventListener("submit",async e=>{
   status.textContent=(file||posterFile)?"Preparing secure upload…":"Saving to NASFLIX…";
   try{
     let result;
-    if(file&&file.size>50*1024*1024&&!editingId){
-       if(!/^video\\/(mp4|webm)$/i.test(file.type||""))throw new Error("Large uploads support MP4 and WebM video files only.");
-       setUploadProgress(0,"Starting large movie upload…","Preparing resumable 10 MB upload parts.");
-       result=await uploadLargeMovie(file,item,posterFile,token);
-       setUploadProgress(100,"Upload complete!","Your movie was stored in R2 successfully.","done");
-    }else if(file||posterFile){
+    if(file||posterFile){
       const form=new FormData();Object.entries(item).forEach(([k,v])=>form.append(k,String(v??"")));if(file)form.append("file",file);if(posterFile)form.append("posterFile",posterFile);
       setUploadProgress(0,"Preparing upload…","Getting your file ready for secure R2 storage.");
       result=await uploadWithProgress(editingId?"/api/media/"+encodeURIComponent(editingId):"/api/media",form,token,(loaded,total)=>{

@@ -4,6 +4,17 @@ const OFFLINE_CACHE_NAME="nasflix-offline-media-v1";
 function loadOfflineList(){try{return JSON.parse(localStorage.getItem("nasflix-offline-items")||"[]");}catch{return [];}}
 function saveOfflineList(){localStorage.setItem("nasflix-offline-items",JSON.stringify(offlineItems));}
 const $ = s => document.querySelector(s);
+/* Bind the main navigation immediately so unrelated page initialization cannot disable the hamburger. */
+(()=>{
+ const toggle=$("#menuToggle"),nav=$("#mainNav");
+ if(!toggle||!nav||toggle.dataset.menuBound==="1")return;
+ toggle.dataset.menuBound="1";
+ const close=()=>{toggle.setAttribute("aria-expanded","false");toggle.setAttribute("aria-label","Open navigation menu");nav.classList.remove("open");};
+ toggle.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();const open=toggle.getAttribute("aria-expanded")!=="true";toggle.setAttribute("aria-expanded",String(open));toggle.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");nav.classList.toggle("open",open);});
+ nav.addEventListener("click",event=>{if(event.target.closest("a"))close();});
+ document.addEventListener("click",event=>{if(!nav.contains(event.target)&&!toggle.contains(event.target))close();});
+ document.addEventListener("keydown",event=>{if(event.key==="Escape")close();});
+})();
 const NASFLIX_APP_MODE=new URLSearchParams(location.search).get("app")==="1";
 if(NASFLIX_APP_MODE){document.body.classList.add("app-mode");}
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));}
@@ -361,9 +372,7 @@ $("#searchInput")?.addEventListener("input",()=>{musicVisibleCount=10;render();}
 $("#searchInput").addEventListener("input",render);
 
 if($("#adminOpen")&&$("#adminModal"))$("#adminOpen").addEventListener("click",()=>{$("#adminModal").classList.add("open");$("#adminModal").setAttribute("aria-hidden","false");});
-const menuToggle=$("#menuToggle"),mainNav=$("#mainNav");
-function closeNav(){if(!menuToggle||!mainNav)return;menuToggle.setAttribute("aria-expanded","false");menuToggle.setAttribute("aria-label","Open navigation menu");mainNav.classList.remove("open");}
-menuToggle?.addEventListener("click",()=>{const open=menuToggle.getAttribute("aria-expanded")!=="true";menuToggle.setAttribute("aria-expanded",String(open));menuToggle.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");mainNav.classList.toggle("open",open);});
+
 // Context-aware bottom navigation: video library tabs vs music library tabs
  const bottomNav=$("#nasBottomNav");
  function renderBottomNav(mode="video"){

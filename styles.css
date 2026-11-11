@@ -1751,3 +1751,24 @@ body.app-mode .ad-banner-section{margin:10px auto 16px;padding:7px 6px;gap:5px;b
 body.app-mode .ad-banner-section .ad-label{font-size:8px;letter-spacing:1.5px;line-height:10px}
 body.app-mode .ad-banner-section .ad-banner-slot{min-height:60px;height:60px;max-height:60px;overflow:hidden}
 body.app-mode .ad-banner-section .ad-banner-slot iframe{max-height:60px}
+
+
+/* Android hamburger drawer: escape the fixed header's paint clipping. */
+body.app-mode header.topbar{
+  overflow:visible!important;
+  contain:layout!important;
+}
+body.app-mode header.topbar nav#mainNav{
+  position:absolute!important;
+  top:78px!important;
+  left:14px!important;
+  right:auto!important;
+  z-index:99999!important;
+  max-height:calc(100dvh - 96px)!important;
+}
+body.app-mode header.topbar nav#mainNav.open{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}

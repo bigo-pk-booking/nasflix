@@ -244,6 +244,14 @@ body.app-mode .main-nav a{min-height:42px;display:flex;align-items:center;touch-
 @keyframes startupOrbit{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.startup-logo,.startup-orbit-one,.startup-orbit-two,.startup-checklist .current i{animation:none}.nas-startup,.startup-progress span{transition:none}}
 
+/* Android WebView layout stability: keep text and horizontal music rails at a fixed scale */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.artist-browser,.music-category-section,.artist-filters,.music-category-grid,.album-browser{min-width:0;max-width:100%}
+.artist-filters,.music-category-grid,.album-browser{overscroll-behavior-x:contain;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
+.artist-filter,.artist-filter.selected{flex:0 0 92px;width:92px;min-width:92px;max-width:92px;transform:none;transition:background-color .18s,border-color .18s,color .18s}
+.artist-filter .artist-avatar{width:76px;height:76px;min-width:76px;min-height:76px;flex:0 0 76px}
+.music-category-grid .music-category-card,.album-browser .album-tile{flex-shrink:0;transform:none}
+
 /* NASFLIX artist album browser */
 .album-browser{display:flex;gap:9px;overflow-x:auto;padding:12px 0 2px;border-top:1px solid #ffffff12;margin-top:10px}.album-tile{flex:0 0 150px;min-height:76px;text-align:left;border:1px solid #59416f;border-radius:12px;padding:12px;background:linear-gradient(145deg,#302044,#171321);color:#f4eaff}.album-tile b{display:block;font-size:12px;line-height:1.35}.album-tile small{display:block;color:#b7a8c9;font-size:10px;margin-top:7px}.album-tile.selected{border-color:#c084fc;background:linear-gradient(145deg,#60318b,#241633)}.album-back{flex:0 0 auto;border:1px solid #7652a4;border-radius:20px;background:#241832;color:#e8d5ff;padding:8px 13px;font-size:11px}
 

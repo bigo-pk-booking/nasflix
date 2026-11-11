@@ -1660,3 +1660,28 @@ body.app-mode.tv-page #tv .tv-player-wrap{
   body.tv-page #tv.tv-section,
   body.app-mode.tv-page #tv.tv-section{padding:0 12px 100px!important}
 }
+
+
+/* TV sticky fix v2: do not create a nested scroll container on the page.
+   overflow-x:hidden computes overflow-y:auto and can trap position:sticky.
+   Use clip on the root/body so the document viewport remains the scrollport. */
+html:has(body.tv-page),
+html:has(body.tv-page) body,
+html:has(body.app-mode.tv-page),
+html:has(body.app-mode.tv-page) body{
+  overflow-x:clip!important;
+  overflow-y:visible!important;
+}
+body.tv-page #tv.tv-section,
+body.app-mode.tv-page #tv.tv-section{
+  overflow:visible!important;
+  contain:none!important;
+  transform:none!important;
+}
+body.tv-page #tv .tv-player-wrap,
+body.app-mode.tv-page #tv .tv-player-wrap{
+  position:-webkit-sticky!important;
+  position:sticky!important;
+  top:82px!important;
+  align-self:start!important;
+}

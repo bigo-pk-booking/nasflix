@@ -406,6 +406,8 @@ function showNasflixPage(page){
     });
     document.querySelectorAll(".media-tab").forEach(tab=>tab.classList.remove("active"));
     renderBottomNav("tv");
+    renderTvChannels();
+    if(!activeTvChannelId)selectTvChannel(NASFLIX_TV_CHANNELS[0]);
     window.scrollTo({top:0,behavior:"smooth"});
     return;
   }
@@ -465,8 +467,14 @@ function renderTvChannels(){
  const query=($("#tvChannelSearch")?.value||"").trim().toLowerCase();
  const channels=NASFLIX_TV_CHANNELS.filter(c=>(activeTvCategory==="All"||c.category===activeTvCategory)&&[c.name,c.country,c.category,c.language].join(" ").toLowerCase().includes(query));
  grid.innerHTML=channels.map(c=>'<button type="button" class="tv-channel-card '+(c.id===activeTvChannelId?"active":"")+'" data-tv-channel="'+c.id+'"><span class="tv-channel-flag">'+c.flag+'</span><span class="tv-channel-copy"><b>'+c.name+'</b><small>'+c.country+' · '+c.category+'</small></span><span class="tv-channel-live">LIVE</span></button>').join("")||'<p class="tv-no-results">No channels match your search.</p>';
- grid.querySelectorAll("[data-tv-channel]").forEach(card=>card.addEventListener("click",()=>{const channel=NASFLIX_TV_CHANNELS.find(c=>c.id===card.dataset.tvChannel);if(channel)selectTvChannel(channel);}));
+ 
 }
+document.addEventListener("click",event=>{
+ const card=event.target.closest("[data-tv-channel]");
+ if(!card)return;
+ const channel=NASFLIX_TV_CHANNELS.find(c=>c.id===card.dataset.tvChannel);
+ if(channel)selectTvChannel(channel);
+});
 $("#tvChannelSearch")?.addEventListener("input",renderTvChannels);
 $("#tvCategoryFilters")?.querySelectorAll("[data-tv-category]").forEach(button=>button.addEventListener("click",()=>{
  activeTvCategory=button.dataset.tvCategory;

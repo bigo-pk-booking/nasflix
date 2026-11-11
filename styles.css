@@ -1744,3 +1744,10 @@ body.tv-page #tv .tv-sticky-stack .tv-category-filters,
 body.app-mode.tv-page #tv .tv-sticky-stack .tv-category-filters{
   margin:0!important;
 }
+
+
+/* Compact Adsterra banner inside the NASFLIX Android app mode only */
+body.app-mode .ad-banner-section{margin:10px auto 16px;padding:7px 6px;gap:5px;border-radius:12px}
+body.app-mode .ad-banner-section .ad-label{font-size:8px;letter-spacing:1.5px;line-height:10px}
+body.app-mode .ad-banner-section .ad-banner-slot{min-height:60px;height:60px;max-height:60px;overflow:hidden}
+body.app-mode .ad-banner-section .ad-banner-slot iframe{max-height:60px}

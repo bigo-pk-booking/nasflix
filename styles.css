@@ -1508,3 +1508,7 @@ body:has(#adminModal.open) #nasBottomNav{
 .music-category-grid .music-category-card{box-sizing:border-box!important;flex:0 0 320px!important;width:320px!important;min-width:320px!important;max-width:320px!important;height:380px!important;min-height:380px!important;max-height:380px!important;}
 .music-category-grid .music-category-card[hidden]{display:none!important;}
 .music-category-empty[hidden]{display:none!important;}
+
+/* Highest-specificity app-mode override: large Explore Music cards */
+body.app-mode .music-section .music-category-grid .music-category-card{box-sizing:border-box!important;flex:0 0 320px!important;width:320px!important;min-width:320px!important;max-width:320px!important;height:380px!important;min-height:380px!important;max-height:380px!important;}
+body.app-mode .music-section .music-category-grid .music-category-card[hidden]{display:none!important;}

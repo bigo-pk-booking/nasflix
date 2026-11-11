@@ -41,32 +41,31 @@
       (() => {
         const button = document.getElementById("menuToggle");
         const menu = document.getElementById("mainNav");
-        if (!button || !menu || button.dataset.menuBound === "1") return;
-        button.dataset.menuBound = "1";
+        if (!button || !menu) return;
         const closeMenu = () => {
           button.setAttribute("aria-expanded", "false");
           button.setAttribute("aria-label", "Open navigation menu");
           menu.classList.remove("open");
         };
-        button.addEventListener("click", (event) => {
-          event.preventDefault();
-          event.stopPropagation();
+        window.NASFLIXToggleMenu = (event) => {
+          if (event) { event.preventDefault(); event.stopPropagation(); }
           const isOpen = button.getAttribute("aria-expanded") !== "true";
           button.setAttribute("aria-expanded", String(isOpen));
           button.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
           menu.classList.toggle("open", isOpen);
-        });
+        };
+        button.onclick = window.NASFLIXToggleMenu;
         menu.addEventListener("click", (event) => {
           if (event.target.closest("a")) closeMenu();
         });
         document.addEventListener("click", (event) => {
           if (!menu.contains(event.target) && !button.contains(event.target)) closeMenu();
-        });
+        }, true);
         document.addEventListener("keydown", (event) => {
           if (event.key === "Escape") closeMenu();
         });
       })();
-    </script>
+    </script>ipt>
     <div class="header-actions">
       <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search titles..." aria-label="Search titles"></label>
       <button type="button" class="header-login" id="accountLoginHeader">Log in</button><button type="button" class="header-logout" id="accountLogoutHeader" hidden>Log out</button>

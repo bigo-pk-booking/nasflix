@@ -63,6 +63,7 @@ function render(){
 }
 
 let accountUser=null,userPlaylists=[],activePlaylistId="",playlistSaveTimer=null,guestMode=true;
+let viewingPlaylistId="";
 let accountAuthVersion=0;
 async function accountRequest(path,body){let response;try{response=await fetch("/api/account/"+path,{method:body===undefined?"GET":"POST",headers:body===undefined?{}:{"content-type":"application/json"},body:body===undefined?undefined:JSON.stringify(body),credentials:"same-origin",cache:"no-store"});}catch(e){throw new Error("Cannot connect to NASFLIX server. Check your internet connection.");}const raw=await response.text();let data={};try{data=raw?JSON.parse(raw):{};}catch{}if(!response.ok)throw new Error(data.error||("Server error ("+response.status+"). "+(raw&&!raw.startsWith("<")?raw.slice(0,160):"Please check Cloudflare Pages Functions and D1 database settings.")));return data;}
 function accountMessage(message){const el=$("#accountMessage");if(el)el.textContent=message;}
